@@ -3,28 +3,25 @@
 # Librerias ----
 options(scipen = 999)
 library(tidyverse) # 1.3.1
-library(sf) # 1.0-7
-library(readxl) # 1.4.0
-library(plotly) # 4.10.0 // https://cloud.r-project.org/src/contrib/plotly_4.10.0.tar.gz
+library(sf) # 1.0-9
+library(plotly) # 4.10.1 // https://cloud.r-project.org/src/contrib/plotly_4.10.0.tar.gz
+source("database.R")
 
-# Datos ----
-bd <- read_excel("www/datos/datos_plataforma.xlsx")
-meta <- read_excel("www/datos/metadatos_plataforma.xlsx")
-shp <- read_sf("www/datos/municipios.geojson") %>% 
+shp <- read_sf("www/datos/municipios.geojson") |> 
   rename(cve_mun = CVEGEO)
 
 gen_barras <- function(edo_sel, ind_sel, anio_sel) {
-  metadatos_sel <- meta %>%
-    filter(no == ind_sel)
+  metadatos_sel <- meta |>
+    filter(idserie == ind_sel)
 
   if(length(anio_sel) > 0) {
-    datos_barras <- bd %>%
-      filter(entidad == edo_sel) %>%
-      filter(no == ind_sel) %>%
+    datos_barras <- bd |>
+      #filter(entidad == edo_sel) |>
+      filter(no == ind_sel) |>
       filter(year == anio_sel)
   
-    datos_barras %>%
-      ggplot(aes(x = reorder(municipio, valor),
+    datos_barras |>
+      ggplot(aes(x = reorder(nom, valor),
                  y = valor)) +
       geom_col(fill = "olivedrab") +
       geom_text(aes(label = prettyNum(round(valor, 2), big.mark = ",")),
@@ -34,9 +31,9 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
                          label = scales::comma_format()) +
       coord_flip() +
       labs(title = metadatos_sel$indicador,
-           subtitle = str_c("Entidad seleccionada: ", datos_barras$entidad[1]),
+           #subtitle = str_c("Entidad seleccionada: ", datos_barras$entidad[1]),
            caption = str_c("Fuente: ", metadatos_sel$fuente),
-           x = NULL, y = metadatos_sel$umedida) +
+           x = NULL, y = metadatos_sel$unidad) +
       theme_bw() +
       theme(plot.title.position  = "plot",
             plot.title = element_text(hjust = 0.5,
@@ -47,20 +44,20 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
 }
 
 gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
-  metadatos_sel <- meta %>% 
-    filter(no == ind_sel)
+  metadatos_sel <- meta |> 
+    filter(idserie == ind_sel)
 
   if(length(anio_sel) > 0) {
-    datos_barras <- bd %>% 
-      filter(entidad == edo_sel) %>% 
-      filter(no == ind_sel) %>% 
+    datos_barras <- bd |> 
+      #filter(entidad == edo_sel) |> 
+      filter(no == ind_sel) |> 
       filter(year == anio_sel)
     
-    mapa <- shp %>% 
-      filter(NOM_ENT == edo_sel) %>% 
+    mapa <- shp |> 
+      filter(NOM_ENT == edo_sel) |> 
       left_join(datos_barras, by = "cve_mun")
     
-    mapa %>% 
+    mapa |> 
       ggplot(aes(fill = valor)) + 
       geom_sf() + 
       scale_fill_gradientn(colors = c("white", "olivedrab")) + 
@@ -74,10 +71,10 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
             plot.subtitle = element_text(hjust = 0.5, 
                                          face = "bold")) + 
       labs(title = metadatos_sel$indicador, 
-           subtitle = str_c("Entidad seleccionada: ", datos_barras$entidad[1]),
+           #subtitle = str_c("Entidad seleccionada: ", datos_barras$entidad[1]),
            caption = str_c("Fuente: ", metadatos_sel$fuente), 
            x = NULL, y = NULL,
-           fill = metadatos_sel$umedida) + 
+           fill = metadatos_sel$unidad) + 
       guides(fill = guide_colorbar(title.position = "top", 
                                    title.hjust = 0.5, 
                                    barwidth = 20, 
@@ -86,25 +83,25 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
 }
 
 gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
-  metadatos_sel <- meta %>% 
-    filter(no == ind_sel)
+  metadatos_sel <- meta |> 
+    filter(idserie == ind_sel)
   
   if(length(anio_sel) > 0) {
-    datos_lineas <- bd %>% 
-      filter(entidad == edo_sel) %>% 
+    datos_lineas <- bd |> 
+      #filter(entidad == edo_sel) |> 
       filter(no == ind_sel) 
     
-    gl <- datos_lineas %>% 
-      ggplot(aes(x = year, y = valor, group = municipio, 
-                 text = str_c("<b>Municipio: </b>", municipio, "<br>", 
+    gl <- datos_lineas |> 
+      ggplot(aes(x = year, y = valor, group = nom, 
+                 text = str_c("<b>Municipio: </b>", nom, "<br>", 
                               "<b>Valor: </b>", prettyNum(round(valor, 2), big.mark = ","), "<br>",
                               "<b>Año: </b>", year))) + 
       geom_line(color = "olivedrab") +
       geom_point(color = "olivedrab") + 
-      labs(title = str_c(metadatos_sel$indicador, "<br>", 
-                         "Entidad seleccionada: ", datos_lineas$entidad[1]),
-           caption = str_c("Fuente: ", metadatos_sel$fuente), 
-           x = NULL, y = metadatos_sel$umedida) + 
+      # labs(title = str_c(metadatos_sel$indicador, "<br>", 
+      #                    "Entidad seleccionada: ", datos_lineas$entidad[1]),
+      #      caption = str_c("Fuente: ", metadatos_sel$fuente), 
+      #      x = NULL, y = metadatos_sel$unidad) + 
       scale_x_continuous(breaks = unique(datos_lineas$year)) +
       scale_y_continuous(label = scales::comma_format()) + 
       theme_bw() + 
@@ -114,15 +111,15 @@ gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
                                       face = "bold"), 
             plot.subtitle = element_text(hjust = 0.5, 
                                          face = "bold"))
-    # Grafica interactiva: 
-    gl %>% 
+    # Gráfica interactiva: 
+    gl |> 
       ggplotly(tooltip = "text")
   }
 }
 
 anios_disponibles <- function(ind_sel) {
-  bd %>%
-    filter(no == ind_sel) %>%
-    pull(year) %>%
+  bd |>
+    filter(no == ind_sel) |>
+    pull(year) |> #todo@ objeto no encontrado!
     unique()
 }
