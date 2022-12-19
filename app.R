@@ -54,17 +54,15 @@ server <- function(input, output, session) {
     gen_barras(edo_sel = input$selEnt,
                ind_sel = input$selIndicador,
                anio_sel = input$sldAnio)
-    
   })
   
   output$mapa <- renderPlot({
     gen_mapa(edo_sel = input$selEnt,
              ind_sel = input$selIndicador,
              anio_sel = input$sldAnio)
-    
   })
   
-  output$grafica_lineas <- renderPlotly({
+  output$grafica_lineas <- renderPlot({
     gen_lineas(edo_sel = input$selEnt,
                ind_sel = input$selIndicador,
                anio_sel = input$sldAnio)
@@ -96,13 +94,11 @@ ui <- fluidPage(
     mainPanel(
       tabsetPanel(
         tabPanel("Gráfica",
-                 plotOutput("grafica_barras",
-                            height = "80vh") |> withSpinner()),
+                 plotOutput("grafica_barras", height = "80vh") %>% withSpinner()),
         tabPanel("Mapa",
-                 plotOutput("mapa",
-                            height = "80vh")  |> withSpinner()),
+                 plotOutput("mapa", height = "80vh") %>% withSpinner()),
         tabPanel("Serie",
-                 plotly::plotlyOutput("grafica_lineas", height = "80vh")  |> withSpinner())
+                 plotOutput("grafica_lineas", height = "80vh") %>% withSpinner())
       )
     )
   )

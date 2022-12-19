@@ -1,5 +1,5 @@
 # https://github.com/r-dbi/odbc/blob/main/README.md
-
+library(tidyverse) # 1.3.1
 # Librerias ----
 library(DBI) # 1.1.3
 

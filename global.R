@@ -2,23 +2,23 @@
 
 # Librerias ----
 library(tidyverse) # 1.3.1
-library(plotly) # 4.10.1 // https://cloud.r-project.org/src/contrib/plotly_4.10.0.tar.gz
+library(ggplot2) # 3.4.0
 source("database.R")
 source("maps.R")
 
 gen_barras <- function(edo_sel, ind_sel, anio_sel) {
   if(is.null(anio_sel))
     return(NULL)
-  metadatos_sel <- meta |>
+  metadatos_sel <- meta %>%
     filter(fecha == anio_sel)
 
-  datos_barras <- bd |>
-    #filter(entidad == edo_sel) |>
-    filter(no == ind_sel) |>
+  datos_barras <- bd %>%
+    #filter(entidad == edo_sel) %>%
+    filter(no == ind_sel) %>%
     filter(year == anio_sel)
   
   # Gráfico
-  datos_barras |>
+  datos_barras %>%
     ggplot(aes(x = reorder(nom, valor),
                y = valor)) +
     geom_col(fill = "olivedrab") +
@@ -48,34 +48,32 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
 gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   if(is.null(anio_sel))
     return(NULL)
-  metadatos_sel <- meta |>
+  metadatos_sel <- meta %>%
     filter(fecha == anio_sel)
 
-  datos_barras <- bd |>
-    #filter(entidad == edo_sel) |>
-    filter(no == ind_sel) |>
+  datos_barras <- bd %>%
+    #filter(entidad == edo_sel) %>%
+    filter(no == ind_sel) %>%
     filter(year == anio_sel)
   
   #todo@ ajustar consultas para que coincidan las claves
-  mapa <- shp |>
-    filter(geo == edo_sel) |>
+  mapa <- shp %>%
+    filter(geo == edo_sel) %>%
     left_join(datos_barras, by = "cve")
 
   # Mapa
-  mapa |>
-    ggplot(aes(fill = valor)) +
-    geom_sf() +
-    scale_fill_gradientn(colors = c("white", "olivedrab")) +
+  mapa %>%
+    ggplot() +
+    geom_sf(aes(fill = valor)) +
     theme_bw() +
+    scale_fill_gradientn(colors = c("white", "olivedrab")) +
     theme(
       axis.text = element_blank(),
       axis.ticks = element_blank(),
       panel.border = element_blank(),
       legend.position = "bottom",
-      plot.title = element_text(hjust = 0.5,
-                                face = "bold"),
-      plot.subtitle = element_text(hjust = 0.5,
-                                   face = "bold")
+      plot.title = element_text(hjust = 0.5, face = "bold"),
+      plot.subtitle = element_text(hjust = 0.5, face = "bold")
     ) +
     labs(
       title = str_c(metadatos_sel$indicador, ", ", anio_sel),
@@ -84,45 +82,35 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
       y = NULL,
       fill = metadatos_sel$unidad
     ) +
-    guides(fill = guide_colorbar(
-      title.position = "top",
-      title.hjust = 0.5,
-      barwidth = 20,
-      barheight = 0.7
-    ))
+   guides(fill = guide_colorbar(
+     title.position = "top",
+     title.hjust = 0.5,
+     barwidth = 20,
+     barheight = 0.7
+   ))
 }
 
 gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
   if(is.null(anio_sel))
     return(NULL)
-  metadatos_sel <- meta |>
+  metadatos_sel <- meta %>%
     filter(fecha == anio_sel)
   
-  datos_lineas <- bd |>
-    #filter(geo == edo_sel) |>
+  datos_lineas <- bd %>%
+    #filter(geo == edo_sel) %>%
     filter(no == ind_sel)
   
   datos_lineas$year <- as.numeric(datos_lineas$year)
-  gl <- datos_lineas |>
+  datos_lineas %>%
     ggplot(aes(
       x = year,
       y = valor,
-      group = nom,
-      text = str_c(
-        "<b>",
-        nom,
-        "</b><br>",
-        "<b>Valor: </b>",
-        prettyNum(round(valor, 2), big.mark = ","),
-        "<br>",
-        "<b>Año: </b>",
-        year
-      )
+      group = nom
     )) +
     geom_line(color = "olivedrab") +
     geom_point(color = "olivedrab") +
     labs(
-      title = str_c(metadatos_sel$indicador),
+      title = str_c(metadatos_sel$indicador, ", ", min(datos_lineas$year), " - ", max(datos_lineas$year)),
       caption = str_c("Fuente: ", metadatos_sel$producto),
       x = NULL,
       y = metadatos_sel$unidad
@@ -133,19 +121,14 @@ gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
     theme(
       panel.border = element_blank(),
       legend.position = "bottom",
-      plot.title = element_text(hjust = 0.5,
-                                face = "bold"),
-      plot.subtitle = element_text(hjust = 0.5,
-                                   face = "bold")
+      plot.title = element_text(hjust = 0.5, face = "bold"),
+      plot.subtitle = element_text(hjust = 0.5, face = "bold")
     )
-  # Gráfica interactiva
-  gl |>
-    ggplotly(tooltip = "text")
 }
 
 anios_disponibles <- function(ind_sel) {
-  bd |>
-    filter(no == ind_sel) |>
-    pull(year) |>
+  bd %>%
+    filter(no == ind_sel) %>%
+    pull(year) %>%
     unique()
 }
