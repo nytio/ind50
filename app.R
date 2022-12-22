@@ -11,7 +11,7 @@ source("global.R")
 # [*] Resaltar Guanajuato
 # Agregar pestañas
 # [-] Tabulado
-# [-] Prospectiva (Si hay más de 3 datos para Guanajuato)
+# [-] Prospectiva (Si hay más de 10 datos para Guanajuato)
 # [-] Metadatos
 
 ui <- fluidPage(
@@ -33,10 +33,10 @@ ui <- fluidPage(
                   label = "Desagregación:",
                   choices = opciones_entidad),
       uiOutput("sldAnio"),
-      hr(),
-      checkboxGroupInput("checkGroup", label = "Opciones:", 
-                         choices = list("Ocultar total" = 1, "Resaltar Guanajuato" = 2),
-                         selected = c(1, 2)),
+      # hr(),
+      # checkboxGroupInput("checkGroup", label = "Opciones:", 
+      #                    choices = list("Ocultar total" = 1, "Resaltar Guanajuato" = 2),
+      #                    selected = c(1, 2)),
       hr(),
       helpText("© 2023 Gobierno del Estado de Guanajuato")
     ),

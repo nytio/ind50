@@ -18,11 +18,26 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     filter(no == ind_sel) %>%
     filter(year == anio_sel)
   
+  if(TRUE) {
+    datos_barras <-
+      datos_barras %>% mutate(ToHighlight = ifelse(cve == 11, "gto", "no" ))
+  } else {
+    datos_barras <-
+      datos_barras %>% mutate(ToHighlight = "no")
+  }
+  
+  if(TRUE) {
+    datos_barras <-
+      datos_barras %>% filter(cve != "MEX")
+  }
+
   # Gráfico
   datos_barras %>%
     ggplot(aes(x = reorder(nom, valor),
-               y = valor)) +
-    geom_col(fill = "olivedrab") +
+               y = valor,
+               fill = ToHighlight)) +
+    geom_col() +
+    scale_fill_manual(values = c("gto"="#00628C", "no" = "#1FB3E5"), guide = FALSE) +
     geom_text(aes(label = prettyNum(round(valor, 2), big.mark = ",")),
               size = 3,
               hjust = -0.2) +
@@ -102,14 +117,30 @@ gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
     filter(no == ind_sel)
   
   datos_lineas$year <- as.numeric(datos_lineas$year)
+  
+  if(TRUE) {
+    datos_lineas <-
+      datos_lineas %>% mutate(ToHighlight = ifelse(cve == 11, "gto", "no" ))
+  } else {
+    datos_lineas <-
+      datos_barras %>% mutate(ToHighlight = "no")
+  }
+  
+  if(TRUE) {
+    datos_lineas <-
+      datos_lineas %>% filter(cve != "MEX")
+  }
+
   datos_lineas %>%
     ggplot(aes(
       x = year,
       y = valor,
-      group = nom
+      group = nom,
+      color = ToHighlight
     )) +
-    geom_line(color = "olivedrab") +
-    geom_point(color = "olivedrab") +
+    geom_line()+
+    scale_color_manual(values = c("gto"="#00628C", "no" = "#DFDEDE"), guide = FALSE) +
+    #geom_point(color = "#DAD9DB") +
     labs(
       title = str_c(metadatos_sel$indicador, ", ", min(datos_lineas$year), " - ", max(datos_lineas$year)),
       caption = str_c("Fuente: ", metadatos_sel$fuente),
