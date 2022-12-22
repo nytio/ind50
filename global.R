@@ -1,6 +1,7 @@
 # https://www.youtube.com/watch?v=_gzOovLEXWo 1:07:07
 
 # Librerias ----
+library(jsonlite)
 library(tidyverse) # 1.3.1
 library(ggplot2) # 3.4.0
 source("database.R")
@@ -60,13 +61,19 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   mapa <- shp %>%
     filter(geo == edo_sel) %>%
     left_join(datos_barras, by = "cve")
+  
+  # Carga los datos del mapa temático
+  k <- fromJSON(metadatos_sel$jsonmap)
+  mapa$valorT <- factor(k$e$v)
+  colores <- palette(c("#fefed1", "#fdfc91", "#f9d114", "#eb8936", "#b93623"))
+  colores_etq <- as.vector(k$e$l)
 
   # Mapa
   mapa %>%
     ggplot() +
-    geom_sf(aes(fill = valor)) +
+    geom_sf(aes(fill = valorT)) +
     theme_bw() +
-    scale_fill_gradientn(colors = c("white", "olivedrab")) +
+    scale_fill_manual(values = colores, labels = colores_etq) +
     theme(
       axis.text = element_blank(),
       axis.ticks = element_blank(),
@@ -77,17 +84,11 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
     ) +
     labs(
       title = str_c(metadatos_sel$indicador, ", ", anio_sel),
-      caption = str_c("Fuente: ", metadatos_sel$producto),
+      caption = str_c("Fuente: ", metadatos_sel$fuente),
       x = NULL,
       y = NULL,
       fill = metadatos_sel$unidad
-    ) +
-   guides(fill = guide_colorbar(
-     title.position = "top",
-     title.hjust = 0.5,
-     barwidth = 20,
-     barheight = 0.7
-   ))
+     )
 }
 
 gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
