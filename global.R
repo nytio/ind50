@@ -32,7 +32,7 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     labs(
       title = str_c(metadatos_sel$indicador, ", ", metadatos_sel$fecha),
       #subtitle = str_c("Entidad seleccionada: ", datos_barras$entidad[1]),
-      caption = str_c("Fuente: ", metadatos_sel$producto),
+      caption = str_c("Fuente: ", metadatos_sel$fuente),
       x = NULL,
       y = metadatos_sel$unidad
     ) +
@@ -112,7 +112,7 @@ gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
     geom_point(color = "olivedrab") +
     labs(
       title = str_c(metadatos_sel$indicador, ", ", min(datos_lineas$year), " - ", max(datos_lineas$year)),
-      caption = str_c("Fuente: ", metadatos_sel$producto),
+      caption = str_c("Fuente: ", metadatos_sel$fuente),
       x = NULL,
       y = metadatos_sel$unidad
     ) +
