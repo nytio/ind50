@@ -1,6 +1,7 @@
 # https://github.com/r-dbi/odbc/blob/main/README.md
-library(tidyverse) # 1.3.1
+
 # Librerias ----
+library(tidyverse) # 1.3.1
 library(DBI) # 1.1.3
 
 # Conexiones ----
@@ -106,5 +107,3 @@ actualiza_bd <- function(selIndicador) {
 
 actualiza_bd(indicadores[1, 1])
 
-#library(readxl) # 1.4.1
-#bdx <- read_excel("www/datos/datos_plataforma.xlsx")

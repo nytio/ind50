@@ -1,11 +1,11 @@
 # https://www.youtube.com/watch?v=_gzOovLEXWo 1:07:07
 
 # Librerias ----
-library(jsonlite)
+library(jsonlite) # 1.8.3
 library(tidyverse) # 1.3.1
 library(ggplot2) # 3.4.0
+library(sf) # 1.0-9
 source("database.R")
-source("maps.R")
 
 gen_barras <- function(edo_sel, ind_sel, anio_sel) {
   if(is.null(anio_sel))
@@ -37,7 +37,7 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
                y = valor,
                fill = ToHighlight)) +
     geom_col() +
-    scale_fill_manual(values = c("gto"="#00628C", "no" = "#1FB3E5"), guide = FALSE) +
+    scale_fill_manual(values = c("gto"="#00628C", "no" = "#1FB3E5"), guide = "none") +
     geom_text(aes(label = prettyNum(round(valor, 2), big.mark = ",")),
               size = 3,
               hjust = -0.2) +
@@ -54,16 +54,37 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     theme_bw() +
     theme(
       plot.title.position  = "plot",
-      plot.title = element_text(hjust = 0.5,
-                                face = "bold"),
-      plot.subtitle = element_text(hjust = 0.5,
-                                   face = "bold")
+      plot.title = element_text(hjust = 0.5, face = "bold", colour = "#333333"),
+      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = "#333333")
     )
 }
 
+shp <- NULL
+colores <- palette(c("#fefed1", "#fdfc91", "#f9d114", "#eb8936", "#b93623"))
 gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   if(is.null(anio_sel))
     return(NULL)
+
+  if(is.null(shp)) {
+    gto <- read_sf("www/datos/gto.geojson") %>%
+      mutate(geo = 1) %>%
+      rename(cve = CLAVE, nom = NOM_MUN) %>%
+      select(geo, cve, nom, geometry)
+
+    mex <- read_sf("www/datos/mex.geojson") %>%
+      mutate(geo = 2) %>%
+      rename(cve = CVE_ENT, nom = NOM_ENT) %>%
+      select(geo, cve, nom, geometry)
+
+    usa <- read_sf("www/datos/usa.geojson") %>%
+      mutate(geo = 7) %>%
+      rename(cve = FIPS, nom = NAME) %>%
+      select(geo, cve, nom, geometry)
+
+    shp <<- bind_rows(gto, mex, usa)
+    rm(gto, mex, usa)
+  }
+
   metadatos_sel <- meta %>%
     filter(fecha == anio_sel)
 
@@ -71,16 +92,15 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
     #filter(entidad == edo_sel) %>%
     filter(no == ind_sel) %>%
     filter(year == anio_sel)
-  
+
   #todo@ ajustar consultas para que coincidan las claves
   mapa <- shp %>%
     filter(geo == edo_sel) %>%
     left_join(datos_barras, by = "cve")
-  
+
   # Carga los datos del mapa temático
   k <- fromJSON(metadatos_sel$jsonmap)
   mapa$valorT <- factor(k$e$v)
-  colores <- palette(c("#fefed1", "#fdfc91", "#f9d114", "#eb8936", "#b93623"))
   colores_etq <- as.vector(k$e$l)
 
   # Mapa
@@ -94,8 +114,8 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
       axis.ticks = element_blank(),
       panel.border = element_blank(),
       legend.position = "bottom",
-      plot.title = element_text(hjust = 0.5, face = "bold"),
-      plot.subtitle = element_text(hjust = 0.5, face = "bold")
+      plot.title = element_text(hjust = 0.5, face = "bold", colour = "#333333"),
+      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = "#333333")
     ) +
     labs(
       title = str_c(metadatos_sel$indicador, ", ", anio_sel),
@@ -139,7 +159,7 @@ gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
       color = ToHighlight
     )) +
     geom_line()+
-    scale_color_manual(values = c("gto"="#00628C", "no" = "#DFDEDE"), guide = FALSE) +
+    scale_color_manual(values = c("gto"="#00628C", "no" = "#DFDEDE"), guide = "none") +
     #geom_point(color = "#DAD9DB") +
     labs(
       title = str_c(metadatos_sel$indicador, ", ", min(datos_lineas$year), " - ", max(datos_lineas$year)),
@@ -153,8 +173,8 @@ gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
     theme(
       panel.border = element_blank(),
       legend.position = "bottom",
-      plot.title = element_text(hjust = 0.5, face = "bold"),
-      plot.subtitle = element_text(hjust = 0.5, face = "bold")
+      plot.title = element_text(hjust = 0.5, face = "bold", colour = "#333333"),
+      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = "#333333")
     )
 }
 
@@ -163,4 +183,25 @@ anios_disponibles <- function(ind_sel) {
     filter(no == ind_sel) %>%
     pull(year) %>%
     unique()
+}
+
+tabulado <- function(edo_sel, ind_sel, anio_sel) {
+  if(is.null(anio_sel))
+    return(NULL)
+  metadatos_sel <- meta %>%
+    filter(fecha == anio_sel)
+  
+  tab <- bd %>%
+    filter(no == ind_sel) %>%
+    filter(year == anio_sel)
+  rownames(tab) <- tab$cve
+  tab <- tab %>%
+    select(nom, valor)
+  names(tab) <- c(names(opciones_entidad)[1], metadatos_sel$unidad)
+
+  DT::datatable(tab,
+                options = list(paging = FALSE, searching = FALSE),
+                caption = str_c(metadatos_sel$indicador, ", ", anio_sel),
+                selection = "none", #list(mode = "single", selected = 12, selectable = 12),
+                style = "bootstrap4")
 }

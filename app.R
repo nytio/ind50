@@ -43,18 +43,20 @@ ui <- fluidPage(
     mainPanel(
       tabsetPanel(
         tabPanel(title = "Tabulado",
-                 br()),
+                 DT::dataTableOutput('tab1'),
+                 icon = icon("table")),
         tabPanel(title = "Gráfica",
-                 plotOutput("grafica_barras", height = "80vh") %>% withSpinner()),
+                 plotOutput("grafica_barras", height = "80vh") %>% withSpinner(),
+                 icon = icon("bar-chart")),
         tabPanel(title = "Mapa",
-                 plotOutput("mapa", height = "80vh") %>% withSpinner()),
+                 plotOutput("mapa", height = "80vh") %>% withSpinner(),
+                 icon = icon("map-marker")),
         tabPanel(title = "Serie",
                  plotOutput("grafica_lineas", height = "80vh") %>% withSpinner()),
         tabPanel(title = "Prospectiva",
                  br()),
         tabPanel(title = "Metadato",
-                 br(),
-                 icon = icon("book"))
+                 br())
       )
     )
   )
@@ -102,7 +104,13 @@ server <- function(input, output, session) {
       br()
     }
   })
-  
+
+  output$tab1 <- DT::renderDataTable({
+    tabulado(edo_sel = input$selEnt,
+             ind_sel = input$selIndicador,
+             anio_sel = input$sldAnio)
+  })
+    
   output$grafica_barras <- renderPlot({
     gen_barras(edo_sel = input$selEnt,
                ind_sel = input$selIndicador,
@@ -110,9 +118,11 @@ server <- function(input, output, session) {
   })
   
   output$mapa <- renderPlot({
-    gen_mapa(edo_sel = input$selEnt,
-             ind_sel = input$selIndicador,
-             anio_sel = input$sldAnio)
+    gen_mapa(
+      edo_sel = input$selEnt,
+      ind_sel = input$selIndicador,
+      anio_sel = input$sldAnio
+    )
   })
   
   output$grafica_lineas <- renderPlot({
@@ -120,7 +130,6 @@ server <- function(input, output, session) {
                ind_sel = input$selIndicador,
                anio_sel = input$sldAnio)
   })
-  
 }
 
 shinyApp(ui, server)
