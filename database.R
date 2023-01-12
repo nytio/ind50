@@ -5,7 +5,7 @@ library(tidyverse) # 1.3.1
 library(DBI) # 1.1.3
 
 # Conexiones ----
-con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10)
+con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10) #circinus indicadores
 
 # Datos ----
 
@@ -30,7 +30,7 @@ opciones_entidad <-NULL
 bd <- NULL
 actualiza_bd <- function(selIndicador) {
   meta <<-
-    dbGetQuery(con, paste0("SELECT * FROM viewb2 WHERE idserie = ", selIndicador))
+    dbGetQuery(con, paste0("SELECT * FROM viewb2 WHERE idserie = ", selIndicador, "ORDER BY idind;"))
   
   idambito <- unique(meta$idambito)
   if (length(idambito) == 1) {
@@ -69,7 +69,7 @@ actualiza_bd <- function(selIndicador) {
                 } else
                   if (idambito == 7) {
                     opciones_entidad <<- c(7)
-                    names(opciones_entidad) <- c("Estados de EE.UU.")
+                    names(opciones_entidad) <<- c("Estados de EE.UU.")
                   }
   }
   
@@ -78,6 +78,7 @@ actualiza_bd <- function(selIndicador) {
       "SELECT * FROM view04 WHERE ",
       paste("idind = ", meta$idind, collapse = " OR ")
     ))
+  campo1 <- campo1[order(campo1$idind),]
   
   use_sql <- paste0(
     'SELECT geografico.cve, geografico.nom, ',
@@ -106,4 +107,3 @@ actualiza_bd <- function(selIndicador) {
 }
 
 actualiza_bd(indicadores[1, 1])
-

@@ -1,0 +1,27 @@
+652
+2650
+25
+2268
+remesas_2021
+Ingresos por remesas familiares en la balanza de pagos
+
+2311
+2651
+35
+2269
+remesasmxn_2021
+Ingresos por remesas familiares en la balanza de pagos
+
+2329
+2652
+36
+2270
+remesaspibe_2020
+Relación del ingresos por remesas familiares en la balanza de pagos y el Producto Interno Bruto Estatal
+
+2329
+2653
+36
+2271
+remesaspibe_2021
+Relación del ingresos por remesas familiares en la balanza de pagos y el Producto Interno Bruto Estatal

@@ -60,7 +60,6 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
 }
 
 shp <- NULL
-colores <- palette(c("#fefed1", "#fdfc91", "#f9d114", "#eb8936", "#b93623"))
 gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   if(is.null(anio_sel))
     return(NULL)
@@ -84,6 +83,8 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
     shp <<- bind_rows(gto, mex, usa)
     rm(gto, mex, usa)
   }
+  
+  colores <<- c("#FEFED1", "#FDFC91", "#F9D114", "#EB8936", "#B93623")
 
   metadatos_sel <- meta %>%
     filter(fecha == anio_sel)
