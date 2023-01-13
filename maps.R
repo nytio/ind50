@@ -16,10 +16,9 @@ frangeerror <- function(muppets, mini, maxi) {
 # moderado, de la función de O(n^4) a O(n^2) donde n es el tamaño del arreglo,
 # pero la complejidad temporal sigue siendo alta si el tamaño del arreglo es
 # grande.
-rangos <- function(muppets) {
+rangos_arreglo <- function(muppets) {
   dim_arreglo <- length(muppets)
   arreglo <- sort(muppets, decreasing = TRUE)
-  OverallError <- frangeerror(arreglo, 1, dim_arreglo)
   # Generar todas las combinaciones posibles de los índices
   idx <- expand.grid(i = 1:((dim_arreglo - 4)), j = 2:(dim_arreglo - 3), k = 3:(dim_arreglo - 2), l = 4:(dim_arreglo - 1))
   
@@ -36,8 +35,8 @@ rangos <- function(muppets) {
       frangeerror(arreglo, x[3] + 1, x[4]) + 
       frangeerror(arreglo, x[4] + 1, dim_arreglo)
   })
-  TAI <- 1 - errors / OverallError
-  # Encontrar los índices con el TAI máximo
+  # Calcula TAI y encuentra los índices con el TAI máximo
+  TAI <- 1 - errors / frangeerror(arreglo, 1, dim_arreglo)
   maxi <- idx[TAI == max(TAI),]
   # Devolver los valores correspondientes a los índices encontrados
   array(
@@ -70,8 +69,9 @@ categoriza <- function(rangos, muppets) {
         ifelse(
           rangos[4, 1] <= muppets & muppets <= rangos[4, 2],
           4,
-          ifelse(rangos[5, 1] <= muppets &
-                   muppets <= rangos[5, 2], 5, 0)
+          ifelse(
+            rangos[5, 1] <= muppets & muppets <= rangos[5, 2],
+            5, 0)
         )
       )
     )
@@ -79,7 +79,8 @@ categoriza <- function(rangos, muppets) {
 }
 
 colorea <- function(muppets) {
-  colorea_clases <- categoriza(colorea_rangos <- rangos(muppets), muppets);
+  colorea_rangos <- rangos_arreglo(muppets)
+  colorea_clases <- categoriza(colorea_rangos, muppets);
   colorea_cuenta <- c(sum(colorea_clases == 1), sum(colorea_clases == 2), sum(colorea_clases == 3), sum(colorea_clases == 4), sum(colorea_clases == 5));
   list(clases = colorea_clases, rangos = colorea_rangos, cuenta = colorea_cuenta)
 }
@@ -269,9 +270,8 @@ mapas_graficos_servidor_a_servidor <- function(rango) {
             
           }
         }
-        #Si un mapa no existe, no aparece; así no deja comas de más.
+        # Si un mapa no existe, no aparece; así no deja comas de más.
         x <- c(m, e, u)
-        
         js <- paste0("{", paste(x[nchar(x) > 0], collapse = ","), "}")
         
         dbExecute(
@@ -292,20 +292,28 @@ mapas_graficos_servidor_a_servidor <- function(rango) {
 }
 
 # Genera mapas del rango dado: n, n:m, dado como un rango consecutivo, o bien en lista c(m, p, n)
-#mapas_graficos_servidor_a_servidor(c(2111,2301,2302))
+##mapas_graficos_servidor_a_servidor(c(2111,2301,2302))
 ##mapas_graficos_servidor_a_servidor(2650:2653)
 mapas_graficos_servidor_a_servidor(2653)
 
 # Actualiza por tabla
-mapas_graficos_servidor_a_servidor(dbGetQuery(con, "SELECT idind FROM indicador WHERE idtabla = 25"))
-mapas_graficos_servidor_a_servidor(dbGetQuery(con, "SELECT idind FROM indicador WHERE idtabla = 35"))
-mapas_graficos_servidor_a_servidor(dbGetQuery(con, "SELECT idind FROM indicador WHERE idtabla = 36"))
+##mapas_graficos_servidor_a_servidor(dbGetQuery(con, "SELECT idind FROM indicador WHERE idtabla = 25"))
+##mapas_graficos_servidor_a_servidor(dbGetQuery(con, "SELECT idind FROM indicador WHERE idtabla = 35"))
+##mapas_graficos_servidor_a_servidor(dbGetQuery(con, "SELECT idind FROM indicador WHERE idtabla = 36"))
 
 #@todo Generar los mapas faltantes, consultando primero aquellos que no tienen mapa dado de alto (son 2300)
 #! Pendientes o indicadores con errores:
-#! >85  @todo hay una categoría con cero municipios, se podría quitar de la escala.
+#!  85 hay una categoría con cero municipios, se podría quitar de la escala. Divisi?n por cero (caso 30)
 #! 145 error Todos los valores son NA en estatal, no es numérico;
 #! 159 error Todos los valores son NA en estatal
 #! 258 Todos los valores son iguales a 141.3, da mapa vacio.
 #! 298 El estado de Guanajuato tiene valor NA, da mapa vacio.
 #! 929 da mapa vacío.
+
+#! 144
+#! 158
+#! 265... vector 201 en delante 
+
+#! Pendientes
+#! numindicador 144 (3:144), 158 (4:144) [Grado de marginación] y 321 (8:306) [Grado de rezago social]: error, no es numérico; sino textos
+#! as.integer(factor(c("Alto", "Medio", "Alto", ""), levels = c("Muy bajo", "Bajo", "Medio", "Alto", "Muy alto")))
