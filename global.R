@@ -14,9 +14,9 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     filter(fecha == anio_sel)
 
   datos_barras <- bd %>%
-    #filter(entidad == edo_sel) %>%
     filter(no == ind_sel) %>%
-    filter(year == anio_sel)
+    filter(year == anio_sel) %>%
+    filter(ambito == edo_sel)
   
   if(TRUE) {
     datos_barras <-
@@ -84,25 +84,20 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
     rm(gto, mex, usa)
   }
   
-  colores <<- c("#FEFED1", "#FDFC91", "#F9D114", "#EB8936", "#B93623")
+  colores <- c("#FEFED1", "#FDFC91", "#F9D114", "#EB8936", "#B93623")
 
   metadatos_sel <- meta %>%
     filter(fecha == anio_sel)
 
-  datos_barras <- bd %>%
-    #filter(entidad == edo_sel) %>%
-    filter(no == ind_sel) %>%
-    filter(year == anio_sel)
-
   #todo@ ajustar consultas para que coincidan las claves
   mapa <- shp %>%
-    filter(geo == edo_sel) %>%
-    left_join(datos_barras, by = "cve")
+    filter(geo == edo_sel)
 
   # Carga los datos del mapa temático
   k <- fromJSON(metadatos_sel$jsonmap)
-  mapa$valorT <- factor(k$e$v)
-  colores_etq <- as.vector(k$e$l)
+  ke <- switch(edo_sel, '1' = k$m, '2' = k$e, '7' = k$u)
+  mapa$valorT <- factor(ke$v)
+  colores_etq <- as.vector(ke$l)
 
   # Mapa
   mapa %>%
@@ -134,8 +129,8 @@ gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
     filter(fecha == anio_sel)
   
   datos_lineas <- bd %>%
-    #filter(geo == edo_sel) %>%
-    filter(no == ind_sel)
+    filter(no == ind_sel) %>%
+    filter(ambito == edo_sel)
   
   datos_lineas$year <- as.numeric(datos_lineas$year)
   
@@ -179,13 +174,6 @@ gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
     )
 }
 
-anios_disponibles <- function(ind_sel) {
-  bd %>%
-    filter(no == ind_sel) %>%
-    pull(year) %>%
-    unique()
-}
-
 tabulado <- function(edo_sel, ind_sel, anio_sel) {
   if(is.null(anio_sel))
     return(NULL)
@@ -194,7 +182,9 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
   
   tab <- bd %>%
     filter(no == ind_sel) %>%
-    filter(year == anio_sel)
+    filter(year == anio_sel) %>%
+    filter(ambito == edo_sel)
+  
   rownames(tab) <- tab$cve
   tab <- tab %>%
     select(nom, valor)
@@ -205,4 +195,11 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
                 caption = str_c(metadatos_sel$indicador, ", ", anio_sel),
                 selection = "none", #list(mode = "single", selected = 12, selectable = 12),
                 style = "bootstrap4")
+}
+
+anios_disponibles <- function(ind_sel) {
+  bd %>%
+    filter(no == ind_sel) %>%
+    pull(year) %>%
+    unique()
 }

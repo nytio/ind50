@@ -3,6 +3,7 @@ library(shiny) # 1.7.3
 library(shinycssloaders) # 1.0.0
 library(shinyWidgets) # 0.7.5
 library(tidyverse) # 1.3.1
+library(openxlsx) # 4.2.5.1
 source("global.R")
 
 #todo@ TEST probar con diferentes niveles de desagregación geográfica
@@ -44,6 +45,7 @@ ui <- fluidPage(
       tabsetPanel(
         tabPanel(title = "Tabulado",
                  DT::dataTableOutput('tab1'),
+                 downloadButton("downloadData", "Descargar Excel"),
                  icon = icon("table")),
         tabPanel(title = "Gráfica",
                  plotOutput("grafica_barras", height = "80vh") %>% withSpinner(),
@@ -105,11 +107,63 @@ server <- function(input, output, session) {
     }
   })
 
-  output$tab1 <- DT::renderDataTable({
+  datasetInput <- reactive({
     tabulado(edo_sel = input$selEnt,
              ind_sel = input$selIndicador,
              anio_sel = input$sldAnio)
   })
+  
+  output$tab1 <- DT::renderDataTable({
+    datasetInput()
+  })
+  
+  # Downloadable csv of selected dataset ----
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste0("tbl", input$selIndicador, "_", input$sldAnio, "_", input$selEnt, ".xlsx")
+    },
+    content = function(file) {
+      # Crea un nuevo libro de trabajo
+      wb <- createWorkbook()
+      
+      # Agrega una hoja de trabajo al libro y escribe el dataframe en ella
+      addWorksheet(wb, "Hoja1")
+      mis_datos <- datasetInput()
+      writeData(wb, "Hoja1", substr(mis_datos$x$caption, 10, nchar(mis_datos$x$caption)-10) )
+      mis_datos <- mis_datos$x$data
+      writeData(wb, "Hoja1", mis_datos, startRow = 3)
+      
+      # Crea un estilos para la tabla
+      titleStyle <- createStyle(
+        fontName = "Arial",
+        fontSize = 13,
+        textDecoration = "bold"
+      )
+      
+      headerStyle <- createStyle(
+        fontName = "Arial",
+        fontSize = 11,
+        fontColour = "white",
+        fgFill = "#3465a4",
+        halign = "center",
+        textDecoration = "bold"
+      )
+      
+      dataStyle <- createStyle(
+        fontName = "Arial",
+        fontSize = 11,
+        borderStyle = "thin"
+      )
+      
+      # Aplica el estilo a las celdas de la tabla
+      addStyle(wb, sheet = "Hoja1", style = titleStyle, rows = 1, cols = 1)
+      addStyle(wb, sheet = "Hoja1", style = headerStyle, rows = 3, cols = 1:(dim(mis_datos)[2]))
+      addStyle(wb, sheet = "Hoja1", style = dataStyle, rows = 4:(dim(mis_datos)[1]+3), cols = 1:(dim(mis_datos)[2]), gridExpand = TRUE)
+      
+      # Guarda el libro de trabajo en un archivo xlsx
+      saveWorkbook(wb, file)
+    }
+  )
     
   output$grafica_barras <- renderPlot({
     gen_barras(edo_sel = input$selEnt,

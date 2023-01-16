@@ -5,7 +5,7 @@ library(tidyverse) # 1.3.1
 library(DBI) # 1.1.3
 
 # Conexiones ----
-con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10) #circinus indicadores
+con <- dbConnect(odbc::odbc(), "circinus", timeout = 10) #circinus indicadores
 
 # Datos ----
 
@@ -16,9 +16,8 @@ names(opciones_coleccion) <- coleccion$titulo
 
 indicadores <- NULL
 opciones_indicadores <- NULL
-
 actualiza_indicador <- function(selColeccion) {
-  indicadores <<- dbGetQuery(con, paste0("SELECT idserie, indicador FROM viewb1 WHERE idcoleccion = ", selColeccion))
+  indicadores <<- dbGetQuery(con, paste0("SELECT idserie, MIN(indicador) AS indicador FROM viewb1 WHERE idcoleccion = ", selColeccion, " GROUP BY idserie;"))
   opciones_indicadores <<- unique(indicadores$idserie)
   names(opciones_indicadores) <<- indicadores$indicador
 }
@@ -39,9 +38,9 @@ actualiza_bd <- function(selIndicador) {
       names(opciones_entidad) <<- c("Entidad federativa")
     } else
       if (idambito == 4) {
-        opciones_entidad <<- c(1, 2, 5)
+        opciones_entidad <<- c(1, 2) #, 5
         names(opciones_entidad) <<-
-          c("Municipio", "Entidad federativa", "Localidad")
+          c("Municipio", "Entidad federativa") #, "Localidad"
       } else
         if (idambito == 3) {
           opciones_entidad <<- c(1, 2)
@@ -81,7 +80,7 @@ actualiza_bd <- function(selIndicador) {
   campo1 <- campo1[order(campo1$idind),]
   
   use_sql <- paste0(
-    'SELECT geografico.cve, geografico.nom, ',
+    'SELECT geografico.ambito, geografico.cve, geografico.nom, ',
     paste(campo1$tabla, campo1$mnemonico, sep = "."),
     " AS valor FROM ",
     campo1$tabla,
@@ -93,7 +92,7 @@ actualiza_bd <- function(selIndicador) {
     campo1$tabla,
     ".mun AND geografico.loc = ",
     campo1$tabla,
-    ".loc"
+    ".loc WHERE ambito != 5"
   )
   
   bd <<- NULL
