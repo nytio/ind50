@@ -45,7 +45,7 @@ ui <- fluidPage(
       tabsetPanel(
         tabPanel(title = "Tabulado",
                  DT::dataTableOutput('tab1'),
-                 downloadButton("downloadData", "Descargar Excel"),
+                 downloadButton("downloadData", "Descargar"),
                  icon = icon("table")),
         tabPanel(title = "Gráfica",
                  plotOutput("grafica_barras", height = "80vh") %>% withSpinner(),

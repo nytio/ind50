@@ -5,7 +5,7 @@ library(tidyverse) # 1.3.1
 library(DBI) # 1.1.3
 
 # Conexiones ----
-con <- dbConnect(odbc::odbc(), "circinus", timeout = 10) #circinus indicadores
+con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10) #circinus indicadores
 
 # Datos ----
 
@@ -103,6 +103,9 @@ actualiza_bd <- function(selIndicador) {
   }
   colnames(bd)[1] <<- "no"
   colnames(bd)[2] <<- "year"
+  
+  meta <<- meta[order(meta$fecha),]
+  bd <<- bd[order(bd$year, bd$ambito, bd$cve),]
 }
 
 actualiza_bd(indicadores[1, 1])
