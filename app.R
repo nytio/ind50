@@ -65,7 +65,6 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  
   observeEvent(input$selColeccion, {
     actualiza_indicador(input$selColeccion)
     updateSelectInput(
@@ -88,8 +87,17 @@ server <- function(input, output, session) {
   }, ignoreInit = TRUE)
   
   #Sugerencia: usar shinywidgets::sliderTextInput
+  anios_disponibles <- reactive({
+    actualiza_indicador(input$selColeccion)
+    bd %>%
+      filter(no == input$selIndicador) %>%
+      filter(ambito == input$selEnt) %>%
+      pull(year) %>%
+      unique()
+  })
+
   output$sldAnio <- renderUI({
-    ad <- anios_disponibles(input$selIndicador)
+    ad <- anios_disponibles()
     if(length(ad) > 1) {
       sliderTextInput(inputId = "sldAnio",
                       label = "Año:",

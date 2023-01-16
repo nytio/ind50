@@ -196,10 +196,3 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
                 selection = "none", #list(mode = "single", selected = 12, selectable = 12),
                 style = "bootstrap4")
 }
-
-anios_disponibles <- function(ind_sel) {
-  bd %>%
-    filter(no == ind_sel) %>%
-    pull(year) %>%
-    unique()
-}
