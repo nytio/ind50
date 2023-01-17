@@ -27,11 +27,13 @@ actualiza_indicador(coleccion[1, 1])
 meta <- NULL
 opciones_entidad <-NULL
 bd <- NULL
-actualiza_bd <- function(selIndicador) {
-  meta <<-
-    dbGetQuery(con, paste0("SELECT * FROM viewb2 WHERE idserie = ", selIndicador, "ORDER BY idind;"))
-  
-  idambito <- unique(meta$idambito)
+actualiza_opciones_entidad <- function(selIndicador, selAnio = NULL) {
+  meta <<- dbGetQuery(con, paste0("SELECT * FROM viewb2 WHERE idserie = ", selIndicador, "ORDER BY idind;"))
+  if(is.null(selAnio)) {
+    idambito <- meta$idambito[meta$fecha == max(meta$fecha)]
+  } else {
+    idambito <- meta$idambito[meta$fecha == selAnio]
+  }
   if (length(idambito) == 1) {
     if (idambito == 2) {
       opciones_entidad <<- c(2)
@@ -71,7 +73,10 @@ actualiza_bd <- function(selIndicador) {
                     names(opciones_entidad) <<- c("Estados de EE.UU.")
                   }
   }
-  
+}
+
+actualiza_bd <- function(selIndicador) {
+  actualiza_opciones_entidad(selIndicador)
   campo1 <-
     dbGetQuery(con, paste0(
       "SELECT * FROM view04 WHERE ",

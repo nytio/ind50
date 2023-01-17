@@ -33,7 +33,7 @@ ui <- fluidPage(
       radioButtons(inputId = "selEnt",
                   label = "Desagregación:",
                   choices = opciones_entidad),
-      uiOutput("sldAnio"),
+      uiOutput("selAnio"),
       # hr(),
       # checkboxGroupInput("checkGroup", label = "Opciones:", 
       #                    choices = list("Ocultar total" = 1, "Resaltar Guanajuato" = 2),
@@ -65,47 +65,25 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  observeEvent(input$selColeccion, {
-    actualiza_indicador(input$selColeccion)
-    updateSelectInput(
-      session = session,
-      inputId = "selIndicador",
-      choices = opciones_indicadores,
-      selected = NULL
-    )
-    actualiza_bd(indicadores[1, 1])
-    updateRadioButtons(inputId = "selEnt",
-                       label = "Desagregación:",
-                       choices = opciones_entidad)
-  }, ignoreInit = TRUE)
-  
-  observeEvent(input$selIndicador, {
-    actualiza_bd(input$selIndicador)
-    updateRadioButtons(inputId = "selEnt",
-                       label = "Desagregación:",
-                       choices = opciones_entidad)
-  }, ignoreInit = TRUE)
-  
-  #Sugerencia: usar shinywidgets::sliderTextInput
   anios_disponibles <- reactive({
-    actualiza_indicador(input$selColeccion)
     bd %>%
       filter(no == input$selIndicador) %>%
       filter(ambito == input$selEnt) %>%
       pull(year) %>%
       unique()
   })
-
-  output$sldAnio <- renderUI({
+  
+  output$selAnio <- renderUI({
     ad <- anios_disponibles()
+    ad <- ad[sort(order(ad))]
     if(length(ad) > 1) {
-      sliderTextInput(inputId = "sldAnio",
+      sliderTextInput(inputId = "selAnio",
                       label = "Año:",
                       grid = TRUE,
                       choices = ad,
                       selected = ad[length(ad)])
     } else if (length(ad) > 0) {
-      selectInput(inputId = "sldAnio",
+      selectInput(inputId = "selAnio",
                   label = "Año",
                   choices = ad,
                   selected = ad[1],
@@ -114,11 +92,66 @@ server <- function(input, output, session) {
       br()
     }
   })
-
+  
+  observeEvent(input$selColeccion, {
+    actualiza_indicador(input$selColeccion)
+    updateSelectInput(
+      session = session,
+      inputId = "selIndicador",
+      choices = opciones_indicadores
+    )
+  }, ignoreInit = TRUE)
+  
+  observeEvent(input$selIndicador, {
+    actualiza_bd(input$selIndicador)
+    ad <- anios_disponibles()
+    ad <- ad[sort(order(ad))]
+    if(length(ad) > 1) {
+      sliderTextInput(inputId = "selAnio",
+                      label = "Año:",
+                      grid = TRUE,
+                      choices = ad,
+                      selected = ad[length(ad)])
+    } else if (length(ad) > 0) {
+      selectInput(inputId = "selAnio",
+                  label = "Año",
+                  choices = ad,
+                  selected = ad[1],
+                  selectize = FALSE)
+    } else {
+      br()
+    }
+    
+    actualiza_opciones_entidad(input$selIndicador, input$selAnio)
+    updateRadioButtons(inputId = "selEnt",
+                       label = "Desagregación:",
+                       choices = opciones_entidad)
+  }, ignoreInit = TRUE)
+  
+  observeEvent(input$selEnt, {
+    ad <- anios_disponibles()
+    ad <- ad[sort(order(ad))]
+    if(length(ad) > 1) {
+      sliderTextInput(inputId = "selAnio",
+                      label = "Año:",
+                      grid = TRUE,
+                      choices = ad,
+                      selected = ad[length(ad)])
+    } else if (length(ad) > 0) {
+      selectInput(inputId = "selAnio",
+                  label = "Año",
+                  choices = ad,
+                  selected = ad[1],
+                  selectize = FALSE)
+    } else {
+      br()
+    }
+  }, ignoreInit = TRUE)
+  
   datasetInput <- reactive({
     tabulado(edo_sel = input$selEnt,
              ind_sel = input$selIndicador,
-             anio_sel = input$sldAnio)
+             anio_sel = input$selAnio)
   })
   
   output$tab1 <- DT::renderDataTable({
@@ -128,7 +161,7 @@ server <- function(input, output, session) {
   # Downloadable csv of selected dataset ----
   output$downloadData <- downloadHandler(
     filename = function() {
-      paste0("tbl", input$selIndicador, "_", input$sldAnio, "_", input$selEnt, ".xlsx")
+      paste0("tbl", input$selIndicador, "_", input$selAnio, "_", input$selEnt, ".xlsx")
     },
     content = function(file) {
       # Crea un nuevo libro de trabajo
@@ -176,21 +209,21 @@ server <- function(input, output, session) {
   output$grafica_barras <- renderPlot({
     gen_barras(edo_sel = input$selEnt,
                ind_sel = input$selIndicador,
-               anio_sel = input$sldAnio)
+               anio_sel = input$selAnio)
   })
   
   output$mapa <- renderPlot({
     gen_mapa(
       edo_sel = input$selEnt,
       ind_sel = input$selIndicador,
-      anio_sel = input$sldAnio
+      anio_sel = input$selAnio
     )
   })
   
   output$grafica_lineas <- renderPlot({
     gen_lineas(edo_sel = input$selEnt,
                ind_sel = input$selIndicador,
-               anio_sel = input$sldAnio)
+               anio_sel = input$selAnio)
   })
 }
 
