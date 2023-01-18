@@ -1,17 +1,13 @@
 options(scipen = 999)
-library(shiny) # 1.7.3
+library(shiny) # 1.7.4
 library(shinycssloaders) # 1.0.0
-library(shinyWidgets) # 0.7.5
-library(tidyverse) # 1.3.1
+library(shinyWidgets) # 0.7.6
+library(tidyverse) # 1.3.2
 library(openxlsx) # 4.2.5.1
 source("global.R")
 
 #todo@ TEST probar con diferentes niveles de desagregación geográfica
-# Agregar opciones en panel:
-# [*] Ocultar total
-# [*] Resaltar Guanajuato
 # Agregar pestañas
-# [-] Tabulado
 # [-] Prospectiva (Si hay más de 10 datos para Guanajuato)
 # [-] Metadatos
 
@@ -55,8 +51,8 @@ ui <- fluidPage(
                  icon = icon("map-marker")),
         tabPanel(title = "Serie",
                  plotOutput("grafica_lineas", height = "80vh") %>% withSpinner()),
-        tabPanel(title = "Prospectiva",
-                 br()),
+        # tabPanel(title = "Prospectiva",
+        #          br()),
         tabPanel(title = "Metadato",
                  br())
       )
@@ -75,7 +71,6 @@ server <- function(input, output, session) {
   
   output$selAnio <- renderUI({
     ad <- anios_disponibles()
-    ad <- ad[sort(order(ad))]
     if(length(ad) > 1) {
       sliderTextInput(inputId = "selAnio",
                       label = "Año:",
@@ -105,7 +100,6 @@ server <- function(input, output, session) {
   observeEvent(input$selIndicador, {
     actualiza_bd(input$selIndicador)
     ad <- anios_disponibles()
-    ad <- ad[sort(order(ad))]
     if(length(ad) > 1) {
       sliderTextInput(inputId = "selAnio",
                       label = "Año:",
@@ -130,7 +124,6 @@ server <- function(input, output, session) {
   
   observeEvent(input$selEnt, {
     ad <- anios_disponibles()
-    ad <- ad[sort(order(ad))]
     if(length(ad) > 1) {
       sliderTextInput(inputId = "selAnio",
                       label = "Año:",

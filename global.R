@@ -1,8 +1,8 @@
 # https://www.youtube.com/watch?v=_gzOovLEXWo 1:07:07
 
 # Librerias ----
-library(jsonlite) # 1.8.3
-library(tidyverse) # 1.3.1
+library(jsonlite) # 1.8.4
+library(tidyverse) # 1.3.2
 library(ggplot2) # 3.4.0
 library(sf) # 1.0-9
 source("database.R")
@@ -18,17 +18,14 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     filter(year == anio_sel) %>%
     filter(ambito == edo_sel)
   
-  if(TRUE) {
+  if(edo_sel == "2") {
     datos_barras <-
       datos_barras %>% mutate(ToHighlight = ifelse(cve == 11, "gto", "no" ))
+    datos_barras <-
+      datos_barras %>% filter(cve != "MEX")
   } else {
     datos_barras <-
       datos_barras %>% mutate(ToHighlight = "no")
-  }
-  
-  if(TRUE) {
-    datos_barras <-
-      datos_barras %>% filter(cve != "MEX")
   }
 
   # Gráfico
@@ -132,21 +129,18 @@ gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
     filter(no == ind_sel) %>%
     filter(ambito == edo_sel)
   
-  datos_lineas$year <- as.numeric(datos_lineas$year)
+  datos_lineas$year <- as.integer(datos_lineas$year)
   
-  if(TRUE) {
+  if(edo_sel == "2") {
     datos_lineas <-
       datos_lineas %>% mutate(ToHighlight = ifelse(cve == 11, "gto", "no" ))
-  } else {
-    datos_lineas <-
-      datos_barras %>% mutate(ToHighlight = "no")
-  }
-  
-  if(TRUE) {
     datos_lineas <-
       datos_lineas %>% filter(cve != "MEX")
+  } else {
+    datos_lineas <-
+      datos_lineas %>% mutate(ToHighlight = "no")
   }
-
+  
   datos_lineas %>%
     ggplot(aes(
       x = year,

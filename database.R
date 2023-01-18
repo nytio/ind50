@@ -1,7 +1,7 @@
 # https://github.com/r-dbi/odbc/blob/main/README.md
 
 # Librerias ----
-library(tidyverse) # 1.3.1
+library(tidyverse) # 1.3.2
 library(DBI) # 1.1.3
 
 # Conexiones ----
@@ -28,7 +28,7 @@ meta <- NULL
 opciones_entidad <-NULL
 bd <- NULL
 actualiza_opciones_entidad <- function(selIndicador, selAnio = NULL) {
-  meta <<- dbGetQuery(con, paste0("SELECT * FROM viewb2 WHERE idserie = ", selIndicador, "ORDER BY idind;"))
+  meta <<- dbGetQuery(con, paste0("SELECT * FROM viewb2 WHERE idserie = ", selIndicador, "ORDER BY orden;"))
   if(is.null(selAnio)) {
     idambito <- meta$idambito[meta$fecha == max(meta$fecha)]
   } else {
@@ -82,7 +82,6 @@ actualiza_bd <- function(selIndicador) {
       "SELECT * FROM view04 WHERE ",
       paste("idind = ", meta$idind, collapse = " OR ")
     ))
-  campo1 <- campo1[order(campo1$idind),]
   
   use_sql <- paste0(
     'SELECT geografico.ambito, geografico.cve, geografico.nom, ',
@@ -109,7 +108,6 @@ actualiza_bd <- function(selIndicador) {
   colnames(bd)[1] <<- "no"
   colnames(bd)[2] <<- "year"
   
-  meta <<- meta[order(meta$fecha),]
   bd <<- bd[order(bd$year, bd$ambito, bd$cve),]
 }
 
