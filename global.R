@@ -129,7 +129,7 @@ gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
     filter(no == ind_sel) %>%
     filter(ambito == edo_sel)
   
-  datos_lineas$year <- as.integer(datos_lineas$year)
+  datos_lineas$year <- as.integer(as.character(datos_lineas$year))
   
   if(edo_sel == "2") {
     datos_lineas <-
