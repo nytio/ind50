@@ -47,7 +47,7 @@ ui <- fluidPage(
                  plotOutput("grafica_barras", height = "80vh") %>% withSpinner(),
                  icon = icon("bar-chart")),
         tabPanel(title = "Mapa",
-                 plotOutput("mapa", height = "80vh") %>% withSpinner(),
+                 plotOutput("grafica_mapa", height = "80vh") %>% withSpinner(),
                  icon = icon("map-marker")),
         tabPanel(title = "Serie",
                  plotOutput("grafica_lineas", height = "80vh") %>% withSpinner()),
@@ -205,12 +205,10 @@ server <- function(input, output, session) {
                anio_sel = input$selAnio)
   })
   
-  output$mapa <- renderPlot({
-    gen_mapa(
-      edo_sel = input$selEnt,
-      ind_sel = input$selIndicador,
-      anio_sel = input$selAnio
-    )
+  output$grafica_mapa <- renderPlot({
+    gen_mapa(edo_sel = input$selEnt,
+             ind_sel = input$selIndicador,
+             anio_sel = input$selAnio)
   })
   
   output$grafica_lineas <- renderPlot({
