@@ -77,12 +77,13 @@ actualiza_opciones_entidad <- function(selIndicador, selAnio = NULL) {
 
 actualiza_bd <- function(selIndicador) {
   actualiza_opciones_entidad(selIndicador)
-  campo1 <-
-    dbGetQuery(con, paste0(
-      "SELECT * FROM view04 WHERE ",
-      paste("idind = ", meta$idind, collapse = " OR ")
-    ))
   
+  campo1 <- NULL
+  use_sql <-  paste("SELECT * FROM view04 WHERE idind =", meta$idind)
+  for (i in 1:length(use_sql)) {
+    campo1 <- rbind(campo1, dbGetQuery(con, use_sql[i]))
+  }
+
   use_sql <- paste0(
     'SELECT geografico.ambito, geografico.cve, geografico.nom, ',
     paste(campo1$tabla, campo1$mnemonico, sep = "."),
