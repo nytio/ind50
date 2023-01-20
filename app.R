@@ -54,7 +54,7 @@ ui <- fluidPage(
         # tabPanel(title = "Prospectiva",
         #          br()),
         tabPanel(title = "Metadato",
-                 br())
+                 DT::dataTableOutput('tab2'))
       )
     )
   )
@@ -203,19 +203,25 @@ server <- function(input, output, session) {
     gen_barras(edo_sel = input$selEnt,
                ind_sel = input$selIndicador,
                anio_sel = input$selAnio)
-  })
+  }, ignoreInit = TRUE)
   
   output$grafica_mapa <- renderPlot({
     gen_mapa(edo_sel = input$selEnt,
              ind_sel = input$selIndicador,
              anio_sel = input$selAnio)
-  })
+  }, ignoreInit = TRUE)
   
   output$grafica_lineas <- renderPlot({
     gen_lineas(edo_sel = input$selEnt,
-               ind_sel = input$selIndicador,
-               anio_sel = input$selAnio)
+               ind_sel = input$selIndicador)
+  }, ignoreInit = TRUE)
+  
+  datasetInput2 <- reactive({
+    tabulado2(ind_sel = input$selIndicador)
   })
+  output$tab2 <- DT::renderDataTable({
+    datasetInput2()
+  }, ignoreInit = TRUE)
 }
 
 shinyApp(ui, server)

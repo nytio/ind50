@@ -8,7 +8,7 @@ library(sf) # 1.0-9
 source("database.R")
 
 gen_barras <- function(edo_sel, ind_sel, anio_sel) {
-  if(is.null(anio_sel))
+  if(is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)
   metadatos_sel <- meta %>%
     filter(fecha == anio_sel)
@@ -58,7 +58,7 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
 
 shp <- NULL
 gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
-  if(is.null(anio_sel))
+  if(is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)
 
   if(is.null(shp)) {
@@ -119,11 +119,10 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
      )
 }
 
-gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
-  if(is.null(anio_sel))
+gen_lineas <- function(edo_sel, ind_sel) {
+  if(is.null(edo_sel) || is.null(ind_sel))
     return(NULL)
-  metadatos_sel <- meta %>%
-    filter(fecha == anio_sel)
+  metadatos_sel <- meta
   
   datos_lineas <- bd %>%
     filter(no == ind_sel) %>%
@@ -152,10 +151,10 @@ gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
     scale_color_manual(values = c("gto"="#00628C", "no" = "#DFDEDE"), guide = "none") +
     #geom_point(color = "#DAD9DB") +
     labs(
-      title = str_c(metadatos_sel$indicador, ", ", min(datos_lineas$year), " - ", max(datos_lineas$year)),
-      caption = str_c("Fuente: ", metadatos_sel$fuente),
+      title = str_c(min(metadatos_sel$indicador), ", ", min(datos_lineas$year), " - ", max(datos_lineas$year)),
+      caption = str_c("Fuente: ", min(metadatos_sel$fuente)),
       x = NULL,
-      y = metadatos_sel$unidad
+      y = min(metadatos_sel$unidad)
     ) +
     scale_x_continuous(breaks = unique(datos_lineas$year)) +
     scale_y_continuous(label = scales::comma_format()) +
@@ -169,7 +168,7 @@ gen_lineas <- function(edo_sel, ind_sel, anio_sel) {
 }
 
 tabulado <- function(edo_sel, ind_sel, anio_sel) {
-  if(is.null(anio_sel))
+  if(is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)
   metadatos_sel <- meta %>%
     filter(fecha == anio_sel)
@@ -187,6 +186,19 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
   DT::datatable(tab,
                 options = list(paging = FALSE, searching = FALSE),
                 caption = str_c(metadatos_sel$indicador, ", ", anio_sel),
+                selection = "none", #list(mode = "single", selected = 12, selectable = 12),
+                style = "bootstrap4")
+}
+
+tabulado2 <- function(ind_sel) {
+  if(is.null(ind_sel))
+    return(NULL)
+  metadatos_sel <- meta %>% 
+    select(idserie, idind, indicador, fecha, unidad, fuente, producto)
+  
+  DT::datatable(metadatos_sel,
+                options = list(paging = FALSE, searching = FALSE),
+                caption = str_c("Indicador: ", min(metadatos_sel$indicador)),
                 selection = "none", #list(mode = "single", selected = 12, selectable = 12),
                 style = "bootstrap4")
 }
