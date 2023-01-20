@@ -62,23 +62,31 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
     return(NULL)
 
   if(is.null(shp)) {
-    gto <- read_sf("www/datos/gto.geojson") %>%
-      mutate(geo = 1) %>%
-      rename(cve = CLAVE, nom = NOM_MUN) %>%
-      select(geo, cve, nom, geometry)
-
-    mex <- read_sf("www/datos/mex.geojson") %>%
-      mutate(geo = 2) %>%
-      rename(cve = CVE_ENT, nom = NOM_ENT) %>%
-      select(geo, cve, nom, geometry)
-
-    usa <- read_sf("www/datos/usa.geojson") %>%
-      mutate(geo = 7) %>%
-      rename(cve = FIPS, nom = NAME) %>%
-      select(geo, cve, nom, geometry)
-
-    shp <<- bind_rows(gto, mex, usa)
-    rm(gto, mex, usa)
+    if(file.exists("www/datos/shp.rds")) {
+      shp <<- readRDS("www/datos/shp.rds")
+    } else {
+      gto <- read_sf("www/datos/gto.geojson") %>%
+        mutate(geo = 1) %>%
+        rename(cve = CLAVE, nom = NOM_MUN) %>%
+        select(geo, cve, nom, geometry)
+      gto <- st_simplify(gto, dTolerance = 100)
+  
+      mex <- read_sf("www/datos/mex.geojson") %>%
+        mutate(geo = 2) %>%
+        rename(cve = CVE_ENT, nom = NOM_ENT) %>%
+        select(geo, cve, nom, geometry)
+      mex <- st_simplify(mex, dTolerance = 1000)
+  
+      usa <- read_sf("www/datos/usa.geojson") %>%
+        mutate(geo = 7) %>%
+        rename(cve = FIPS, nom = NAME) %>%
+        select(geo, cve, nom, geometry)
+      usa <- st_simplify(usa, dTolerance = 1000)
+  
+      shp <<- bind_rows(gto, mex, usa)
+      rm(gto, mex, usa)
+      saveRDS(shp, file = "www/datos/shp.rds")
+    }
   }
   
   colores <- c("#FEFED1", "#FDFC91", "#F9D114", "#EB8936", "#B93623")
@@ -194,11 +202,13 @@ tabulado2 <- function(ind_sel) {
   if(is.null(ind_sel))
     return(NULL)
   metadatos_sel <- meta %>% 
-    select(idserie, idind, indicador, fecha, unidad, fuente, producto)
-  
+    mutate(id = paste(idserie, idind, sep = "-")) %>%
+    select(id, indicador, descripcion, unidad, fecha,  fuente, producto)
+  names(metadatos_sel) <- c("No", "Nombre del Indicador", "Definición del indicador", "Unidad de medida", "Fecha","Fuente del indicador", "Sitio de consulta del indicador")
+
   DT::datatable(metadatos_sel,
                 options = list(paging = FALSE, searching = FALSE),
-                caption = str_c("Indicador: ", min(metadatos_sel$indicador)),
+                #caption = "Ficha del indicador",
                 selection = "none", #list(mode = "single", selected = 12, selectable = 12),
-                style = "bootstrap4")
+                style = "bootstrap4", escape = FALSE)
 }
