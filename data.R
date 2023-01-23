@@ -82,4 +82,31 @@ query <- paste(
 )
 dbExecute(con, query)
 
-  
+
+# Actualiza una fuente ----
+library(DBI)
+library(data.table)
+
+con <- dbConnect(odbc::odbc(), "circinus", timeout = 10) #indicadores circinus
+
+datos <- fread("docs/data/tabla_iter_20.csv")
+
+# Comprobar si la tabla existe
+tabla_existe <- dbExistsTable(con, "tabla_iter_20")
+
+# Si la tabla no existe, crearla antes de escribir los datos
+if (!tabla_existe) {
+  #dbCreateTable(con, "tabla_iter_20", datos)
+  # Es mejor ejecutar un query explícito
+  query <- readLines("docs/data/tabla_iter_20.sql")
+  query <- paste(query, collapse = " ")
+  result <- dbExecute(con, query)
+} else {
+  query <- "DELETE FROM tabla_iter_20;"
+  result <- dbExecute(con, query)
+}
+# En caso de eliminar toda la tabla, con su estructura, ejecutar:
+# DROP TABLE nombre_tabla;
+
+# Guarda todo los datos en un solo paso:
+dbWriteTable(con, "tabla_iter_20", datos, overwrite = FALSE, append = TRUE, row.names = FALSE)
