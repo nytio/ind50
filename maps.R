@@ -2,26 +2,27 @@
 
 # Librerias ----
 library(tidyverse) # 1.3.1
-library(sf) # 1.0-9
 library(DBI) # 1.1.3
 
 # Conexiones ----
 con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10) #circinus indicadores
 
 frangeerror <- function(muppets, mini, maxi) {
-  sum(abs(mean(muppets[mini:maxi]) - muppets[mini:maxi]))
+  mean_val <- mean(muppets[mini:maxi])
+  sum(abs(mean_val - muppets[mini:maxi]), na.rm = TRUE)
 }
 
 # Optimizado para reducir el tiempo de ejecución, en casos de tamaño de arreglo
 # moderado, de la función de O(n^4) a O(n^2) donde n es el tamaño del arreglo,
 # pero la complejidad temporal sigue siendo alta si el tamaño del arreglo es
-# grande.
+# grande. Requiere de 2 segundos para calcular los rangos para un mapa.
+#! Enero de 2023
 rangos_arreglo <- function(muppets) {
   dim_arreglo <- length(muppets)
-  arreglo <- sort(muppets, decreasing = TRUE)
+  arreglo <- muppets[order(muppets, decreasing = TRUE)]
   # Generar todas las combinaciones posibles de los índices
   idx <- expand.grid(i = 1:((dim_arreglo - 4)), j = 2:(dim_arreglo - 3), k = 3:(dim_arreglo - 2), l = 4:(dim_arreglo - 1))
-  
+
   # Eliminar las combinaciones con índice inicial mayor que índice final
   idx <- idx[idx$i < idx$j,]
   idx <- idx[idx$j < idx$k,]
@@ -29,29 +30,19 @@ rangos_arreglo <- function(muppets) {
   
   # Aplicar frangeerror a cada combinación y calcular el TAI
   errors <- apply(idx, 1, function(x) {
-    frangeerror(arreglo, 1, x[1]) + 
-      frangeerror(arreglo, x[1] + 1, x[2]) + 
-      frangeerror(arreglo, x[2] + 1, x[3]) + 
-      frangeerror(arreglo, x[3] + 1, x[4]) + 
+    frangeerror(arreglo, 1, x[1]) +
+      frangeerror(arreglo, x[1] + 1, x[2]) +
+      frangeerror(arreglo, x[2] + 1, x[3]) +
+      frangeerror(arreglo, x[3] + 1, x[4]) +
       frangeerror(arreglo, x[4] + 1, dim_arreglo)
   })
   # Calcula TAI y encuentra los índices con el TAI máximo
   TAI <- 1 - errors / frangeerror(arreglo, 1, dim_arreglo)
   maxi <- idx[TAI == max(TAI),]
-  # Devolver los valores correspondientes a los índices encontrados
+  # Devolver los rangos correspondientes a los índices encontrados
   array(
-    c(
-      arreglo[dim_arreglo],
-      arreglo[maxi$l],
-      arreglo[maxi$k],
-      arreglo[maxi$j],
-      arreglo[maxi$i],
-      arreglo[maxi$l + 1],
-      arreglo[maxi$k + 1],
-      arreglo[maxi$j + 1],
-      arreglo[maxi$i + 1],
-      arreglo[1]
-    ),
+    c(arreglo[dim_arreglo], arreglo[maxi$l], arreglo[maxi$k], arreglo[maxi$j], arreglo[maxi$i],
+      arreglo[maxi$l + 1], arreglo[maxi$k + 1], arreglo[maxi$j + 1], arreglo[maxi$i + 1], arreglo[1]),
     c(5, 2)
   )
 }
@@ -80,8 +71,10 @@ categoriza <- function(rangos, muppets) {
 
 colorea <- function(muppets) {
   colorea_rangos <- rangos_arreglo(muppets)
-  colorea_clases <- categoriza(colorea_rangos, muppets);
-  colorea_cuenta <- c(sum(colorea_clases == 1), sum(colorea_clases == 2), sum(colorea_clases == 3), sum(colorea_clases == 4), sum(colorea_clases == 5));
+  colorea_clases <- categoriza(colorea_rangos, muppets)
+  # colorea_clases <- findInterval(muppets, c(colorea_rangos[,1], Inf))
+  colorea_cuenta <- c(sum(colorea_clases == 1), sum(colorea_clases == 2), sum(colorea_clases == 3), sum(colorea_clases == 4), sum(colorea_clases == 5))
+  # colorea_cuenta <- as.vector(table(colorea_clases))
   list(clases = colorea_clases, rangos = colorea_rangos, cuenta = colorea_cuenta)
 }
 
@@ -294,7 +287,9 @@ mapas_graficos_servidor_a_servidor <- function(rango) {
 # Genera mapas del rango dado: n, n:m, dado como un rango consecutivo, o bien en lista c(m, p, n)
 ##mapas_graficos_servidor_a_servidor(c(2111,2301,2302))
 ##mapas_graficos_servidor_a_servidor(2650:2653)
-mapas_graficos_servidor_a_servidor(2653)
+#mapas_graficos_servidor_a_servidor(2653)
+
+t1 <- system.time( mapas_graficos_servidor_a_servidor(2653) )
 
 # Actualiza por tabla
 ##mapas_graficos_servidor_a_servidor(dbGetQuery(con, "SELECT idind FROM indicador WHERE idtabla = 25"))
