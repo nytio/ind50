@@ -209,13 +209,13 @@ server <- function(input, output, session) {
       saveWorkbook(wb, file)
     }
   )
-    
+
   output$grafica_barras <- renderPlot({
     gen_barras(edo_sel = input$selEnt,
                ind_sel = input$selIndicador,
                anio_sel = input$selAnio)
   })
-  
+
   output$grafica_mapa <- renderPlot({
     gen_mapa(edo_sel = input$selEnt,
              ind_sel = input$selIndicador,
