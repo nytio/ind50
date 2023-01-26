@@ -57,54 +57,55 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     )
 }
 
-shp <- NULL
 gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
-  if(is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
+  if (is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)
-
-  if(is.null(shp)) {
-    if(file.exists("www/datos/shp.rds")) {
-      shp <<- readRDS("www/datos/shp.rds")
-    } else {
-      gto <- read_sf("www/datos/gto.geojson") %>%
-        mutate(geo = 1) %>%
-        rename(cve = CLAVE, nom = NOM_MUN) %>%
-        select(geo, cve, nom, geometry)
-      gto <- st_simplify(gto, dTolerance = 100)
   
-      mex <- read_sf("www/datos/mex.geojson") %>%
-        mutate(geo = 2) %>%
-        rename(cve = CVE_ENT, nom = NOM_ENT) %>%
-        select(geo, cve, nom, geometry)
-      mex <- st_simplify(mex, dTolerance = 1000)
-  
-      usa <- read_sf("www/datos/usa.geojson") %>%
-        mutate(geo = 7) %>%
-        rename(cve = FIPS, nom = NAME) %>%
-        select(geo, cve, nom, geometry)
-      usa <- st_simplify(usa, dTolerance = 1000)
-  
-      shp <<- bind_rows(gto, mex, usa)
-      rm(gto, mex, usa)
-      saveRDS(shp, file = "www/datos/shp.rds")
-    }
+  if (file.exists("www/datos/shp.rds")) {
+    shp <- readRDS("www/datos/shp.rds")
+  } else {
+    gto <- read_sf("www/datos/gto.geojson") %>%
+      mutate(geo = 1) %>%
+      rename(cve = CLAVE, nom = NOM_MUN) %>%
+      select(geo, cve, nom, geometry)
+    gto <- st_simplify(gto, dTolerance = 100)
+    
+    mex <- read_sf("www/datos/mex.geojson") %>%
+      mutate(geo = 2) %>%
+      rename(cve = CVE_ENT, nom = NOM_ENT) %>%
+      select(geo, cve, nom, geometry)
+    mex <- st_simplify(mex, dTolerance = 1000)
+    
+    usa <- read_sf("www/datos/usa.geojson") %>%
+      mutate(geo = 7) %>%
+      rename(cve = FIPS, nom = NAME) %>%
+      select(geo, cve, nom, geometry)
+    usa <- st_simplify(usa, dTolerance = 1000)
+    
+    shp <- bind_rows(gto, mex, usa)
+    rm(gto, mex, usa)
+    saveRDS(shp, file = "www/datos/shp.rds")
   }
   
-  colores <- c("#FEFED1", "#FDFC91", "#F9D114", "#EB8936", "#B93623")
-
+  colores <-
+    c("#FEFED1", "#FDFC91", "#F9D114", "#EB8936", "#B93623")
+  
   metadatos_sel <- meta %>%
     filter(fecha == anio_sel)
-
+  
   #todo@ ajustar consultas para que coincidan las claves
   mapa <- shp %>%
     filter(geo == edo_sel)
-
+  
   # Carga los datos del mapa temático
   k <- fromJSON(metadatos_sel$jsonmap)
-  ke <- switch(edo_sel, '1' = k$m, '2' = k$e, '7' = k$u)
+  ke <- switch(edo_sel,
+               '1' = k$m,
+               '2' = k$e,
+               '7' = k$u)
   mapa$valorT <- factor(ke$v)
   colores_etq <- as.vector(ke$l)
-
+  
   # Mapa
   mapa %>%
     ggplot() +
@@ -116,8 +117,16 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
       axis.ticks = element_blank(),
       panel.border = element_blank(),
       legend.position = "bottom",
-      plot.title = element_text(hjust = 0.5, face = "bold", colour = "#333333"),
-      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = "#333333")
+      plot.title = element_text(
+        hjust = 0.5,
+        face = "bold",
+        colour = "#333333"
+      ),
+      plot.subtitle = element_text(
+        hjust = 0.5,
+        face = "bold",
+        colour = "#333333"
+      )
     ) +
     labs(
       title = str_c(metadatos_sel$indicador, ", ", anio_sel),
@@ -125,7 +134,7 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
       x = NULL,
       y = NULL,
       fill = metadatos_sel$unidad
-     )
+    )
 }
 
 gen_lineas <- function(edo_sel, ind_sel) {
