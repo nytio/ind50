@@ -5,7 +5,6 @@ library(jsonlite) # 1.8.4
 library(tidyverse) # 1.3.2
 library(ggplot2) # 3.4.0
 library(sf) # 1.0-9
-library(ggrepel) # 0.9.2
 source("database.R")
 
 gen_barras <- function(edo_sel, ind_sel, anio_sel) {
@@ -36,7 +35,7 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
                fill = ToHighlight)) +
     geom_col() +
     scale_fill_manual(values = c("gto"="#00628C", "no" = "#1FB3E5"), guide = "none") +
-    geom_text_repel(aes(label = prettyNum(round(valor, 2), big.mark = ",")),
+    geom_text(aes(label = prettyNum(round(valor, 2), big.mark = ",")),
               size = 3,
               hjust = -0.2) +
     scale_y_continuous(expand = expansion(c(0, 0.2), 0),
