@@ -10,13 +10,20 @@ source("database.R")
 gen_barras <- function(edo_sel, ind_sel, anio_sel) {
   if(is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)
+
   metadatos_sel <- meta %>%
     filter(fecha == anio_sel)
+
+  if(length(metadatos_sel$fecha) == 0)
+    return(NULL)
 
   datos_barras <- bd %>%
     filter(no == ind_sel) %>%
     filter(year == anio_sel) %>%
     filter(ambito == edo_sel)
+  
+  if(length(datos_barras$ambito) == 0)
+    return(NULL)
   
   if(edo_sel == "2") {
     datos_barras <-
@@ -60,6 +67,12 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   if (is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)
   
+  metadatos_sel <- meta %>%
+    filter(fecha == anio_sel)
+  
+  if(length(metadatos_sel$fecha) == 0)
+    return(NULL)
+  
   if (file.exists("www/datos/shp.rds")) {
     shp <- readRDS("www/datos/shp.rds")
   } else {
@@ -89,9 +102,6 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   colores <-
     c("#FEFED1", "#FDFC91", "#F9D114", "#EB8936", "#B93623")
   
-  metadatos_sel <- meta %>%
-    filter(fecha == anio_sel)
-  
   #todo@ ajustar consultas para que coincidan las claves
   mapa <- shp %>%
     filter(geo == edo_sel)
@@ -104,6 +114,7 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
                '7' = k$u)
   if(is.null(ke))
     return(NULL)
+
   mapa$valorT <- factor(ke$v)
   colores_etq <- as.vector(ke$l)
   
@@ -147,6 +158,9 @@ gen_lineas <- function(edo_sel, ind_sel) {
     filter(no == ind_sel) %>%
     filter(ambito == edo_sel)
   
+  if(length(datos_lineas$ambito) == 0)
+    return(NULL)
+  
   datos_lineas$year <- as.integer(as.character(datos_lineas$year))
   
   if(edo_sel == "2") {
@@ -189,13 +203,20 @@ gen_lineas <- function(edo_sel, ind_sel) {
 tabulado <- function(edo_sel, ind_sel, anio_sel) {
   if(is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)
+
   metadatos_sel <- meta %>%
     filter(fecha == anio_sel)
+  
+  if(length(metadatos_sel$fecha) == 0)
+    return(NULL)
   
   tab <- bd %>%
     filter(no == ind_sel) %>%
     filter(year == anio_sel) %>%
     filter(ambito == edo_sel)
+  
+  if(length(tab$ambito) == 0)
+    return(NULL)
   
   rownames(tab) <- tab$cve
   tab <- tab %>%

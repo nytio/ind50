@@ -1,7 +1,7 @@
 options(scipen = 999)
 library(shiny) # 1.7.4
-library(shinycssloaders) # 1.0.0
 library(shinyWidgets) # 0.7.6
+library(shinycssloaders) # 1.0.0
 library(tidyverse) # 1.3.2
 library(openxlsx) # 4.2.5.1
 source("global.R")
@@ -96,9 +96,9 @@ server <- function(input, output, session) {
         }
       }
       updateSliderTextInput(session = session,
-                        inputId = "selAnio",
-                        choices = ad,
-                        selected = usel)
+                            inputId = "selAnio",
+                            choices = ad,
+                            selected = usel)
     }
     
     actualiza_opciones_entidad(input$selIndicador, input$selAnio)
