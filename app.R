@@ -29,7 +29,11 @@ ui <- fluidPage(
       radioButtons(inputId = "selEnt",
                   label = "Desagregación:",
                   choices = opciones_entidad),
-      uiOutput("selAnio"),
+      sliderTextInput(inputId = "selAnio",
+                  label = "Año",
+                  choices = c("1990", "1995", "2000", "2005", "2010", "2015", "2020"),
+                  selected = "2020",
+                  grid = TRUE),
       # hr(),
       # checkboxGroupInput("checkGroup", label = "Opciones:", 
       #                    choices = list("Ocultar total" = 1, "Resaltar Guanajuato" = 2),
@@ -69,25 +73,6 @@ server <- function(input, output, session) {
       unique()
   })
   
-  output$selAnio <- renderUI({
-    ad <- anios_disponibles()
-    if(length(ad) > 1) {
-      sliderTextInput(inputId = "selAnio",
-                      label = "Año:",
-                      grid = TRUE,
-                      choices = ad,
-                      selected = ad[length(ad)])
-    } else if (length(ad) > 0) {
-      selectInput(inputId = "selAnio",
-                  label = "Año",
-                  choices = ad,
-                  selected = ad[1],
-                  selectize = FALSE)
-    } else {
-      br()
-    }
-  })
-  
   observeEvent(input$selColeccion, {
     actualiza_indicador(input$selColeccion)
     updateSelectInput(
@@ -100,44 +85,50 @@ server <- function(input, output, session) {
   observeEvent(input$selIndicador, {
     actualiza_bd(input$selIndicador)
     ad <- anios_disponibles()
-    if(length(ad) > 1) {
-      sliderTextInput(inputId = "selAnio",
-                      label = "Año:",
-                      grid = TRUE,
-                      choices = ad,
-                      selected = ad[length(ad)])
-    } else if (length(ad) > 0) {
-      selectInput(inputId = "selAnio",
-                  label = "Año",
-                  choices = ad,
-                  selected = ad[1],
-                  selectize = FALSE)
-    } else {
-      br()
+    if(length(ad) > 0) {
+      if(is.null(input$selAnio)) {
+        usel <- ad[length(ad)]
+      } else {
+        if (input$selAnio %in% ad) {
+          usel <- input$selAnio
+        } else {
+          usel <- ad[length(ad)]
+        }
+      }
+      updateSliderTextInput(session = session,
+                        inputId = "selAnio",
+                        choices = ad,
+                        selected = usel)
     }
     
     actualiza_opciones_entidad(input$selIndicador, input$selAnio)
+    if (input$selEnt %in% opciones_entidad) {
+      usel <- input$selEnt
+    } else {
+      usel <- opciones_entidad[length(opciones_entidad)]
+    }
     updateRadioButtons(inputId = "selEnt",
                        label = "Desagregación:",
-                       choices = opciones_entidad)
-  }, ignoreInit = TRUE)
+                       choices = opciones_entidad,
+                       selected = usel)
+  }, ignoreInit = FALSE)
   
   observeEvent(input$selEnt, {
     ad <- anios_disponibles()
-    if(length(ad) > 1) {
-      sliderTextInput(inputId = "selAnio",
-                      label = "Año:",
-                      grid = TRUE,
-                      choices = ad,
-                      selected = ad[length(ad)])
-    } else if (length(ad) > 0) {
-      selectInput(inputId = "selAnio",
-                  label = "Año",
-                  choices = ad,
-                  selected = ad[1],
-                  selectize = FALSE)
-    } else {
-      br()
+    if(length(ad) > 0) {
+      if(is.null(input$selAnio)) {
+        usel <- ad[length(ad)]
+      } else {
+        if (input$selAnio %in% ad) {
+          usel <- input$selAnio
+        } else {
+          usel <- ad[length(ad)]
+        }
+      }
+      updateSliderTextInput(session = session,
+                            inputId = "selAnio",
+                            choices = ad,
+                            selected = usel)
     }
   }, ignoreInit = TRUE)
   

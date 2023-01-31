@@ -7,7 +7,7 @@ library(lubridate)
 library(foreign)
 
 # Conexiones ----
-con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10) #indicadores circinus
+con <- dbConnect(odbc::odbc(), "circinus", timeout = 10) #indicadores circinus
 
 # Crea la tabla en la base de datos
 query <- paste(

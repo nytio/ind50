@@ -102,6 +102,8 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
                '1' = k$m,
                '2' = k$e,
                '7' = k$u)
+  if(is.null(ke))
+    return(NULL)
   mapa$valorT <- factor(ke$v)
   colores_etq <- as.vector(ke$l)
   
