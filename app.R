@@ -141,7 +141,7 @@ server <- function(input, output, session) {
     datasetInput()
   })
   
-  # Downloadable csv of selected dataset ----
+  # Archivo descargable del conjunto de datos seleccionado ----
   output$downloadData <- downloadHandler(
     filename = function() {
       paste0("tbl", input$selIndicador, "_", input$selAnio, "_", input$selEnt, ".xlsx")
