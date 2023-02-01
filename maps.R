@@ -1,4 +1,4 @@
-# Genera los mapas y los guarda en la base de datos
+# Genera los mapas temáticos y los guarda en la base de datos
 
 # Librerias ----
 library(tidyverse) # 1.3.1
@@ -71,6 +71,7 @@ categoriza <- function(rangos, muppets) {
 
 colorea <- function(muppets) {
   colorea_rangos <- rangos_arreglo(muppets)
+  #colorea_rangos <- classIntervals(muppets, n=5, style="jenks")
   colorea_clases <- categoriza(colorea_rangos, muppets)
   # colorea_clases <- findInterval(muppets, c(colorea_rangos[,1], Inf))
   colorea_cuenta <- c(sum(colorea_clases == 1), sum(colorea_clases == 2), sum(colorea_clases == 3), sum(colorea_clases == 4), sum(colorea_clases == 5))
@@ -296,7 +297,8 @@ t1 <- system.time( mapas_graficos_servidor_a_servidor(2653) )
 ##mapas_graficos_servidor_a_servidor(dbGetQuery(con, "SELECT idind FROM indicador WHERE idtabla = 35"))
 ##mapas_graficos_servidor_a_servidor(dbGetQuery(con, "SELECT idind FROM indicador WHERE idtabla = 36"))
 
-#@todo Generar los mapas faltantes, consultando primero aquellos que no tienen mapa dado de alto (son 2300)
+#@todo Pendientes
+#! Generar los mapas faltantes, consultando primero aquellos que no tienen mapa dado de alto (son 2300)
 #! Pendientes o indicadores con errores:
 #!  85 hay una categoría con cero municipios, se podría quitar de la escala. Divisi?n por cero (caso 30)
 #! 145 error Todos los valores son NA en estatal, no es numérico;
@@ -309,6 +311,5 @@ t1 <- system.time( mapas_graficos_servidor_a_servidor(2653) )
 #! 158
 #! 265... vector 201 en delante 
 
-#! Pendientes
 #! numindicador 144 (3:144), 158 (4:144) [Grado de marginación] y 321 (8:306) [Grado de rezago social]: error, no es numérico; sino textos
 #! as.integer(factor(c("Alto", "Medio", "Alto", ""), levels = c("Muy bajo", "Bajo", "Medio", "Alto", "Muy alto")))

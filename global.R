@@ -1,4 +1,4 @@
-# https://www.youtube.com/watch?v=_gzOovLEXWo 1:07:07
+# Genera gráficas y tablas
 
 # Librerias ----
 library(jsonlite) # 1.8.4
@@ -102,7 +102,7 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   colores <-
     c("#FEFED1", "#FDFC91", "#F9D114", "#EB8936", "#B93623")
   
-  #todo@ ajustar consultas para que coincidan las claves
+  #@todo ajustar consultas para que coincidan las claves
   mapa <- shp %>%
     filter(geo == edo_sel)
   
@@ -244,3 +244,5 @@ tabulado2 <- function(ind_sel) {
                 selection = "none", #list(mode = "single", selected = 12, selectable = 12),
                 style = "bootstrap4", escape = FALSE)
 }
+
+# https://www.youtube.com/watch?v=_gzOovLEXWo 1:07:07

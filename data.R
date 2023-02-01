@@ -3,8 +3,8 @@
 # Librerias ----
 library(tidyverse) # 1.3.1
 library(DBI) # 1.1.3
-library(lubridate)
-library(foreign)
+library(lubridate) # 1.9.1
+library(foreign) # 0.8-84
 
 # Conexiones ----
 con <- dbConnect(odbc::odbc(), "circinus", timeout = 10) #indicadores circinus

@@ -1,4 +1,4 @@
-# https://github.com/r-dbi/odbc/blob/main/README.md
+# Consultas la base de datos
 
 # Librerias ----
 library(tidyverse) # 1.3.2
@@ -113,3 +113,5 @@ actualiza_bd <- function(selIndicador) {
 }
 
 actualiza_bd(indicadores[1, 1])
+
+# https://github.com/r-dbi/odbc/blob/main/README.md
