@@ -7,7 +7,7 @@ library(lubridate) # 1.9.1
 library(foreign) # 0.8-84
 
 # Conexiones ----
-con <- dbConnect(odbc::odbc(), "circinus", timeout = 10) #indicadores circinus
+con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10) #indicadores circinus
 
 # Crea la tabla en la base de datos
 query <- paste(
@@ -87,7 +87,7 @@ dbExecute(con, query)
 library(DBI)
 library(data.table)
 
-con <- dbConnect(odbc::odbc(), "circinus", timeout = 10) #indicadores circinus
+con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10) #indicadores circinus
 
 datos <- fread("docs/data/tabla_iter_20.csv")
 
