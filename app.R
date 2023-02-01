@@ -6,10 +6,9 @@ library(tidyverse) # 1.3.2
 library(openxlsx) # 4.2.5.1
 source("global.R")
 
-#todo@ TEST probar con diferentes niveles de desagregación geográfica
+#@todo TEST probar con diferentes niveles de desagregación geográfica
 # Agregar pestañas
-# [-] Prospectiva (Si hay más de 10 datos para Guanajuato)
-# [-] Metadatos
+# [-] Prospectiva (Si hay más de 10 datos para proyectar)
 
 ui <- fluidPage(
   includeCSS("www/styles.css"),
@@ -36,7 +35,7 @@ ui <- fluidPage(
                   grid = TRUE),
       # hr(),
       # checkboxGroupInput("checkGroup", label = "Opciones:", 
-      #                    choices = list("Ocultar total" = 1, "Resaltar Guanajuato" = 2),
+      #                    choices = list("Ocultar total" = 1, "Resaltar" = 2),
       #                    selected = c(1, 2)),
       hr(),
       helpText("© 2023 Gobierno del Estado de Guanajuato")
