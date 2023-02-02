@@ -44,20 +44,25 @@ ui <- fluidPage(
       tabsetPanel(
         tabPanel(title = "Tabulado",
                  DT::dataTableOutput('tab1'),
-                 downloadButton("downloadData", "Descargar"),
+                 br(),
+                 downloadButton("downloadData", "Descargar", icon = icon("download", lib = "glyphicon")),
                  icon = icon("table")),
         tabPanel(title = "Gráfica",
                  plotOutput("grafica_barras", height = "85vh") %>% withSpinner(type = 4),
                  icon = icon("bar-chart")),
         tabPanel(title = "Mapa",
                  plotOutput("grafica_mapa", height = "85vh") %>% withSpinner(type = 4),
-                 icon = icon("map-marker")),
+                 icon = icon("map-marker", lib = "glyphicon")),
         tabPanel(title = "Serie",
-                 plotOutput("grafica_lineas", height = "85vh") %>% withSpinner(type = 4)),
+                 plotOutput("grafica_lineas", height = "85vh") %>% withSpinner(type = 4),
+                 icon = icon("stats", lib = "glyphicon")),
         # tabPanel(title = "Prospectiva",
-        #          br()),
+        #           br(), icon = icon("circle-arrow-up", lib = "glyphicon")),
         tabPanel(title = "Metadato",
-                 DT::dataTableOutput('tab2'))
+                 DT::dataTableOutput('tab2'),
+                 icon = icon("info-sign", lib = "glyphicon"))
+        # tabPanel(title = "Ayuda",
+        #          br(), icon = icon("question-sign", lib = "glyphicon"))
       )
     )
   )
