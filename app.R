@@ -43,9 +43,9 @@ ui <- fluidPage(
     mainPanel(
       tabsetPanel(
         tabPanel(title = "Tabulado",
-                 div(style="position: relative;",
-                 div(style="position:absolute;left:calc(80%);top:0px;margin-top:6px;z-index:2",downloadButton("downloadData", "Descargar", icon = icon("download", lib = "glyphicon"))),
-                 div(style="position:absolute;left:0px;top:0px;width:calc(80%);z-index:1", DT::dataTableOutput('tab1')) ),
+                 div(class="boxtab0",
+                 div(class="boxtab1", downloadButton("downloadData", "Descargar", icon = icon("download", lib = "glyphicon"))),
+                 div(class="boxtab2", DT::dataTableOutput('tab1'))),
                  icon = icon("table")),
         tabPanel(title = "Gráfica",
                  plotOutput("grafica_barras", height = "85vh") %>% withSpinner(type = 4),

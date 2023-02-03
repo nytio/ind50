@@ -7,3 +7,23 @@ caption {
   font-weight: bold;
   text-align: center;
 }
+
+.boxtab0 {
+  position: relative;
+}
+
+.boxtab1 {
+  position:absolute;
+  left:calc(80%);
+  top:0px;
+  margin-top:6px;
+  z-index:2
+}
+
+.boxtab2 {
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:calc(80%);
+  z-index:1
+}
