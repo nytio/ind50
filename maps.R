@@ -5,7 +5,7 @@ library(tidyverse) # 1.3.1
 library(DBI) # 1.1.3
 
 # Conexiones ----
-con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10) #circinus indicadores
+con <- dbConnect(odbc::odbc(), "circinus", timeout = 10) #circinus indicadores
 
 frangeerror <- function(muppets, mini, maxi) {
   mean_val <- mean(muppets[mini:maxi])
@@ -290,7 +290,8 @@ mapas_graficos_servidor_a_servidor <- function(rango) {
 ##mapas_graficos_servidor_a_servidor(2650:2653)
 #mapas_graficos_servidor_a_servidor(2653)
 
-t1 <- system.time( mapas_graficos_servidor_a_servidor(2653) )
+#t1 <- system.time( mapas_graficos_servidor_a_servidor(2653) )
+#t1 <- system.time(mapas_graficos_servidor_a_servidor(2654:2708)) # 5.58681818 segundos promedio por mapa (estatal y municipal por indicador con valores enteros)
 
 # Actualiza por tabla
 ##mapas_graficos_servidor_a_servidor(dbGetQuery(con, "SELECT idind FROM indicador WHERE idtabla = 25"))

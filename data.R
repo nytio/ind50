@@ -114,5 +114,53 @@ dbWriteTable(con, "tabla_iter_20", datos, overwrite = FALSE, append = TRUE, row.
 library(DBI)
 library(data.table)
 
-con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10) #indicadores circinus
+con <- dbConnect(odbc::odbc(), "circinus", timeout = 10) #indicadores circinus
+
+test_variales_tabla  <- function(nombre_tabla) {
+  query <- paste0("SELECT * FROM tabla WHERE tabla = '", nombre_tabla, "'")
+  tabla <- dbGetQuery(con, query)
+  
+  query <- paste0("SELECT * FROM indicador WHERE idtabla = ", tabla$idtabla)
+  indicador <- dbGetQuery(con, query)
+  
+  mnemonico <- NULL
+  for(i in indicador$idmnemonico) {
+    query <- paste0("SELECT * FROM mnemonico WHERE idmnemonico = ", i)
+    mnemonico <- rbind(mnemonico, dbGetQuery(con, query))
+  }
+  
+  query <- paste0("SELECT * FROM ",nombre_tabla," LIMIT 10")
+  tabla_ <- dbGetQuery(con, query)
+  
+  r <- colnames(tabla_)
+  faltan <- NULL
+  for(j in r[5:length(r)])
+    if(!(j %in% mnemonico$mnemonico)) {
+      message(paste("Variable no referida:", j))
+      faltan <- c(faltan, j)
+    }
+  return(faltan)
+}
+
+u <- test_variales_tabla("tabla_iter_20")
+for(k in u) {
+  query <- paste0("SELECT idmnemonico FROM public.mnemonico WHERE mnemonico = '", k,"'")
+  mnemo_ <- dbGetQuery(con, query)
+  if(length(mnemo_$idmnemonico) > 0)
+    message("Nombre de variable documentado:", k)
+}
+
+# Si ninguno está documentado se procede a dar de alta estos elementos
+query <- paste0("SELECT idtabla FROM tabla WHERE tabla = 'tabla_iter_20'")
+idtabla <- dbGetQuery(con, query)
+for(k in u) {
+  query <- paste0("INSERT INTO mnemonico(mnemonico) VALUES ('", k, "') RETURNING idmnemonico")
+  idmnemonico <- dbGetQuery(con, query)
+  query <- paste0("INSERT INTO indicador(idtabla, idmnemonico, fecha) VALUES (",idtabla$idtabla,", ",idmnemonico$idmnemonico,", '2020')")
+  dbExecute(con, query)
+}
+
+#No olvidar completar la documentación para el resto de los campos.
+# mnemonico
+# indicador
 
