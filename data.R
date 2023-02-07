@@ -82,7 +82,6 @@ query <- paste(
 )
 dbExecute(con, query)
 
-
 # Actualiza una fuente ----
 library(DBI)
 library(data.table)
@@ -110,3 +109,10 @@ if (!tabla_existe) {
 
 # Guarda todo los datos en un solo paso:
 dbWriteTable(con, "tabla_iter_20", datos, overwrite = FALSE, append = TRUE, row.names = FALSE)
+
+# Verifica que una tabla contenga todas sus registros en entradas ----
+library(DBI)
+library(data.table)
+
+con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10) #indicadores circinus
+
