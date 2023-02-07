@@ -11,7 +11,7 @@ source("global.R")
 # [-] Prospectiva (Si hay más de 10 datos para proyectar)
 
 ui <- fluidPage(
-  includeCSS("www/styles.css"),
+  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")),
   titlePanel("Catálogo de indicadores"),
   #br(),
   sidebarLayout(
