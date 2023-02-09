@@ -80,7 +80,7 @@ query <- paste(
   ")",
   collapse = "\n"
 )
-dbExecute(con, query)
+#dbExecute(con, query)
 
 # Actualiza una fuente ----
 library(DBI)
@@ -95,20 +95,20 @@ tabla_existe <- dbExistsTable(con, "tabla_iter_20")
 
 # Si la tabla no existe, crearla antes de escribir los datos
 if (!tabla_existe) {
-  #dbCreateTable(con, "tabla_iter_20", datos)
+  #-dbCreateTable(con, "tabla_iter_20", datos)
   # Es mejor ejecutar un query explícito
   query <- readLines("docs/data/tabla_iter_20.sql")
   query <- paste(query, collapse = " ")
-  result <- dbExecute(con, query)
+  #result <- dbExecute(con, query)
 } else {
   query <- "DELETE FROM tabla_iter_20;"
-  result <- dbExecute(con, query)
+  #result <- dbExecute(con, query)
 }
 # En caso de eliminar toda la tabla, con su estructura, ejecutar:
 # DROP TABLE nombre_tabla;
 
 # Guarda todo los datos en un solo paso:
-dbWriteTable(con, "tabla_iter_20", datos, overwrite = FALSE, append = TRUE, row.names = FALSE)
+#dbWriteTable(con, "tabla_iter_20", datos, overwrite = FALSE, append = TRUE, row.names = FALSE)
 
 # Verifica que una tabla contenga todas sus registros en entradas ----
 library(DBI)
@@ -141,24 +141,34 @@ test_variales_tabla  <- function(nombre_tabla) {
     }
   return(faltan)
 }
+#test_variales_tabla("tabla_iter_20")
 
-u <- test_variales_tabla("tabla_iter_20")
-for(k in u) {
-  query <- paste0("SELECT idmnemonico FROM public.mnemonico WHERE mnemonico = '", k,"'")
-  mnemo_ <- dbGetQuery(con, query)
-  if(length(mnemo_$idmnemonico) > 0)
-    message("Nombre de variable documentado:", k)
+alta_variales_tabla <- function(nombre_tabla) {
+  u <- test_variales_tabla(nombre_tabla)
+  l <- 0
+  for(k in u) {
+    query <- paste0("SELECT idmnemonico FROM public.mnemonico WHERE mnemonico = '", k,"'")
+    mnemo_ <- dbGetQuery(con, query)
+    if(length(mnemo_$idmnemonico) > 0) {
+      message("Nombre de variable documentado:", k)
+      l <- l + 1
+    }
+  }
+  
+  if(l > 0)
+    return(NULL)
+  
+  # Si ninguno está documentado se procede a dar de alta estos elementos
+  query <- paste0("SELECT idtabla FROM tabla WHERE tabla = '", nombre_tabla, "'")
+  idtabla <- dbGetQuery(con, query)
+  for(k in u) {
+    query <- paste0("INSERT INTO mnemonico(mnemonico) VALUES ('", k, "') RETURNING idmnemonico")
+    idmnemonico <- dbGetQuery(con, query)
+    query <- paste0("INSERT INTO indicador(idtabla, idmnemonico, fecha) VALUES (",idtabla$idtabla,", ",idmnemonico$idmnemonico,", '2020')")
+    dbExecute(con, query)
+  }
 }
-
-# Si ninguno está documentado se procede a dar de alta estos elementos
-query <- paste0("SELECT idtabla FROM tabla WHERE tabla = 'tabla_iter_20'")
-idtabla <- dbGetQuery(con, query)
-for(k in u) {
-  query <- paste0("INSERT INTO mnemonico(mnemonico) VALUES ('", k, "') RETURNING idmnemonico")
-  idmnemonico <- dbGetQuery(con, query)
-  query <- paste0("INSERT INTO indicador(idtabla, idmnemonico, fecha) VALUES (",idtabla$idtabla,", ",idmnemonico$idmnemonico,", '2020')")
-  dbExecute(con, query)
-}
+#alta_variales_tabla("tabla_iter_20")
 
 #No olvidar completar la documentación para el resto de los campos.
 # mnemonico
