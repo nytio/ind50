@@ -38,27 +38,27 @@ etiqueta_base <- function(defun) {
                                       "16" = "De 1 000 000 a 1 499 999",
                                       "17" = "De 1 500 000 y más",
                                       "99" = "No especificado", .ordered = TRUE))
-  
-  defun <- defun |>
-    mutate(TLOC_OCURR = recode_factor(TLOC_OCURR,
-                                      "1" = "De 1 a 999",
-                                      "2" = "De 1 000 a 1 999",
-                                      "3" = "De 2 000 a 2 499",
-                                      "4" = "De 2 500 a 4 999",
-                                      "5" = "De 5 000 a 9 999",
-                                      "6" = "De 10 000 a 14 999",
-                                      "7" = "De 15 000 a 19 999",
-                                      "8" = "De 20 000 a 29 999",
-                                      "9" = "De 30 000 a 39 999",
-                                      "10" = "De 40 000 a 49 999",
-                                      "11" = "De 50 000 a 74 999",
-                                      "12" = "De 75 000 a 99 999",
-                                      "13" = "De 100 000 a 249 999",
-                                      "14" = "De 250 000 a 499 999",
-                                      "15" = "De 500 000 a 999 999",
-                                      "16" = "De 1 000 000 a 1 499 999",
-                                      "17" = "De 1 500 000 y más",
-                                      "99" = "No especificado", .ordered = TRUE))
+  if("TLOC_OCURR" %in% names(defun))
+    defun <- defun |>
+      mutate(TLOC_OCURR = recode_factor(TLOC_OCURR,
+                                        "1" = "De 1 a 999",
+                                        "2" = "De 1 000 a 1 999",
+                                        "3" = "De 2 000 a 2 499",
+                                        "4" = "De 2 500 a 4 999",
+                                        "5" = "De 5 000 a 9 999",
+                                        "6" = "De 10 000 a 14 999",
+                                        "7" = "De 15 000 a 19 999",
+                                        "8" = "De 20 000 a 29 999",
+                                        "9" = "De 30 000 a 39 999",
+                                        "10" = "De 40 000 a 49 999",
+                                        "11" = "De 50 000 a 74 999",
+                                        "12" = "De 75 000 a 99 999",
+                                        "13" = "De 100 000 a 249 999",
+                                        "14" = "De 250 000 a 499 999",
+                                        "15" = "De 500 000 a 999 999",
+                                        "16" = "De 1 000 000 a 1 499 999",
+                                        "17" = "De 1 500 000 y más",
+                                        "99" = "No especificado", .ordered = TRUE))
   
   defun <- defun |>
     mutate(SEXO = recode_factor(SEXO,
@@ -128,7 +128,8 @@ etiqueta_base <- function(defun) {
                                      "11" = "No trabaja",
                                      "97" = "No aplica a menores de 5 años",
                                      "98" = "Insuficientemente especificada",
-                                     "99" = "No especificada"))
+                                     "99" = "No especificada",
+                                     .default = "No especificada"))
   
   defun <- defun |>
     mutate(ESCOLARIDA = recode_factor(ESCOLARIDA,
@@ -163,7 +164,8 @@ etiqueta_base <- function(defun) {
                                     "3" = "Suicidio",
                                     "4" = "Se ignora",
                                     "5" = "Operaciones legales y de guerra",
-                                    "8" = "No aplica para muerte natural"))
+                                    "8" = "No aplica para muerte natural",
+                                    .default = "No aplica para muerte natural"))
   
   defun <- defun |>
     mutate(OCURR_TRAB = recode_factor(OCURR_TRAB,
@@ -190,7 +192,8 @@ etiqueta_base <- function(defun) {
     mutate(NECROPSIA = recode_factor(NECROPSIA,
                                      "1" = "Sí",
                                      "2" = "No",
-                                     "9" = "No especificada"))
+                                     "9" = "No especificada",
+                                     .default = "No especificada"))
   
   defun <- defun |>
     mutate(ASIST_MEDI = recode_factor(ASIST_MEDI,
@@ -241,37 +244,39 @@ etiqueta_base <- function(defun) {
                                       "7" = "Seguro Popular",
                                       "8" = "Otra",
                                       "9" = "IMSS PROSPERA",
-                                      "99" = "No especificada"))
-  
-  defun <- defun |>
-    mutate(EMBARAZO = recode_factor(EMBARAZO,
-                                    "1" = "El embarazo",
-                                    "2" = "El parto",
-                                    "3" = "El puerperio",
-                                    "4" = "43 días a 11 meses después del parto o aborto",
-                                    "5" = "No estuvo embarazada en los últimos once meses previos a la muerte",
-                                    "8" = "No aplica",
-                                    "9" = "No especificado"))
-  
-  defun <- defun |>
-    mutate(REL_EMBA = recode_factor(REL_EMBA,
-                                    "1" = "Sí tuvieron relación las causas",
-                                    "2" = "No tuvieron relación las causas",
-                                    "8" = "No aplica",
-                                    "9" = "No especificada"))
-  
-  defun <- defun |>
-    mutate(VIO_FAMI = recode_factor(VIO_FAMI,
-                                    "1" = "Sí",
-                                    "2" = "No",
-                                    "8" = "No aplica cuando no es homicidio",
-                                    "9" = "No especificado"))
-  
-  defun <- defun |>
-    mutate(AREA_UR = recode_factor(AREA_UR,
-                                   "1" = "Urbana",
-                                   "2" = "Rural",
-                                   "9" = "No especificada"))
+                                      "99" = "No especificada",
+                                      .default = "No especificada"))
+  if("EMBARAZO" %in% names(defun))
+    defun <- defun |>
+      mutate(EMBARAZO = recode_factor(EMBARAZO,
+                                      "1" = "El embarazo",
+                                      "2" = "El parto",
+                                      "3" = "El puerperio",
+                                      "4" = "43 días a 11 meses después del parto o aborto",
+                                      "5" = "No estuvo embarazada en los últimos once meses previos a la muerte",
+                                      "8" = "No aplica",
+                                      "9" = "No especificado",
+                                      .default = "No especificada"))
+  if("REL_EMBA" %in% names(defun))
+    defun <- defun |>
+      mutate(REL_EMBA = recode_factor(REL_EMBA,
+                                      "1" = "Sí tuvieron relación las causas",
+                                      "2" = "No tuvieron relación las causas",
+                                      "8" = "No aplica",
+                                      "9" = "No especificada"))
+  if("VIO_FAMI" %in% names(defun))
+    defun <- defun |>
+      mutate(VIO_FAMI = recode_factor(VIO_FAMI,
+                                      "1" = "Sí",
+                                      "2" = "No",
+                                      "8" = "No aplica cuando no es homicidio",
+                                      "9" = "No especificado"))
+  if("AREA_UR" %in% names(defun))
+    defun <- defun |>
+      mutate(AREA_UR = recode_factor(AREA_UR,
+                                     "1" = "Urbana",
+                                     "2" = "Rural",
+                                     "9" = "No especificada"))
   
   defun <- defun |>
     mutate(EDAD_AGRU = recode_factor(EDAD_AGRU,
@@ -305,43 +310,43 @@ etiqueta_base <- function(defun) {
                                      "28" = "De 115 a 119",
                                      "29" = "De 120",
                                      "30" = "No especificada", .ordered = TRUE))
-  
-  defun <- defun |>
-    mutate(COMPLICARO = recode_factor(COMPLICARO,
-                                      "1" = "Sí complicaron el embarazo",
-                                      "2" = "No complicaron el embarazo",
-                                      "8" = "No aplica",
-                                      "9" = "No especificada"))
-  
-  defun <- defun |>
-    mutate(MES_CERT = recode_factor(MES_CERT,
-                                    "1" = "Enero",
-                                    "2" = "Febrero",
-                                    "3" = "Marzo",
-                                    "4" = "Abril",
-                                    "5" = "Mayo",
-                                    "6" = "Junio",
-                                    "7" = "Julio",
-                                    "8" = "Agosto",
-                                    "9" = "Septiembre",
-                                    "10" = "Octubre",
-                                    "11" = "Noviembre",
-                                    "12" = "Diciembre",
-                                    "99" = "No especificado"))
-  
-  defun <- defun |>
-    mutate(LENGUA = recode_factor(LENGUA,
-                                  "1" = "Sí",
-                                  "2" = "No",
-                                  "8" = "No aplica a menores de 3 años",
-                                  "9" = "Se ignora"))
-  
-  defun <- defun |>
-    mutate(COND_ACT = recode_factor(COND_ACT,
+  if("COMPLICARO" %in% names(defun))
+    defun <- defun |>
+      mutate(COMPLICARO = recode_factor(COMPLICARO,
+                                        "1" = "Sí complicaron el embarazo",
+                                        "2" = "No complicaron el embarazo",
+                                        "8" = "No aplica",
+                                        "9" = "No especificada"))
+  if("MES_CERT" %in% names(defun))
+    defun <- defun |>
+      mutate(MES_CERT = recode_factor(MES_CERT,
+                                      "1" = "Enero",
+                                      "2" = "Febrero",
+                                      "3" = "Marzo",
+                                      "4" = "Abril",
+                                      "5" = "Mayo",
+                                      "6" = "Junio",
+                                      "7" = "Julio",
+                                      "8" = "Agosto",
+                                      "9" = "Septiembre",
+                                      "10" = "Octubre",
+                                      "11" = "Noviembre",
+                                      "12" = "Diciembre",
+                                      "99" = "No especificado"))
+  if("LENGUA" %in% names(defun))
+    defun <- defun |>
+      mutate(LENGUA = recode_factor(LENGUA,
                                     "1" = "Sí",
                                     "2" = "No",
-                                    "8" = "No aplica a menores de 5 años",
+                                    "8" = "No aplica a menores de 3 años",
                                     "9" = "Se ignora"))
+  if("COND_ACT" %in% names(defun))
+    defun <- defun |>
+      mutate(COND_ACT = recode_factor(COND_ACT,
+                                      "1" = "Sí",
+                                      "2" = "No",
+                                      "8" = "No aplica a menores de 5 años",
+                                      "9" = "Se ignora"))
   
   return(defun)
 }
@@ -354,11 +359,14 @@ fechas_base <- function(defun) {
     defun$DIA_OCURR <- NA
   defun$MES_OCURR[which(defun$MES_OCURR == "99")] <- NA
   defun$ANIO_OCUR[which(defun$ANIO_OCUR == "9999")] <- NA
+  
   if("DIA_REGIS" %in% names(defun))
     defun$DIA_REGIS[which(defun$DIA_REGIS == "99")] <- NA
   else
     defun$DIA_REGIS <- NA
   defun$MES_REGIS[which(defun$MES_REGIS == "99")] <- NA
+  defun$ANIO_REGIS[which(defun$ANIO_REGIS == "9999")] <- NA
+  
   if("DIA_NACIM" %in% names(defun))
     defun$DIA_NACIM[which(defun$DIA_NACIM == "99")] <- NA
   else
@@ -366,13 +374,13 @@ fechas_base <- function(defun) {
   defun$MES_NACIM[which(defun$MES_NACIM == "99")] <- NA
   defun$ANIO_NACIM[which(defun$ANIO_NACIM == "9999")] <- NA
   
-  if(max(defun$ANIO_OCUR) < 100)
+  if(max(defun$ANIO_OCUR, na.rm = TRUE) < 100)
     defun$ANIO_OCUR <- 1900 + defun$ANIO_OCUR
   
-  if(max(defun$ANIO_REGIS) < 100)
+  if(max(defun$ANIO_REGIS, na.rm = TRUE) < 100)
     defun$ANIO_REGIS <- 1900 + defun$ANIO_REGIS
   
-  if(max(defun$ANIO_NACIM) < 100)
+  if(max(defun$ANIO_NACIM, na.rm = TRUE) < 100)
     defun$ANIO_NACIM <- 1900 + defun$ANIO_NACIM
 
   defun <- defun |>
@@ -434,7 +442,349 @@ fechas_base <- function(defun) {
   return(defun)
 }
 
+
+
+
+# La tabla LISTA_MEX que lista las CAUSAS BASICAS de la defunción de acuerdo la
+# Lista mexicana de enfermedades. Aplica para los años: 1998 a 2005, 2008 a 2011
+# y 2013 y 2014. Para el resto de los años se aplica como sigue:
+# 1990 - 1997 No presenta este catálogo (ver tabla DETALLADA)
+# 2006 y 2007 LISTAMEX_2006_2007
+# 2012 LISTAMEX_2012
+# 2015 LISTAMEX_2015
+
+# La tabla LISBASMIN corresponde a una lista básica de las principales causas de
+# defunción para el periodo 1990 a 1997.
 categoriza_causas_principales <- function(defun) {
+  if(!("LISTA_MEX" %in% names(defun))) {
+    regla <- c(
+      "01" = "01",
+      "010" = "01A",
+      "011" = "01B",
+      "012" = "01D",
+      "013" = "01E",
+      "014" = "01F",
+      "015" = "01G",
+      "016" = "01H",
+      "019" = "01",
+      "02" = "02",
+      "020" = "02A",
+      "021" = "02B",
+      "022" = "02C",
+      "023" = "02D",
+      "024" = "02E",
+      "025" = "02F",
+      "029" = "02Z",
+      "03" = "03",
+      "030" = "03A",
+      "031" = "03B",
+      "032" = "03C",
+      "033" = "03D",
+      "034" = "03E",
+      "035" = "03F",
+      "036" = "03G",
+      "037" = "03H",
+      "038" = "03I",
+      "039" = "03Z",
+      "04" = "06",
+      "040" = "06A",
+      "041" = "06B",
+      "042" = "06C",
+      "043" = "06D",
+      "044" = "06E",
+      "045" = "06I",
+      "046" = "06J",
+      "047" = "06L",
+      "048" = "06M",
+      "049" = "06Z",
+      "05" = "07",
+      "050" = "07A",
+      "051" = "07C",
+      "052" = "07D",
+      "053" = "07E",
+      "054" = "07F",
+      "059" = "07",
+      "06" = "04",
+      "060" = "04C",
+      "061" = "04D",
+      "069" = "04F",
+      "07" = "05",
+      "070" = "05A",
+      "071" = "05C",
+      "072" = "05D",
+      "073" = "05F",
+      "074" = "05I",
+      "075" = "05J",
+      "076" = "05K",
+      "077" = "05L",
+      "078" = "05M",
+      "079" = "05Z",
+      "08" = "08",
+      "09" = "09",
+      "090" = "09A",
+      "091" = "09B",
+      "092" = "09C",
+      "093" = "09D",
+      "094" = "09E",
+      "095" = "09F",
+      "096" = "09G",
+      "099" = "09Z",
+      "10" = "10",
+      "100" = "10A",
+      "101" = "10B",
+      "109" = "10Z",
+      "11" = "11",
+      "110" = "11A",
+      "111" = "11B",
+      "112" = "11C",
+      "113" = "11D",
+      "119" = "11E",
+      "12" = "12",
+      "120" = "12A",
+      "121" = "12B",
+      "122" = "12C",
+      "123" = "12D",
+      "124" = "12F",
+      "125" = "12G",
+      "126" = "12H",
+      "129" = "12J",
+      "13" = "13",
+      "130" = "13A",
+      "139" = "13Z",
+      "14" = "14",
+      "140" = "14A",
+      "141" = "14D",
+      "149" = "14Z",
+      "15" = "17",
+      "150" = "17A",
+      "151" = "17B",
+      "152" = "17C",
+      "153" = "17D",
+      "154" = "17E",
+      "155" = "17F",
+      "156" = "17G",
+      "159" = "17Z",
+      "16" = "16A",
+      "17" = "18",
+      "18" = "20",
+      "180" = "20A",
+      "181" = "20D",
+      "182" = "20E",
+      "183" = "20F",
+      "184" = "06H",
+      "185" = "06H",
+      "189" = "20Z",
+      "19" = "21",
+      "190" = "21A",
+      "191" = "21B",
+      "192" = "21C",
+      "193" = "21E",
+      "20" = "19",
+      "200" = "19A",
+      "209" = "19Z",
+      "21" = "22",
+      "210" = "22",
+      "211" = "22E",
+      "212" = "22F",
+      "213" = "22",
+      "214" = "22G",
+      "215" = "22C",
+      "216" = "22",
+      "217" = "22H",
+      "218" = "22I",
+      "219" = "22Z",
+      "22" = "23",
+      "220" = "23A",
+      "221" = "23C",
+      "222" = "23D",
+      "223" = "23E",
+      "224" = "23F",
+      "225" = "23G",
+      "229" = "23Z",
+      "23" = "24",
+      "230" = "24C",
+      "231" = "24D",
+      "232" = "24G",
+      "233" = "24H",
+      "234" = "24J",
+      "235" = "24K",
+      "239" = "24Z",
+      "24" = "25",
+      "240" = "25A",
+      "241" = "25C",
+      "249" = "25Z",
+      "25" = "26",
+      "250" = "26A",
+      "251" = "26B",
+      "26" = "27",
+      "260" = "27A",
+      "269" = "27Z",
+      "27" = "28",
+      "270" = "28A",
+      "279" = "28Z",
+      "28" = "29",
+      "280" = "29A",
+      "281" = "29B",
+      "289" = "29Z",
+      "29" = "30",
+      "290" = "30A",
+      "291" = "30B",
+      "292" = "30C",
+      "293" = "30D",
+      "294" = "30E",
+      "299" = "30Z",
+      "30" = "31",
+      "300" = "31A",
+      "301" = "31C",
+      "302" = "31D",
+      "303" = "31E",
+      "304" = "31F",
+      "305" = "31G",
+      "309" = "31Z",
+      "31" = "32",
+      "310" = "32B",
+      "311" = "32C",
+      "312" = "32D",
+      "313" = "32E",
+      "314" = "32F",
+      "315" = "32H",
+      "319" = "32Z",
+      "32" = "33",
+      "320" = "33A",
+      "321" = "33B",
+      "322" = "33C",
+      "323" = "33D",
+      "324" = "33F",
+      "325" = "33G",
+      "326" = "33H",
+      "327" = "33J",
+      "329" = "33Z",
+      "33" = "34",
+      "330" = "34B",
+      "331" = "34C",
+      "339" = "34Z",
+      "34" = "35",
+      "340" = "35A",
+      "341" = "35D",
+      "342" = "35E",
+      "343" = "35G",
+      "344" = "35I",
+      "345" = "35J",
+      "346" = "35K",
+      "347" = "35M",
+      "348" = "35N",
+      "349" = "35Z",
+      "35" = "38",
+      "350" = "38A",
+      "351" = "38C",
+      "352" = "38D",
+      "353" = "38H",
+      "359" = "38I",
+      "36" = "39",
+      "360" = "39A",
+      "361" = "39C",
+      "362" = "39D",
+      "363" = "39E",
+      "369" = "39F",
+      "37" = "41",
+      "370" = "40",
+      "371" = "41A",
+      "372" = "41C",
+      "373" = "41B",
+      "374" = "41F",
+      "375" = "41H",
+      "376" = "41J",
+      "379" = "41Z",
+      "38" = "43A",
+      "380" = "43A",
+      "381" = "43A",
+      "382" = "43B",
+      "389" = "43C",
+      "39" = "43",
+      "390" = "43F",
+      "391" = "43G",
+      "392" = "43H",
+      "393" = "43J",
+      "394" = "43M",
+      "399" = "43N",
+      "40" = "45",
+      "41" = "44",
+      "42" = "36",
+      "420" = "36A",
+      "429" = "36Z",
+      "43" = "37",
+      "430" = "37A",
+      "431" = "37E",
+      "432" = "37D",
+      "433" = "37",
+      "434" = "37G",
+      "435" = "37H",
+      "436" = "37I",
+      "437" = "37C",
+      "439" = "37Z",
+      "44" = "47",
+      "440" = "47C",
+      "441" = "47D",
+      "442" = "47E",
+      "443" = "47F",
+      "444" = "47H",
+      "445" = "47I",
+      "446" = "47K",
+      "447" = "47M",
+      "449" = "47N",
+      "45" = "46",
+      "450" = "46A",
+      "451" = "46B",
+      "452" = "46C",
+      "453" = "46D",
+      "454" = "46E",
+      "455" = "46I",
+      "456" = "46J",
+      "459" = "46Z",
+      "46" = "48",
+      "460" = "48A",
+      "461" = "48B",
+      "462" = "38G",
+      "463" = "48C",
+      "464" = "48D",
+      "465" = "48E",
+      "466" = "48F",
+      "467" = "48G",
+      "469" = "48Z",
+      "47" = "49",
+      "470" = "49A",
+      "471" = "49B",
+      "472" = "49C",
+      "473" = "49D",
+      "474" = "49E",
+      "479" = "49Z",
+      "48" = "53",
+      "480" = "53A",
+      "481" = "53B",
+      "482" = "53C",
+      "49" = "58",
+      "50" = "50",
+      "51" = "52",
+      "52" = "51",
+      "520" = "51A",
+      "521" = "51B",
+      "522" = "51C",
+      "523" = "51D",
+      "524" = "51E",
+      "529" = "51Z",
+      "53" = "57",
+      "54" = "54",
+      "55" = "55",
+      "56" = "56",
+      "560" = "56A",
+      "561" = "56B",
+      "569" = "56"
+    )
+    # Elabora la lista requerida a partir de la información disponible
+    defun <- defun |>
+      mutate(LISTA_MEX = as.character(regla[as.character(LISTA_BAS)]))
+  }
+  
   defun <- defun |>
     mutate(causa_de_muerte = factor(
       if_else(
@@ -566,7 +916,7 @@ procesa_defun21 <- function(){
 }
 
 ## Calculo de variables para el año 2020
-procesa_defun20 {
+procesa_defun20 <- function() {
   defun <- tibble(read.dbf(paste0(path, "2020/defun20.dbf")))
   defun <- fechas_base(defun)
   defun <- defun |>
@@ -607,7 +957,9 @@ procesa_defun <- function(ddig, dir_alm) {
   defun <- fechas_base(defun)
   defun <- defun |>
     arrange(FECHA_OCUR)
-  try(defun <- categoriza_causas_principales(defun), silent=TRUE)  
+  # Etiqueta las variables
+  try(defun <- etiqueta_base(defun), silent = FALSE)
+  try(defun <- categoriza_causas_principales(defun), silent = FALSE)  
 
   fecha1 <- paste0(ydig, "-01-01")
   fecha2 <- paste0(ydig + 1, "-01-01")
@@ -619,7 +971,7 @@ procesa_defun <- function(ddig, dir_alm) {
     select(-colnames(defun)[!(colnames(defun) %in% colnames(defun21))])
   # Agrega variables faltantes
   defun[colnames(defun21)[!(colnames(defun21) %in% colnames(defun))]] <- NA
-
+  
   saveRDS(defun, file = sprintf("docs/data/defun%02d.rds", ddig))
   
   defun <- defun |>
@@ -674,16 +1026,188 @@ procesa_defun <- function(ddig, dir_alm) {
 # procesa_defun(0, "2000_2004")
 # procesa_defun(99, "1995_1999")
 # procesa_defun(98, "1995_1999")
-# procesa_defun(97, "1995_1999")
-# procesa_defun(96, "1995_1999")
-# procesa_defun(95, "1995_1999")
-# procesa_defun(94, "1990_1994")
-# procesa_defun(93, "1990_1994")
-# procesa_defun(92, "1990_1994")
-# procesa_defun(91, "1990_1994")
-# procesa_defun(90, "1990_1994")
+procesa_defun(97, "1995_1999")
+procesa_defun(96, "1995_1999")
+procesa_defun(95, "1995_1999")
+procesa_defun(94, "1990_1994")
+procesa_defun(93, "1990_1994")
+procesa_defun(92, "1990_1994")
+procesa_defun(91, "1990_1994")
+procesa_defun(90, "1990_1994")
 
 # 2.- Entender ----
+
+# Calcula el tabulado por entidad federativa
+# dónde se registra el hecho vital
+elabora_tabulado_REGIS <- function(anio = "21", sexo = "", causa = "") {
+  # Carga la base de datos
+  defun <- readRDS(paste0("docs/data/defun", anio,".rds"))
+
+  # Filtra por una categoría
+  if(sexo != "")
+    defun <- defun |> filter(SEXO == sexo)
+  if(causa != "")
+    defun <- defun |> filter(causa_de_muerte == causa)
+  
+  # Estandariza claves
+  defun$ENT_REGIS <- as.integer(defun$ENT_REGIS)
+  defun$MUN_REGIS <- as.integer(defun$MUN_REGIS)
+  
+  # Agrupa
+  registradas <- defun |>
+    group_by(ENT_REGIS) |>
+    summarize(dato = n())
+  
+  colnames(registradas)[1] <- "ENT"
+  registradas$MUN <- 0
+  
+  registradas <- registradas[,c(1,3,2)]
+  
+  registradas <- registradas |>
+    bind_rows(bind_cols(registradas |> summarise(across(dato, sum))))
+  
+  registradas <- registradas |>
+    mutate(ENT = ifelse(is.na(ENT), 0, ENT),
+           MUN = ifelse(is.na(MUN), 0, MUN))
+
+  defun <- defun |>
+    filter(ENT_REGIS == "11")
+  
+  registradas2 <- defun |>
+    group_by(MUN_REGIS) |>
+    summarize(dato = n())
+  
+  colnames(registradas2)[1] <- "MUN"
+  registradas2$ENT <- 11
+  
+  registradas3 <- rbind(registradas, registradas2)
+  
+  return(registradas3 |> filter(ENT < 33, MUN < 47))
+}
+
+# Calcula el tabulado por entidad federativa
+# dónde ocurre el hecho vital
+elabora_tabulado_OCURR <- function(anio = "21", sexo = "", causa = "") {
+  # Carga la base de datos
+  defun <- readRDS(paste0("docs/data/defun", anio,".rds"))
+  
+  # Filtra por una categoría
+  if(sexo != "")
+    defun <- defun |> filter(SEXO == sexo)
+  if(causa != "")
+    defun <- defun |> filter(causa_de_muerte == causa)
+
+  # Estandariza claves
+  defun$ENT_OCURR <- as.integer(defun$ENT_OCURR)
+  defun$MUN_OCURR <- as.integer(defun$MUN_OCURR)
+  
+  # Registradas
+  registradas <- defun |>
+    group_by(ENT_OCURR) |>
+    summarize(dato = n())
+  
+  colnames(registradas)[1] <- "ENT"
+  registradas$MUN <- 0
+  
+  registradas <- registradas[,c(1,3,2)]
+  
+  registradas <- registradas |>
+    bind_rows(bind_cols(registradas |> summarise(across(dato, sum))))
+  
+  registradas <- registradas |>
+    mutate(ENT = ifelse(is.na(ENT), 0, ENT),
+           MUN = ifelse(is.na(MUN), 0, MUN))
+  
+  defun <- defun |>
+    filter(ENT_OCURR == "11")
+  
+  registradas2 <- defun |>
+    group_by(MUN_OCURR) |>
+    summarize(dato = n())
+  
+  colnames(registradas2)[1] <- "MUN"
+  registradas2$ENT <- 11
+
+  registradas3 <- rbind(registradas, registradas2)
+  
+  return(registradas3 |> filter(ENT < 33, MUN < 47))
+}
+
+# Calcula el tabulado por entidad federativa 
+# de residencia habitual del fallecido
+elabora_tabulado_RESID <- function(anio = "21", sexo = "", causa = "") {
+  # Carga la base de datos
+  defun <- readRDS(paste0("docs/data/defun", anio,".rds"))
+  
+  # Filtra por una categoría
+  if(sexo != "")
+    defun <- defun |> filter(SEXO == sexo)
+  if(causa != "")
+    defun <- defun |> filter(causa_de_muerte == causa)
+
+  # Estandariza claves
+  defun$ENT_RESID <- as.integer(defun$ENT_RESID)
+  defun$MUN_RESID <- as.integer(defun$MUN_RESID)
+
+  # Registradas
+  registradas <- defun |>
+    group_by(ENT_RESID) |>
+    summarize(dato = n())
+  
+  colnames(registradas)[1] <- "ENT"
+  registradas$MUN <- 0
+  
+  registradas <- registradas[,c(1,3,2)]
+  
+  registradas <- registradas |>
+    bind_rows(bind_cols(registradas |> summarise(across(dato, sum))))
+
+  registradas <- registradas |>
+    mutate(ENT = ifelse(is.na(ENT), 0, ENT),
+           MUN = ifelse(is.na(MUN), 0, MUN))
+  
+  defun <- defun |>
+    filter(ENT_RESID == "11")
+  
+  registradas2 <- defun |>
+    group_by(MUN_RESID) |>
+    summarize(dato = n())
+  
+  colnames(registradas2)[1] <- "MUN"
+  registradas2$ENT <- 11
+
+  registradas3 <- rbind(registradas, registradas2)
+  
+  return(registradas3 |> filter(ENT < 33, MUN < 47))
+}
+
+#test1 <- elabora_tabulado_REGIS("21")
+# test2 <- elabora_tabulado_OCURR("21")
+# test3 <- elabora_tabulado_RESID("21")
+# 
+# test1 <- elabora_tabulado_REGIS("O21")
+# test2 <- elabora_tabulado_OCURR("O21")
+# test3 <- elabora_tabulado_RESID("O21")
+
+# test1 <- elabora_tabulado_REGIS("03")
+# test2 <- elabora_tabulado_OCURR("03")
+# test3 <- elabora_tabulado_RESID("03")
+# 
+# test1 <- elabora_tabulado_REGIS("O03")
+# test2 <- elabora_tabulado_OCURR("O03")
+# test3 <- elabora_tabulado_RESID("O03")
+
+#test1 <- elabora_tabulado_REGIS("03", sexo = "Hombre", causa = "Diabetes mellitus")
+
+#k <- readRDS(paste0("docs/data/defun11.rds")) |> filter(SEXO == "Hombre")
+
+# Tipo de filtros
+
+#ccvc <- defun |>
+#  filter(substr(LISTA_MEX, 1, 2) == "26")
+
+# Analiza las bases de datos por año
+
 
 # 3.- Comunicar ----
 
