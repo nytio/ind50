@@ -2,7 +2,6 @@
 
 # Librerias ----
 library(tidyverse) # 1.3.2
-library(DBI) # 1.1.3
 library(data.table) # 1.14.6
 library(foreign) # 0.8-84
 
@@ -442,21 +441,17 @@ fechas_base <- function(defun) {
   return(defun)
 }
 
-
-
-
-# La tabla LISTA_MEX que lista las CAUSAS BASICAS de la defunción de acuerdo la
-# Lista mexicana de enfermedades. Aplica para los años: 1998 a 2005, 2008 a 2011
-# y 2013 y 2014. Para el resto de los años se aplica como sigue:
-# 1990 - 1997 No presenta este catálogo (ver tabla DETALLADA)
-# 2006 y 2007 LISTAMEX_2006_2007
-# 2012 LISTAMEX_2012
-# 2015 LISTAMEX_2015
-
-# La tabla LISBASMIN corresponde a una lista básica de las principales causas de
-# defunción para el periodo 1990 a 1997.
+# El catálogo LISTA_MEX es un listado de las causas básicas de defunciones de
+# acuerdo a una lista mexicana de enfermedades. Aplica para los años: 1998 a
+# 2005, 2008 a 2011 y 2013 y siguientes. Para el resto de los años se aplica
+# como sigue: 1990 - 1997 No presenta este catálogo (solo LISTA_BAS, incluye
+# conversión) 2006 y 2007 LISTAMEX_2006_2007 2012 LISTAMEX_2012 2015
+# LISTAMEX_2015 El código presume compatibilidad entre las diversas versiones de
+# LISTA_MEX.
 categoriza_causas_principales <- function(defun) {
   if(!("LISTA_MEX" %in% names(defun))) {
+    # La tabla LISTA_BAS corresponde a una lista básica de las principales causas de
+    # defunción para el periodo 1990 a 1997.
     regla <- c(
       "01" = "01",
       "010" = "01A",
@@ -1026,14 +1021,14 @@ procesa_defun <- function(ddig, dir_alm) {
 # procesa_defun(0, "2000_2004")
 # procesa_defun(99, "1995_1999")
 # procesa_defun(98, "1995_1999")
-procesa_defun(97, "1995_1999")
-procesa_defun(96, "1995_1999")
-procesa_defun(95, "1995_1999")
-procesa_defun(94, "1990_1994")
-procesa_defun(93, "1990_1994")
-procesa_defun(92, "1990_1994")
-procesa_defun(91, "1990_1994")
-procesa_defun(90, "1990_1994")
+# procesa_defun(97, "1995_1999")
+# procesa_defun(96, "1995_1999")
+# procesa_defun(95, "1995_1999")
+# procesa_defun(94, "1990_1994")
+# procesa_defun(93, "1990_1994")
+# procesa_defun(92, "1990_1994")
+# procesa_defun(91, "1990_1994")
+# procesa_defun(90, "1990_1994")
 
 # 2.- Entender ----
 
@@ -1181,9 +1176,9 @@ elabora_tabulado_RESID <- function(anio = "21", sexo = "", causa = "") {
   return(registradas3 |> filter(ENT < 33, MUN < 47))
 }
 
-#test1 <- elabora_tabulado_REGIS("21")
-# test2 <- elabora_tabulado_OCURR("21")
-# test3 <- elabora_tabulado_RESID("21")
+# test <- elabora_tabulado_REGIS("21")
+# test <- elabora_tabulado_OCURR("21")
+# test <- elabora_tabulado_RESID("21")
 # 
 # test1 <- elabora_tabulado_REGIS("O21")
 # test2 <- elabora_tabulado_OCURR("O21")
@@ -1197,17 +1192,308 @@ elabora_tabulado_RESID <- function(anio = "21", sexo = "", causa = "") {
 # test2 <- elabora_tabulado_OCURR("O03")
 # test3 <- elabora_tabulado_RESID("O03")
 
-#test1 <- elabora_tabulado_REGIS("03", sexo = "Hombre", causa = "Diabetes mellitus")
-
-#k <- readRDS(paste0("docs/data/defun11.rds")) |> filter(SEXO == "Hombre")
-
-# Tipo de filtros
-
-#ccvc <- defun |>
-#  filter(substr(LISTA_MEX, 1, 2) == "26")
+# test1 <- elabora_tabulado_REGIS("90", sexo = "Hombre", causa = "Diabetes mellitus")
 
 # Analiza las bases de datos por año
 
-
 # 3.- Comunicar ----
 
+# Conecta con la base de datos
+library(DBI) # 1.1.3
+con <- dbConnect(odbc::odbc(), "circinus", timeout = 10)
+
+# Calcula los indicadores y los guarda en la base de datos
+crea_tabla_defun <- function(ddig = 21) {
+  anio <- sprintf("%02d", ddig)
+  # Crea las tablas en la base de datos
+  # Si la tabla no existe, crearla antes de escribir los datos
+  if (!dbExistsTable(con, paste0("tabla_defun_",anio))) {
+    query <- readLines("docs/data/tabla_defun.sql")
+    query <- paste(query, collapse = " ")
+    query <- gsub("21", anio, query)
+    dbExecute(con, query)
+    
+    # Agrega las entradas para entidades y municipios
+    query <- paste0("INSERT INTO tabla_defun_", anio,"(ent) VALUES")
+    for (i in 0:32) {
+      dbExecute(con, paste0(query, " (", i, "); ") )
+    }
+    query <- paste0("INSERT INTO tabla_defun_", anio,"(mun) VALUES")
+    for (i in 1:46) {
+      dbExecute(con, paste0(query, " (", i, "); ") )
+    }
+  }
+  
+  test <- elabora_tabulado_REGIS(anio)
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET regis = ", test$dato[i],
+                    " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_REGIS(anio, sexo = "Hombre")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET regis_m = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_REGIS(anio, sexo = "Mujer")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET regis_f = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  
+  test <- elabora_tabulado_OCURR(anio)
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET ocurr = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_OCURR(anio, sexo = "Hombre")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET ocurr_m = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_OCURR(anio, sexo = "Mujer")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET ocurr_f = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(anio)
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET resid = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(anio, sexo = "Hombre")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET resid_m = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(anio, sexo = "Mujer")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET resid_f = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  
+  # 5 principales causas (a nivel nacional en 2021)
+  test <- elabora_tabulado_RESID(anio, causa = "COVID-19")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET causa_1 = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(anio, sexo = "Hombre", causa = "COVID-19")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET causa_1_m = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(anio, sexo = "Mujer", causa = "COVID-19")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET causa_1_f = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  
+  test <- elabora_tabulado_RESID(anio, causa = "Enfermedades del corazón")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET causa_2 = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(anio, sexo = "Hombre", causa = "Enfermedades del corazón")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET causa_2_m = ", test$dato[i],
+                   " WHERE ENT =", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(anio, sexo = "Mujer", causa = "Enfermedades del corazón")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET causa_2_f = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  
+  test <- elabora_tabulado_RESID(anio, causa = "Diabetes mellitus")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET causa_3 = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(anio, sexo = "Hombre", causa = "Diabetes mellitus")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET causa_3_m = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(anio, sexo = "Mujer", causa = "Diabetes mellitus")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET causa_3_f = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  
+  test <- elabora_tabulado_RESID(anio, causa = "Tumores malignos")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET causa_4 = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(anio, sexo = "Hombre", causa = "Tumores malignos")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET causa_4_m = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(anio, sexo = "Mujer", causa = "Tumores malignos")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET causa_4_f = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  
+  test <- elabora_tabulado_RESID(anio, causa = "Influenza y neumonía")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET causa_5 = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(anio, sexo = "Hombre", causa = "Influenza y neumonía")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET causa_5_m = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(anio, sexo = "Mujer", causa = "Influenza y neumonía")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET causa_5_f = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  
+  # Con el recuento acumulado
+  test <- elabora_tabulado_RESID(paste0("O", anio))
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_resid = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(paste0("O", anio), sexo = "Hombre")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_resid_m = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(paste0("O", anio), sexo = "Mujer")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_resid_f = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN= ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  
+  test <- elabora_tabulado_RESID(paste0("O", anio), causa = "COVID-19")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_causa_1 = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(paste0("O", anio), sexo = "Hombre", causa = "COVID-19")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_causa_1_m = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(paste0("O", anio), sexo = "Mujer", causa = "COVID-19")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_causa_1_f = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  
+  test <- elabora_tabulado_RESID(paste0("O", anio), causa = "Enfermedades del corazón")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_causa_2 = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(paste0("O", anio), sexo = "Hombre", causa = "Enfermedades del corazón")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_causa_2_m = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(paste0("O", anio), sexo = "Mujer", causa = "Enfermedades del corazón")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_causa_2_f = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  
+  test <- elabora_tabulado_RESID(paste0("O", anio), causa = "Diabetes mellitus")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_causa_3 = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(paste0("O", anio), sexo = "Hombre", causa = "Diabetes mellitus")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_causa_3_m = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(paste0("O", anio), sexo = "Mujer", causa = "Diabetes mellitus")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_causa_3_f = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  
+  test <- elabora_tabulado_RESID(paste0("O", anio), causa = "Tumores malignos")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_causa_4 = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(paste0("O", anio), sexo = "Hombre", causa = "Tumores malignos")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_causa_4_m = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(paste0("O", anio), sexo = "Mujer", causa = "Tumores malignos")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_causa_4_f = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  
+  test <- elabora_tabulado_RESID(paste0("O", anio), causa = "Influenza y neumonía")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_causa_5 = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(paste0("O", anio), sexo = "Hombre", causa = "Influenza y neumonía")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_causa_5_m = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+  test <- elabora_tabulado_RESID(paste0("O", anio), sexo = "Mujer", causa = "Influenza y neumonía")
+  for(i in 1:dim(test)[1]) {
+    query <- paste0("UPDATE tabla_defun_", anio," SET o_causa_5_f = ", test$dato[i],
+                   " WHERE ENT = ", test$ENT[i], " AND MUN = ", test$MUN[i], ";")
+    dbExecute(con, query)
+  }
+}
+
+# crea_tabla_defun(21)
+# for(i in c(20:0, 99:90))
+#   crea_tabla_defun(i)
+
+# Completa la documentación de los indicadores en la base de datos
