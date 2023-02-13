@@ -1497,3 +1497,88 @@ crea_tabla_defun <- function(ddig = 21) {
 #   crea_tabla_defun(i)
 
 # Completa la documentación de los indicadores en la base de datos
+library(DBI)
+library(data.table)
+
+con <- dbConnect(odbc::odbc(), "circinus", timeout = 10)
+
+test_variales_tabla  <- function(nombre_tabla) {
+  query <- paste0("SELECT * FROM tabla WHERE tabla = '", nombre_tabla, "'")
+  tabla <- dbGetQuery(con, query)
+  
+  if(length(tabla$idtabla) == 0) {
+    query <- paste0("INSERT INTO tabla(tabla) VALUES ('", nombre_tabla, "')")
+    dbExecute(con, query)
+    return(NULL)
+  }
+  
+  query <- paste0("SELECT * FROM indicador WHERE idtabla = ", tabla$idtabla)
+  indicador <- dbGetQuery(con, query)
+  
+  mnemonico <- NULL
+  for(i in indicador$idmnemonico) {
+    query <- paste0("SELECT * FROM mnemonico WHERE idmnemonico = ", i)
+    mnemonico <- rbind(mnemonico, dbGetQuery(con, query))
+  }
+  
+  query <- paste0("SELECT * FROM ",nombre_tabla," LIMIT 10")
+  tabla_ <- dbGetQuery(con, query)
+  
+  r <- colnames(tabla_)
+  faltan <- NULL
+  for(j in r[5:length(r)])
+    if(!(j %in% mnemonico$mnemonico)) {
+      message(paste("Variable no referida:", j))
+      faltan <- c(faltan, j)
+    }
+  return(faltan)
+}
+
+# for(i in c(21:0,99:90)) {
+#   test_variales_tabla(sprintf("tabla_defun_%02d"))
+# }
+
+alta_variales_tabla <- function(nombre_tabla, anio = 2020) {
+  u <- test_variales_tabla(nombre_tabla)
+  l <- 0
+  for(k in u) {
+    query <- paste0("SELECT idmnemonico FROM public.mnemonico WHERE mnemonico = '", k,"'")
+    mnemo_ <- dbGetQuery(con, query)
+    if(length(mnemo_$idmnemonico) > 0) {
+      message("Nombre de variable documentado:", k)
+      l <- l + 1
+    }
+  }
+  
+  if(l > 0) {
+    # Están dados de alta los nombres, solo agrega indicador
+    query <- paste0("SELECT idtabla FROM tabla WHERE tabla = '", nombre_tabla, "'")
+    idtabla <- dbGetQuery(con, query)
+    for(k in u) {
+      query <- paste0("SELECT idmnemonico FROM public.mnemonico WHERE mnemonico = '", k,"'")
+      idmnemonico <- dbGetQuery(con, query)
+      query <- paste0("INSERT INTO indicador(idtabla, idmnemonico, fecha) VALUES (",idtabla$idtabla,", ",idmnemonico$idmnemonico,", ", anio, ")")
+      dbExecute(con, query)
+    }
+    return(NULL)
+  }
+
+  # Si ninguno está documentado se procede a dar de alta estos elementos
+  query <- paste0("SELECT idtabla FROM tabla WHERE tabla = '", nombre_tabla, "'")
+  idtabla <- dbGetQuery(con, query)
+  for(k in u) {
+    query <- paste0("INSERT INTO mnemonico(mnemonico) VALUES ('", k, "') RETURNING idmnemonico")
+    idmnemonico <- dbGetQuery(con, query)
+    query <- paste0("INSERT INTO indicador(idtabla, idmnemonico, fecha) VALUES (",idtabla$idtabla,", ",idmnemonico$idmnemonico,", ", anio, ")")
+    dbExecute(con, query)
+  }
+}
+
+#alta_variales_tabla("tabla_defun_21", 2021)
+#alta_variales_tabla("tabla_defun_20", 2020)
+# for(i in c(19:0)) {
+#   alta_variales_tabla(sprintf("tabla_defun_%02d", i), 2000+i)
+# }
+# for(i in c(99:90)) {
+#   alta_variales_tabla(sprintf("tabla_defun_%02d", i), 1900+i)
+# }
