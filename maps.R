@@ -294,7 +294,6 @@ mapas_graficos_servidor_a_servidor <- function(rango) {
 #t1 <- system.time(mapas_graficos_servidor_a_servidor(2654:2708)) # 5.58681818 segundos promedio por mapa (estatal y municipal por indicador con valores enteros)
 
 #mapas_graficos_servidor_a_servidor(2709:4053)
-mapas_graficos_servidor_a_servidor(3415:4053)
 
 # Actualiza por tabla
 ##mapas_graficos_servidor_a_servidor(dbGetQuery(con, "SELECT idind FROM indicador WHERE idtabla = 25"))
