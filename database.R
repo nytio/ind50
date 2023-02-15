@@ -75,11 +75,12 @@ actualiza_opciones_entidad <- function(selIndicador, selAnio = NULL) {
   }
 }
 
-actualiza_bd <- function(selIndicador) {
-  actualiza_opciones_entidad(selIndicador)
-  
+actualiza_bde <- function(selIndicador, caso = 1) {
+  caso1 <- switch (caso, meta$idind, meta$idmasculino, meta$idfemenino)
+  if(any(is.na(caso1)))
+    return(NULL)
   campo1 <- NULL
-  use_sql <-  paste("SELECT * FROM view04 WHERE idind =", meta$idind)
+  use_sql <-  paste("SELECT * FROM view04 WHERE idind =", caso1)
   for (i in 1:length(use_sql)) {
     campo1 <- rbind(campo1, dbGetQuery(con, use_sql[i]))
   }
@@ -100,16 +101,29 @@ actualiza_bd <- function(selIndicador) {
     ".loc WHERE ambito != 5"
   )
   
-  bd <<- NULL
+  bde <- NULL
   for (i in 1:length(use_sql)) {
     cs <-
       cbind(meta$idserie[i], cbind(meta$fecha[i], dbGetQuery(con, use_sql[i])))
-    bd <<- rbind(bd, cs)
+    bde <- rbind(bde, cs)
   }
-  colnames(bd)[1] <<- "no"
-  colnames(bd)[2] <<- "year"
+  colnames(bde)[1] <- "no"
+  colnames(bde)[2] <- "year"
   
-  bd <<- bd[order(bd$year, bd$ambito, bd$cve),]
+  return (bde[order(bd$year, bd$ambito, bd$cve),])
+}
+
+actualiza_bd <- function(selIndicador) {
+  actualiza_opciones_entidad(selIndicador)
+  bd <<- actualiza_bde(selIndicador)
+  bd_m <- actualiza_bde(selIndicador, 2)
+  bd_f <- actualiza_bde(selIndicador, 3)
+  if(!is.null(bd_f)) {
+    colnames(bd_m)[6] <- "valor_m"
+    colnames(bd_f)[6] <- "valor_f"
+    bd <<- merge(bd, bd_m, by = colnames(bd_m)[1:5])
+    bd <<- merge(bd, bd_f, by = colnames(bd_f)[1:5])
+  }
 }
 
 actualiza_bd(indicadores[1, 1])
