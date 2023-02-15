@@ -110,7 +110,7 @@ actualiza_bde <- function(selIndicador, caso = 1) {
   colnames(bde)[1] <- "no"
   colnames(bde)[2] <- "year"
   
-  return (bde[order(bd$year, bd$ambito, bd$cve),])
+  return (bde[order(bde$year, bde$ambito, bde$cve),])
 }
 
 actualiza_bd <- function(selIndicador) {

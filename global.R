@@ -219,9 +219,15 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
     return(NULL)
   
   rownames(tab) <- tab$cve
-  tab <- tab %>%
-    select(nom, valor)
-  names(tab) <- c(names(opciones_entidad)[1], metadatos_sel$unidad)
+  if(is.na(metadatos_sel$idmasculino)) {
+    tab <- tab %>%
+      select(nom, valor)
+    names(tab) <- c(names(opciones_entidad)[1], metadatos_sel$unidad)
+  } else {
+    tab <- tab %>%
+      select(nom, valor, valor_m, valor_f)
+    names(tab) <- c(names(opciones_entidad)[1], metadatos_sel$unidad, "Hombres", "Mujeres")
+  }
 
   DT::datatable(tab,
                 options = list(paging = FALSE, searching = FALSE),
