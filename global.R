@@ -173,23 +173,31 @@ gen_lineas <- function(edo_sel, ind_sel) {
       datos_lineas %>% mutate(ToHighlight = "no")
   }
   
+  if(length(unique(datos_lineas$year)) < 19)
+    escala_x <- unique(datos_lineas$year)
+  else
+    escala_x <- seq(min(datos_lineas$year), max(datos_lineas$year), by = 5)
+
   datos_lineas %>%
     ggplot(aes(
       x = year,
       y = valor,
       group = nom,
-      color = ToHighlight
+      color = ToHighlight,
+      linetype = ToHighlight
     )) +
-    geom_line()+
-    scale_color_manual(values = c("gto"="#00628C", "no" = "#DFDEDE"), guide = "none") +
-    #geom_point(color = "#DAD9DB") +
+    geom_line() +
+    scale_color_manual(values = c("gto" = "#00628C", "no" = "#8d8d8d"), guide = "none") +
+    scale_linetype_manual(values = c("gto" = "solid", "no" = "solid"), guide = "none") +
+    scale_size_manual(values = c("gto" = 1.0, "no" = 0.5), guide = "none") +
+    #geom_point(color = "#8d8d8d") +
     labs(
       title = str_c(min(metadatos_sel$indicador), ", ", min(datos_lineas$year), " - ", max(datos_lineas$year)),
       caption = str_c("Fuente: ", min(metadatos_sel$fuente)),
       x = NULL,
       y = min(metadatos_sel$unidad)
     ) +
-    scale_x_continuous(breaks = unique(datos_lineas$year)) +
+    scale_x_continuous(breaks = escala_x) +
     scale_y_continuous(label = scales::comma_format()) +
     theme_bw() +
     theme(
