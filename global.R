@@ -204,7 +204,8 @@ gen_lineas <- function(edo_sel, ind_sel) {
       panel.border = element_blank(),
       legend.position = "bottom",
       plot.title = element_text(hjust = 0.5, face = "bold", colour = "#333333"),
-      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = "#333333")
+      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = "#333333"),
+      axis.text.x = element_text(angle = 0, hjust = 1)
     )
 }
 
