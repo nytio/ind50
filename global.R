@@ -249,7 +249,12 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
 
 descargar <- function(mis_datos, selAnio, file) {
   # Crea un nuevo libro de trabajo
-  wb <- createWorkbook()
+  # Establecer las propiedades del libro
+  wb <- createWorkbook(
+    creator = "Mario Hernández Morales",
+    title = minimal_html(mis_datos$x$caption) %>% html_elements("caption") %>% html_text(),
+    subject = names(mis_datos$x$data)[2],
+    category = "Catálogo de indicadores")
   
   # Agrega una hoja de trabajo al libro y escribe el dataframe en ella
   addWorksheet(wb, "Hoja1")
@@ -263,7 +268,7 @@ descargar <- function(mis_datos, selAnio, file) {
   html <- minimal_html(metadatos_sel$producto)
   writeData(wb, "Hoja1", html %>% html_elements("a") %>% html_text(), startRow = dim(mis_datos)[1]+6)
   writeData(wb, "Hoja1", html %>% html_elements("a") %>% html_attrs(), startRow = dim(mis_datos)[1]+7)
-  
+  writeData(wb, "Hoja1", "Elaboró: Instituto de Planeación, Estadística y Geografía del Estado de Guanajuato (IPLANEG).", startRow = dim(mis_datos)[1]+8)
   # Crea un estilos para la tabla
   titleStyle <- createStyle(
     fontName = "Arial",
@@ -293,8 +298,8 @@ descargar <- function(mis_datos, selAnio, file) {
   # Aplica el estilo a las celdas de la tabla
   addStyle(wb, sheet = "Hoja1", style = titleStyle, rows = 1, cols = 1)
   addStyle(wb, sheet = "Hoja1", style = headerStyle, rows = 3, cols = 1:(dim(mis_datos)[2]))
-  addStyle(wb, sheet = "Hoja1", style = dataStyle, rows = 4:(dim(mis_datos)[1]+7), cols = 1:(dim(mis_datos)[2]), gridExpand = TRUE)
-  addStyle(wb, sheet = "Hoja1", style = fuenteStyle, rows = (dim(mis_datos)[1]+5):(dim(mis_datos)[1]+7), cols = 1, gridExpand = TRUE, stack = TRUE)
+  addStyle(wb, sheet = "Hoja1", style = dataStyle, rows = 4:(dim(mis_datos)[1]+8), cols = 1:(dim(mis_datos)[2]), gridExpand = TRUE)
+  addStyle(wb, sheet = "Hoja1", style = fuenteStyle, rows = (dim(mis_datos)[1]+5):(dim(mis_datos)[1]+8), cols = 1, gridExpand = TRUE, stack = TRUE)
   setColWidths(wb, sheet = "Hoja1", cols = 2:(dim(mis_datos)[2]+2), widths = "auto")
   
   # Guarda el libro de trabajo en un archivo xlsx
