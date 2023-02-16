@@ -1,10 +1,12 @@
 # Genera gráficas y tablas
 
 # Librerias ----
-library(jsonlite) # 1.8.4
 library(tidyverse) # 1.3.2
-library(ggplot2) # 3.4.0
+library(ggplot2) # 3.4.1
+library(jsonlite) # 1.8.4
 library(sf) # 1.0-9
+library(openxlsx) # 4.2.5.2
+library(rvest) # 1.0-3
 source("database.R")
 
 gen_barras <- function(edo_sel, ind_sel, anio_sel) {

@@ -3,7 +3,6 @@ library(shiny) # 1.7.4
 library(shinyWidgets) # 0.7.6
 library(shinycssloaders) # 1.0.0
 library(tidyverse) # 1.3.2
-library(openxlsx) # 4.2.5.1
 source("global.R")
 
 #@todo TEST probar con diferentes niveles de desagregación geográfica
