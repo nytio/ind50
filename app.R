@@ -160,56 +160,7 @@ server <- function(input, output, session) {
       paste0("tbl", input$selIndicador, "_", input$selAnio, "_", input$selEnt, ".xlsx")
     },
     content = function(file) {
-      # Crea un nuevo libro de trabajo
-      wb <- createWorkbook()
-      
-      # Agrega una hoja de trabajo al libro y escribe el dataframe en ella
-      addWorksheet(wb, "Hoja1")
-      mis_datos <- datasetInput()
-      writeData(wb, "Hoja1", substr(mis_datos$x$caption, 10, nchar(mis_datos$x$caption)-10) )
-      mis_datos <- mis_datos$x$data
-      writeData(wb, "Hoja1", mis_datos, startRow = 3)
-      metadatos_sel <- meta %>% 
-        filter(fecha == input$selAnio) %>%
-        select(indicador, descripcion, unidad, fecha,  fuente, producto)
-      writeData(wb, "Hoja1", paste("Fuente:", metadatos_sel$fuente), startRow = dim(mis_datos)[1]+5)
-      writeData(wb, "Hoja1", paste(metadatos_sel$producto), startRow = dim(mis_datos)[1]+6)
-      
-      # Crea un estilos para la tabla
-      titleStyle <- createStyle(
-        fontName = "Arial",
-        fontSize = 13,
-        textDecoration = "bold"
-      )
-      
-      headerStyle <- createStyle(
-        fontName = "Arial",
-        fontSize = 11,
-        fontColour = "white",
-        fgFill = "#3465a4",
-        halign = "center",
-        textDecoration = "bold"
-      )
-      
-      dataStyle <- createStyle(
-        fontName = "Arial",
-        fontSize = 11,
-        borderStyle = "thin"
-      )
-      
-      fuenteStyle <- createStyle(
-        fontSize = 9,
-      )
-      
-      # Aplica el estilo a las celdas de la tabla
-      addStyle(wb, sheet = "Hoja1", style = titleStyle, rows = 1, cols = 1)
-      addStyle(wb, sheet = "Hoja1", style = headerStyle, rows = 3, cols = 1:(dim(mis_datos)[2]))
-      addStyle(wb, sheet = "Hoja1", style = dataStyle, rows = 4:(dim(mis_datos)[1]+6), cols = 1:(dim(mis_datos)[2]), gridExpand = TRUE)
-      addStyle(wb, sheet = "Hoja1", style = fuenteStyle, rows = (dim(mis_datos)[1]+5):(dim(mis_datos)[1]+7), cols = 1, gridExpand = TRUE, stack = TRUE)
-      setColWidths(wb, sheet = "Hoja1", cols = 2:(dim(mis_datos)[2]), widths = "auto")
-      
-      # Guarda el libro de trabajo en un archivo xlsx
-      saveWorkbook(wb, file)
+      descargar(datasetInput(), input$selAnio, file)
     }
   )
 
