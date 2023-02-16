@@ -173,7 +173,7 @@ gen_lineas <- function(edo_sel, ind_sel) {
       datos_lineas %>% mutate(ToHighlight = "no")
   }
   
-  if(length(unique(datos_lineas$year)) < 19)
+  if(length(unique(datos_lineas$year)) < 20)
     escala_x <- unique(datos_lineas$year)
   else
     escala_x <- seq(min(datos_lineas$year), max(datos_lineas$year), by = 5)
