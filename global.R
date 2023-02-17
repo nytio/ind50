@@ -37,7 +37,7 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
       datos_barras %>% mutate(ToHighlight = "no")
   }
   
-  # Registra que se descargó un archivo
+  # Registra que se mostró un gráfico
   contabiliza_uso(metadatos_sel$idind, "hitsgph")
 
   # Gráfico
@@ -123,7 +123,7 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   mapa$valorT <- factor(ke$v)
   colores_etq <- as.vector(ke$l)
   
-  # Registra que se descargó un archivo
+  # Registra que se mostró un mapa
   contabiliza_uso(metadatos_sel$idind, "hitsmap")
   
   # Mapa
@@ -246,7 +246,7 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
     names(tab) <- c(c("Municipio", "Entidad federativa")[as.numeric(edo_sel)], metadatos_sel$unidad, "Hombres", "Mujeres")
   }
   
-  # Registra que se descargó un archivo
+  # Registra que se mostró un tabulado
   contabiliza_uso(metadatos_sel$idind, "hitstbl")
 
   DT::datatable(tab,
@@ -311,7 +311,7 @@ descargar <- function(mis_datos, selAnio, file) {
   addStyle(wb, sheet = "Hoja1", style = fuenteStyle, rows = (dim(mis_datos)[1]+5):(dim(mis_datos)[1]+8), cols = 1, gridExpand = TRUE, stack = TRUE)
   setColWidths(wb, sheet = "Hoja1", cols = 2:(dim(mis_datos)[2]+2), widths = "auto")
   
-  # Registra que se descargó un archivo
+  # Registra que se descargó un archivo en excel
   contabiliza_uso(metadatos_sel$idind, "hitsxls")
   
   # Guarda el libro de trabajo en un archivo xlsx
