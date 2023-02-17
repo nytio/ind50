@@ -128,4 +128,9 @@ actualiza_bd <- function(selIndicador) {
 
 actualiza_bd(indicadores[1, 1])
 
+contabiliza_uso(idind, campo) {
+  query <- paste0("UPDATE indicador SET ", campo," = ", campo," + 1 WHERE idind = ", metadatos_sel$idind, ";")
+  dbExecute(con, query)
+}
+
 # https://github.com/r-dbi/odbc/blob/main/README.md

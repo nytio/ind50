@@ -38,7 +38,7 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
   }
   
   # Registra que se descargó un archivo
-  dbExecute(con, paste0("UPDATE indicador SET hitsgph = hitsgph + 1 WHERE idind = ", metadatos_sel$idind))
+  contabiliza_uso(metadatos_sel$idind, "hitsgph")
 
   # Gráfico
   datos_barras %>%
@@ -124,7 +124,7 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   colores_etq <- as.vector(ke$l)
   
   # Registra que se descargó un archivo
-  dbExecute(con, paste0("UPDATE indicador SET hitsmap = hitsmap + 1 WHERE idind = ", metadatos_sel$idind))
+  contabiliza_uso(metadatos_sel$idind, "hitsmap")
   
   # Mapa
   mapa %>%
@@ -247,7 +247,7 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
   }
   
   # Registra que se descargó un archivo
-  dbExecute(con, paste0("UPDATE indicador SET hitstbl = hitstbl + 1 WHERE idind = ", metadatos_sel$idind))
+  contabiliza_uso(metadatos_sel$idind, "hitstbl")
 
   DT::datatable(tab,
                 options = list(paging = FALSE, searching = FALSE),
@@ -312,7 +312,7 @@ descargar <- function(mis_datos, selAnio, file) {
   setColWidths(wb, sheet = "Hoja1", cols = 2:(dim(mis_datos)[2]+2), widths = "auto")
   
   # Registra que se descargó un archivo
-  dbExecute(con, paste0("UPDATE indicador SET hitsxls = hitsxls + 1 WHERE idind = ", metadatos_sel$idind))
+  contabiliza_uso(metadatos_sel$idind, "hitsxls")
   
   # Guarda el libro de trabajo en un archivo xlsx
   saveWorkbook(wb, file)
