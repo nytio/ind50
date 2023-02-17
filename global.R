@@ -36,6 +36,9 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     datos_barras <-
       datos_barras %>% mutate(ToHighlight = "no")
   }
+  
+  # Registra que se descargó un archivo
+  dbExecute(con, paste0("UPDATE indicador SET hitsgph = hitsgph + 1 WHERE idind = ", metadatos_sel$idind))
 
   # Gráfico
   datos_barras %>%
@@ -119,6 +122,9 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
 
   mapa$valorT <- factor(ke$v)
   colores_etq <- as.vector(ke$l)
+  
+  # Registra que se descargó un archivo
+  dbExecute(con, paste0("UPDATE indicador SET hitsmap = hitsmap + 1 WHERE idind = ", metadatos_sel$idind))
   
   # Mapa
   mapa %>%
@@ -239,6 +245,9 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
       select(nom, valor, valor_m, valor_f)
     names(tab) <- c(names(opciones_entidad)[1], metadatos_sel$unidad, "Hombres", "Mujeres")
   }
+  
+  # Registra que se descargó un archivo
+  dbExecute(con, paste0("UPDATE indicador SET hitstbl = hitstbl + 1 WHERE idind = ", metadatos_sel$idind))
 
   DT::datatable(tab,
                 options = list(paging = FALSE, searching = FALSE),
@@ -262,8 +271,8 @@ descargar <- function(mis_datos, selAnio, file) {
   mis_datos <- mis_datos$x$data
   writeData(wb, "Hoja1", mis_datos, startRow = 3)
   metadatos_sel <- meta %>% 
-    filter(fecha == selAnio) %>%
-    select(indicador, descripcion, unidad, fecha,  fuente, producto)
+    filter(fecha == selAnio)
+  
   writeData(wb, "Hoja1", paste("Fuente:", metadatos_sel$fuente), startRow = dim(mis_datos)[1]+5)
   html <- minimal_html(metadatos_sel$producto)
   writeData(wb, "Hoja1", html %>% html_elements("a") %>% html_text(), startRow = dim(mis_datos)[1]+6)
@@ -302,6 +311,9 @@ descargar <- function(mis_datos, selAnio, file) {
   addStyle(wb, sheet = "Hoja1", style = fuenteStyle, rows = (dim(mis_datos)[1]+5):(dim(mis_datos)[1]+8), cols = 1, gridExpand = TRUE, stack = TRUE)
   setColWidths(wb, sheet = "Hoja1", cols = 2:(dim(mis_datos)[2]+2), widths = "auto")
   
+  # Registra que se descargó un archivo
+  dbExecute(con, paste0("UPDATE indicador SET hitsxls = hitsxls + 1 WHERE idind = ", metadatos_sel$idind))
+  
   # Guarda el libro de trabajo en un archivo xlsx
   saveWorkbook(wb, file)
 }
@@ -321,4 +333,4 @@ tabulado2 <- function(ind_sel) {
                 style = "bootstrap4", escape = FALSE)
 }
 
-# https://www.youtube.com/watch?v=_gzOovLEXWo 1:07:07
+# https://youtu.be/_gzOovLEXWo?t=4027
