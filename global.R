@@ -239,11 +239,11 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
   if(is.na(metadatos_sel$idmasculino)) {
     tab <- tab %>%
       select(nom, valor)
-    names(tab) <- c(names(opciones_entidad)[1], metadatos_sel$unidad)
+    names(tab) <- c(c("Municipio", "Entidad federativa")[as.numeric(edo_sel)], metadatos_sel$unidad)
   } else {
     tab <- tab %>%
       select(nom, valor, valor_m, valor_f)
-    names(tab) <- c(names(opciones_entidad)[1], metadatos_sel$unidad, "Hombres", "Mujeres")
+    names(tab) <- c(c("Municipio", "Entidad federativa")[as.numeric(edo_sel)], metadatos_sel$unidad, "Hombres", "Mujeres")
   }
   
   # Registra que se descargó un archivo
