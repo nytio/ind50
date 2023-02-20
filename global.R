@@ -246,14 +246,21 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
     names(tab) <- c(c("Municipio", "Entidad federativa")[as.numeric(edo_sel)], metadatos_sel$unidad, "Hombres", "Mujeres")
   }
   
-  # Registra que se mostró un tabulado
-  contabiliza_uso(metadatos_sel$idind, "hitstbl")
-
-  DT::datatable(tab,
+  mis_datos <- DT::datatable(tab,
                 options = list(paging = FALSE, searching = FALSE),
                 caption = str_c(metadatos_sel$indicador, ", ", anio_sel),
                 selection = "none", #list(mode = "single", selected = 12, selectable = 12),
                 style = "bootstrap4")
+  
+  if(metadatos_sel$idtipodato == 1)
+    mis_datos <- mis_datos %>%  DT::formatRound(columns = 2:dim(tab)[2], digits = 0)
+  else if(metadatos_sel$idtipodato == 2)
+    mis_datos <- mis_datos %>%  DT::formatRound(columns = 2:dim(tab)[2], digits = 3)
+  
+  # Registra que se mostró un tabulado
+  contabiliza_uso(metadatos_sel$idind, "hitstbl")
+  
+  return(mis_datos)
 }
 
 descargar <- function(mis_datos, selAnio, file) {
