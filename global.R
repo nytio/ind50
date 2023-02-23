@@ -252,10 +252,11 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
                 selection = "none", #list(mode = "single", selected = 12, selectable = 12),
                 style = "bootstrap4")
   
+  # Da formato a los valores numéricos
   if(metadatos_sel$idtipodato == 1)
     mis_datos <- mis_datos %>%  DT::formatRound(columns = 2:dim(tab)[2], digits = 0)
   else if(metadatos_sel$idtipodato == 2)
-    mis_datos <- mis_datos %>%  DT::formatRound(columns = 2:dim(tab)[2], digits = 3)
+    mis_datos <- mis_datos %>%  DT::formatRound(columns = 2:dim(tab)[2], digits = 2)
   
   # Registra que se mostró un tabulado
   contabiliza_uso(metadatos_sel$idind, "hitstbl")
@@ -264,28 +265,34 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
 }
 
 descargar <- function(mis_datos, selAnio, file) {
+  # Extraer los datos y el título de la tabla
+  tabla <- mis_datos$x$data
+  titulo <- minimal_html(mis_datos$x$caption) %>% html_text()
+  
   # Crea un nuevo libro de trabajo
-  # Establecer las propiedades del libro
   wb <- createWorkbook(
     creator = "Mario Hernández Morales",
-    title = minimal_html(mis_datos$x$caption) %>% html_elements("caption") %>% html_text(),
-    subject = names(mis_datos$x$data)[2],
+    title = titulo,
+    subject = names(tabla)[2],
     category = "Catálogo de indicadores")
   
-  # Agrega una hoja de trabajo al libro y escribe el dataframe en ella
+  # Agrega una hoja de trabajo al libro y escribe los datos en ella
   addWorksheet(wb, "Hoja1")
-  writeData(wb, "Hoja1", substr(mis_datos$x$caption, 10, nchar(mis_datos$x$caption)-10) )
-  mis_datos <- mis_datos$x$data
-  writeData(wb, "Hoja1", mis_datos, startRow = 3)
+  writeData(wb, "Hoja1", titulo, startRow = 1, startCol = 1)
+  writeData(wb, "Hoja1", tabla, startRow = 3)
+  
+  # Obtener metadatos del indicador seleccionado
   metadatos_sel <- meta %>% 
     filter(fecha == selAnio)
   
-  writeData(wb, "Hoja1", paste("Fuente:", metadatos_sel$fuente), startRow = dim(mis_datos)[1]+5)
-  html <- minimal_html(metadatos_sel$producto)
-  writeData(wb, "Hoja1", html %>% html_elements("a") %>% html_text(), startRow = dim(mis_datos)[1]+6)
-  writeData(wb, "Hoja1", html %>% html_elements("a") %>% html_attrs(), startRow = dim(mis_datos)[1]+7)
-  writeData(wb, "Hoja1", "Elaboró: Instituto de Planeación, Estadística y Geografía del Estado de Guanajuato (IPLANEG).", startRow = dim(mis_datos)[1]+8)
-  # Crea un estilos para la tabla
+  # Escribir metadatos en la hoja de trabajo
+  writeData(wb, "Hoja1", paste("Fuente:", metadatos_sel$fuente), startRow = nrow(tabla)+5)
+  html <- minimal_html(metadatos_sel$producto) %>% html_elements("a")
+  writeData(wb, "Hoja1", html %>% html_text(), startRow = nrow(tabla)+6)
+  writeData(wb, "Hoja1", html %>% html_attrs(), startRow = nrow(tabla)+7)
+  writeData(wb, "Hoja1", "Elaboró: Instituto de Planeación, Estadística y Geografía del Estado de Guanajuato (IPLANEG).", startRow = nrow(tabla)+8)
+  
+  # Establecer los estilos de la tabla
   titleStyle <- createStyle(
     fontName = "Arial",
     fontSize = 13,
@@ -307,16 +314,30 @@ descargar <- function(mis_datos, selAnio, file) {
     borderStyle = "thin"
   )
   
-  fuenteStyle <- createStyle(
-    fontSize = 9,
+  bottomLineStyle <- createStyle(
+    border = "Bottom",
+    borderColour = "#3465a4",
+    borderStyle = "thin"
   )
+  
+  fuenteStyle <- createStyle(fontSize = 9)
+  styleNum <- createStyle(numFmt = "#,##0")
+  styleDec <- createStyle(numFmt = "0.00")
   
   # Aplica el estilo a las celdas de la tabla
   addStyle(wb, sheet = "Hoja1", style = titleStyle, rows = 1, cols = 1)
-  addStyle(wb, sheet = "Hoja1", style = headerStyle, rows = 3, cols = 1:(dim(mis_datos)[2]))
-  addStyle(wb, sheet = "Hoja1", style = dataStyle, rows = 4:(dim(mis_datos)[1]+8), cols = 1:(dim(mis_datos)[2]), gridExpand = TRUE)
-  addStyle(wb, sheet = "Hoja1", style = fuenteStyle, rows = (dim(mis_datos)[1]+5):(dim(mis_datos)[1]+8), cols = 1, gridExpand = TRUE, stack = TRUE)
-  setColWidths(wb, sheet = "Hoja1", cols = 2:(dim(mis_datos)[2]+2), widths = "auto")
+  addStyle(wb, sheet = "Hoja1", style = headerStyle, rows = 3, cols = 1:ncol(tabla))
+  addStyle(wb, sheet = "Hoja1", style = dataStyle, rows = 4:(nrow(tabla)+8), cols = 1:ncol(tabla), gridExpand = TRUE)
+  addStyle(wb, sheet = "Hoja1", style = bottomLineStyle, rows = nrow(tabla)+3, cols = 1:ncol(tabla), gridExpand = TRUE, stack = TRUE)
+  addStyle(wb, sheet = "Hoja1", style = fuenteStyle, rows = (nrow(tabla)+5):(nrow(tabla)+8), cols = 1, gridExpand = TRUE, stack = TRUE)
+  
+  # Da formato a los valores numéricos
+  if(metadatos_sel$idtipodato == 1)
+    addStyle(wb, sheet = "Hoja1", style = styleNum, rows = 4:(nrow(tabla)+8), cols = 2:ncol(tabla), gridExpand = TRUE, stack = TRUE)
+  else if(metadatos_sel$idtipodato == 2)
+    addStyle(wb, sheet = "Hoja1", style = styleDec, rows = 4:(nrow(tabla)+8), cols = 2:ncol(tabla), gridExpand = TRUE, stack = TRUE)
+  
+  setColWidths(wb, sheet = "Hoja1", cols = 2:(ncol(tabla)+2), widths = "auto")
   
   # Registra que se descargó un archivo en excel
   contabiliza_uso(metadatos_sel$idind, "hitsxls")
