@@ -271,7 +271,7 @@ descargar <- function(mis_datos, selAnio, file) {
   
   # Crea un nuevo libro de trabajo
   wb <- createWorkbook(
-    creator = "Mario Hernández Morales",
+    creator = "Mario Hernandez",
     title = titulo,
     subject = names(tabla)[2],
     category = "Catálogo de indicadores")
@@ -322,7 +322,7 @@ descargar <- function(mis_datos, selAnio, file) {
   
   fuenteStyle <- createStyle(fontSize = 9)
   styleNum <- createStyle(numFmt = "#,##0")
-  styleDec <- createStyle(numFmt = "0.00")
+  styleDec <- createStyle(numFmt = "#,##0.00")
   
   # Aplica el estilo a las celdas de la tabla
   addStyle(wb, sheet = "Hoja1", style = titleStyle, rows = 1, cols = 1)
@@ -338,6 +338,8 @@ descargar <- function(mis_datos, selAnio, file) {
     addStyle(wb, sheet = "Hoja1", style = styleDec, rows = 4:(nrow(tabla)+8), cols = 2:ncol(tabla), gridExpand = TRUE, stack = TRUE)
   
   setColWidths(wb, sheet = "Hoja1", cols = 2:(ncol(tabla)+2), widths = "auto")
+  
+  showGridLines(wb, sheet = "Hoja1", showGridLines = FALSE)
   
   # Registra que se descargó un archivo en excel
   contabiliza_uso(metadatos_sel$idind, "hitsxls")
