@@ -2,7 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
+/docs/*
+/fonts/*
+*.xlsx
+*.docx
 *~
 *#
-*docs
-*xlsx
