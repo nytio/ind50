@@ -9,6 +9,14 @@ library(openxlsx) # 4.2.5.2
 library(rvest) # 1.0-3
 source("database.R")
 
+systemfonts::register_font(
+  name = 'typus',
+  plain = "fonts/Regular.otf",
+  bold = "fonts/Bold.otf",
+  italic = "fonts/RegularItalic.otf",
+  bolditalic = "fonts/BoldItalic.otf"
+)
+
 gen_barras <- function(edo_sel, ind_sel, anio_sel) {
   if(is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)
@@ -60,7 +68,7 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
       x = NULL,
       y = metadatos_sel$unidad
     ) +
-    theme_bw() +
+    theme_bw(base_family = "typus") +
     theme(
       plot.title.position  = "plot",
       plot.title = element_text(hjust = 0.5, face = "bold", colour = "#333333"),
@@ -130,23 +138,15 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   mapa %>%
     ggplot() +
     geom_sf(aes(fill = valorT)) +
-    theme_bw() +
+    theme_bw(base_family = "typus") +
     scale_fill_manual(values = colores, labels = colores_etq) +
     theme(
       axis.text = element_blank(),
       axis.ticks = element_blank(),
       panel.border = element_blank(),
       legend.position = "bottom",
-      plot.title = element_text(
-        hjust = 0.5,
-        face = "bold",
-        colour = "#333333"
-      ),
-      plot.subtitle = element_text(
-        hjust = 0.5,
-        face = "bold",
-        colour = "#333333"
-      )
+      plot.title = element_text(hjust = 0.5, face = "bold", colour = "#333333"),
+      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = "#333333")
     ) +
     labs(
       title = str_c(metadatos_sel$indicador, ", ", anio_sel),
@@ -207,7 +207,7 @@ gen_lineas <- function(edo_sel, ind_sel) {
     ) +
     scale_x_continuous(breaks = escala_x) +
     scale_y_continuous(label = scales::comma_format()) +
-    theme_bw() +
+    theme_bw(base_family = "typus") +
     theme(
       panel.border = element_blank(),
       legend.position = "bottom",
