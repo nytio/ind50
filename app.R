@@ -2,7 +2,8 @@ options(scipen = 999)
 library(shiny) # 1.7.4
 library(shinyWidgets) # 0.7.6
 library(shinycssloaders) # 1.0.0
-library(tidyverse) # 1.3.2
+library(tidyverse) # 2.0.0
+library(DT) # 0.27 
 source("global.R")
 
 #@todo TEST probar con diferentes niveles de desagregación geográfica
@@ -44,7 +45,7 @@ ui <- fluidPage(
         tabPanel(title = "Tabulado",
                  div(class="boxtab0",
                  div(class="boxtab1", downloadButton("downloadData", "Descargar", icon = icon("download", lib = "glyphicon"))),
-                 div(class="boxtab2", DT::dataTableOutput('tab1'))),
+                 div(class="boxtab2", DTOutput('tab1'))),
                  icon = icon("table")),
         tabPanel(title = "Gráfica",
                  plotOutput("grafica_barras", height = "85vh") %>% withSpinner(type = 4),
@@ -58,7 +59,7 @@ ui <- fluidPage(
         # tabPanel(title = "Prospectiva",
         #           br(), icon = icon("circle-arrow-up", lib = "glyphicon")),
         tabPanel(title = "Metadato",
-                 DT::dataTableOutput('tab2'),
+                 DTOutput('tab2'),
                  icon = icon("info-sign", lib = "glyphicon")),
         tabPanel(title = "Ayuda",
                  h4("Descripción"),
@@ -149,7 +150,7 @@ server <- function(input, output, session) {
              anio_sel = input$selAnio)
   })
   
-  output$tab1 <- DT::renderDataTable({
+  output$tab1 <- renderDT({
     datasetInput()
   })
   
@@ -183,7 +184,7 @@ server <- function(input, output, session) {
   datasetInput2 <- reactive({
     tabulado2(ind_sel = input$selIndicador)
   })
-  output$tab2 <- DT::renderDataTable({
+  output$tab2 <- renderDT({
     datasetInput2()
   })
 }

@@ -1,7 +1,8 @@
 # Genera gráficas y tablas
 
 # Librerias ----
-library(tidyverse) # 1.3.2
+library(tidyverse) # 2.0.0
+library(DT) # 1.0.27
 library(ggplot2) # 3.4.1
 library(jsonlite) # 1.8.4
 library(sf) # 1.0-9
@@ -254,9 +255,9 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
   
   # Da formato a los valores numéricos
   if(metadatos_sel$idtipodato == 1)
-    mis_datos <- mis_datos %>%  DT::formatRound(columns = 2:dim(tab)[2], digits = 0)
+    mis_datos <- mis_datos %>% formatRound(columns = 2:dim(tab)[2], digits = 0)
   else if(metadatos_sel$idtipodato == 2)
-    mis_datos <- mis_datos %>%  DT::formatRound(columns = 2:dim(tab)[2], digits = 2)
+    mis_datos <- mis_datos %>% formatRound(columns = 2:dim(tab)[2], digits = 2)
   
   # Registra que se mostró un tabulado
   contabiliza_uso(metadatos_sel$idind, "hitstbl")
