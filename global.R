@@ -6,6 +6,7 @@ library(DT) # 1.0.27
 library(ggplot2) # 3.4.1
 library(jsonlite) # 1.8.4
 library(sf) # 1.0-9
+library(ggspatial) # 1.1.7
 library(openxlsx) # 4.2.5.2
 library(rvest) # 1.0-3
 source("database.R")
@@ -69,7 +70,7 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
       x = NULL,
       y = metadatos_sel$unidad
     ) +
-    theme_bw(base_family = "typus") +
+    theme_linedraw(base_size = 13, base_family = "typus") +
     theme(
       plot.title.position  = "plot",
       plot.title = element_text(hjust = 0.5, face = "bold", colour = "#333333"),
@@ -90,22 +91,25 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   if (file.exists("www/datos/shp.rds")) {
     shp <- readRDS("www/datos/shp.rds")
   } else {
-    gto <- read_sf("www/datos/gto.geojson") %>%
+    gto <- read_sf("www/datos/gto.shp") %>%
       mutate(geo = 1) %>%
       rename(cve = CLAVE, nom = NOM_MUN) %>%
       select(geo, cve, nom, geometry)
+    gto <- st_transform(gto, 3857)
     gto <- st_simplify(gto, dTolerance = 100)
     
-    mex <- read_sf("www/datos/mex.geojson") %>%
+    mex <- read_sf("www/datos/mex.shp") %>%
       mutate(geo = 2) %>%
       rename(cve = CVE_ENT, nom = NOM_ENT) %>%
       select(geo, cve, nom, geometry)
+    mex <- st_transform(mex, 3857)
     mex <- st_simplify(mex, dTolerance = 1000)
     
-    usa <- read_sf("www/datos/usa.geojson") %>%
+    usa <- read_sf("www/datos/usa.shp") %>%
       mutate(geo = 7) %>%
       rename(cve = FIPS, nom = NAME) %>%
       select(geo, cve, nom, geometry)
+    usa <- st_transform(usa, 3857)
     usa <- st_simplify(usa, dTolerance = 1000)
     
     shp <- bind_rows(gto, mex, usa)
@@ -139,7 +143,7 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   mapa %>%
     ggplot() +
     geom_sf(aes(fill = valorT)) +
-    theme_bw(base_family = "typus") +
+    theme_light(base_size = 13, base_family = "typus") +
     scale_fill_manual(values = colores, labels = colores_etq) +
     theme(
       axis.text = element_blank(),
@@ -155,7 +159,10 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
       x = NULL,
       y = NULL,
       fill = metadatos_sel$unidad
-    )
+    ) +
+    coord_sf(crs = 3857) +
+    annotation_scale(location = "bl", bar_cols = c("#333333", "white")) +
+    annotation_north_arrow(location = "tr", style = north_arrow_orienteering(line_col = "#333333", fill = c("white", "#333333")))
 }
 
 gen_lineas <- function(edo_sel, ind_sel) {
@@ -208,7 +215,7 @@ gen_lineas <- function(edo_sel, ind_sel) {
     ) +
     scale_x_continuous(breaks = escala_x) +
     scale_y_continuous(label = scales::comma_format()) +
-    theme_bw(base_family = "typus") +
+    theme_linedraw(base_size = 13, base_family = "typus") +
     theme(
       panel.border = element_blank(),
       legend.position = "bottom",

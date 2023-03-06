@@ -8,3 +8,8 @@
 *.docx
 *~
 *#
+*.dbf
+*.prj
+*.shp
+*.shx
+*.rds
