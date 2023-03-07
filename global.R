@@ -75,7 +75,7 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
       x = NULL,
       y = metadatos_sel$unidad
     ) +
-    theme_linedraw(base_size = 13, base_family = "typus") +
+    theme_light(base_size = 13, base_family = "typus") +
     theme(
       plot.title.position  = "plot",
       plot.title = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
@@ -221,7 +221,7 @@ gen_lineas <- function(edo_sel, ind_sel) {
     ) +
     scale_x_continuous(breaks = escala_x) +
     scale_y_continuous(label = scales::comma_format()) +
-    theme_linedraw(base_size = 13, base_family = "typus") +
+    theme_light(base_size = 13, base_family = "typus") +
     theme(
       panel.border = element_blank(),
       legend.position = "bottom",
