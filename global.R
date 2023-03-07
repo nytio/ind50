@@ -2,13 +2,13 @@
 
 # Librerias ----
 library(tidyverse) # 2.0.0
-library(DT) # 1.0.27
+library(DT) # 0.27
 library(ggplot2) # 3.4.1
 library(jsonlite) # 1.8.4
 library(sf) # 1.0-9
 library(ggspatial) # 1.1.7
 library(openxlsx) # 4.2.5.2
-library(rvest) # 1.0-3
+library(rvest) # 1.0.3
 source("database.R")
 
 systemfonts::register_font(
@@ -19,6 +19,11 @@ systemfonts::register_font(
   bolditalic = "fonts/BoldItalic.otf"
 )
 
+colores_tematico <-
+  c("#FEFED1", "#FDFC91", "#F9D114", "#EB8936", "#B93623")
+colores_simbolos <- c("#484A49", "#F5F7F6")
+colores_texto <- "#333333"
+  
 gen_barras <- function(edo_sel, ind_sel, anio_sel) {
   if(is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)
@@ -73,8 +78,8 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     theme_linedraw(base_size = 13, base_family = "typus") +
     theme(
       plot.title.position  = "plot",
-      plot.title = element_text(hjust = 0.5, face = "bold", colour = "#333333"),
-      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = "#333333")
+      plot.title = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
+      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = colores_texto)
     )
 }
 
@@ -112,13 +117,10 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
     usa <- st_transform(usa, 3857)
     usa <- st_simplify(usa, dTolerance = 1000)
     
-    shp <- bind_rows(gto, mex, usa)
+    shp <- dplyr::bind_rows(gto, mex, usa)
     rm(gto, mex, usa)
     saveRDS(shp, file = "www/datos/shp.rds")
   }
-  
-  colores <-
-    c("#FEFED1", "#FDFC91", "#F9D114", "#EB8936", "#B93623")
   
   #@todo ajustar consultas para que coincidan las claves
   mapa <- shp %>%
@@ -144,14 +146,14 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
     ggplot() +
     geom_sf(aes(fill = valorT)) +
     theme_light(base_size = 13, base_family = "typus") +
-    scale_fill_manual(values = colores, labels = colores_etq) +
+    scale_fill_manual(values = colores_tematico, labels = colores_etq) +
     theme(
       axis.text = element_blank(),
       axis.ticks = element_blank(),
       panel.border = element_blank(),
       legend.position = "bottom",
-      plot.title = element_text(hjust = 0.5, face = "bold", colour = "#333333"),
-      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = "#333333")
+      plot.title = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
+      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = colores_texto)
     ) +
     labs(
       title = str_c(metadatos_sel$indicador, ", ", anio_sel),
@@ -161,11 +163,11 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
       fill = metadatos_sel$unidad
     ) +
     coord_sf(crs = 3857) +
-    annotation_scale(location = "bl", bar_cols = c("#484A49", "#F5F7F6")) +
+    annotation_scale(location = "bl", bar_cols = colores_simbolos) +
     annotation_north_arrow(location = "tr",
                            style = north_arrow_orienteering(
-                             line_col = "#484A49",
-                             fill = c("#F5F7F6", "#484A49")
+                             line_col = colores_simbolos[1],
+                             fill = colores_simbolos[2:1]
                            ))
 }
 
@@ -223,8 +225,8 @@ gen_lineas <- function(edo_sel, ind_sel) {
     theme(
       panel.border = element_blank(),
       legend.position = "bottom",
-      plot.title = element_text(hjust = 0.5, face = "bold", colour = "#333333"),
-      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = "#333333"),
+      plot.title = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
+      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
       axis.text.x = element_text(angle = 0, hjust = 1)
     )
 }
