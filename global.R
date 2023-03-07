@@ -161,8 +161,12 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
       fill = metadatos_sel$unidad
     ) +
     coord_sf(crs = 3857) +
-    annotation_scale(location = "bl", bar_cols = c("#333333", "white")) +
-    annotation_north_arrow(location = "tr", style = north_arrow_orienteering(line_col = "#333333", fill = c("white", "#333333")))
+    annotation_scale(location = "bl", bar_cols = c("#484A49", "#F5F7F6")) +
+    annotation_north_arrow(location = "tr",
+                           style = north_arrow_orienteering(
+                             line_col = "#484A49",
+                             fill = c("#F5F7F6", "#484A49")
+                           ))
 }
 
 gen_lineas <- function(edo_sel, ind_sel) {
