@@ -20,6 +20,7 @@ actualiza_indicador <- function(selColeccion) {
   indicadores <<- dbGetQuery(con, paste0("SELECT idserie, MIN(indicador) AS indicador FROM viewb1 WHERE idcoleccion = ", selColeccion, " GROUP BY idserie;"))
   opciones_indicadores <<- unique(indicadores$idserie)
   names(opciones_indicadores) <<- indicadores$indicador
+  opciones_indicadores <<- sort(opciones_indicadores)
 }
 
 actualiza_indicador(coleccion[1, 1])

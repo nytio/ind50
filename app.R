@@ -94,7 +94,7 @@ server <- function(input, output, session) {
     updateSelectInput(
       session = session,
       inputId = "selIndicador",
-      choices = sort(opciones_indicadores, decreasing = TRUE)
+      choices = opciones_indicadores
     )
   }, ignoreInit = TRUE)
   
