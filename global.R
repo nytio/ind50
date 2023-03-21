@@ -195,6 +195,9 @@ gen_lineas <- function(edo_sel, ind_sel) {
       datos_lineas %>% mutate(ToHighlight = "no")
   }
   
+  if(length(unique(datos_lineas$year)) < 2)
+    return(NULL)
+  
   if(length(unique(datos_lineas$year)) < 20)
     escala_x <- unique(datos_lineas$year)
   else
@@ -373,6 +376,18 @@ tabulado2 <- function(ind_sel) {
   DT::datatable(metadatos_sel,
                 options = list(paging = FALSE, searching = FALSE),
                 #caption = "Ficha del indicador",
+                selection = "none", #list(mode = "single", selected = 12, selectable = 12),
+                style = "bootstrap4", escape = FALSE)
+}
+
+tabulado3 <- function() {
+  metadatos_sel <- consulta_bde()
+  names(metadatos_sel) <- c("No", "Nombre del Indicador", "Unidad de medida", "Fecha","Fuente del indicador", "Sitio de consulta del indicador")
+  
+  DT::datatable(metadatos_sel,
+                options = list(paging = TRUE, searching = TRUE),
+                #caption = "Listado de indicadores",
+                filter = list(position = "top", clear = TRUE, plain = FALSE),
                 selection = "none", #list(mode = "single", selected = 12, selectable = 12),
                 style = "bootstrap4", escape = FALSE)
 }

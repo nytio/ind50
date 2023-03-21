@@ -60,6 +60,9 @@ ui <- fluidPage(
         #           br(), icon = icon("circle-arrow-up", lib = "glyphicon")),
         tabPanel(title = "Metadato",
                  DTOutput('tab2'),
+                 checkboxInput("show_tab", "Mostrar catálogo de indicadores"),
+                 conditionalPanel(condition = "input.show_tab == true",
+                                  DTOutput('tab3')),
                  icon = icon("info-sign", lib = "glyphicon")),
         tabPanel(title = "Ayuda",
                  h4("Descripción"),
@@ -70,7 +73,8 @@ ui <- fluidPage(
                  tags$ul(tags$li("Descarga de pirámides de población:", a(href = 'datos/piramide.xlsx', '/piramide.xlsx', target='_blank')),
                          tags$li("Descarga de proyecciones de población:", a(href = 'datos/proymun.xlsx', '/proymun.xlsx', target='_blank')),
                          tags$li("Acceso al código fuente:", a(href = 'https://github.com/nytio/ind50', '/ind50', target='_blank'))),
-                 icon = icon("question-sign", lib = "glyphicon"))
+                 icon = icon("question-sign", lib = "glyphicon")),
+        selected = "Ayuda"
       )
     )
   )
@@ -90,14 +94,14 @@ server <- function(input, output, session) {
     updateSelectInput(
       session = session,
       inputId = "selIndicador",
-      choices = opciones_indicadores
+      choices = sort(opciones_indicadores, decreasing = TRUE)
     )
   }, ignoreInit = TRUE)
   
   observeEvent(input$selIndicador, {
     actualiza_bd(input$selIndicador)
     ad <- anios_disponibles()
-    if(length(ad) > 0) {
+    if(length(ad) > 1) {
       if(is.null(input$selAnio)) {
         usel <- ad[length(ad)]
       } else {
@@ -110,7 +114,15 @@ server <- function(input, output, session) {
       updateSliderTextInput(session = session,
                             inputId = "selAnio",
                             choices = ad,
-                            selected = usel)
+                            selected = usel)#,
+                            # from_fixed = NULL,
+                            # to_fixed = NULL)
+    } else if(length(ad) > 0) {
+      updateSliderTextInput(session = session,
+                            inputId = "selAnio",
+                            choices = c("ND", ad),
+                            selected = ad)#,
+                            # from_fixed = ad)
     }
     
     actualiza_opciones_entidad(input$selIndicador, input$selAnio)
@@ -186,6 +198,13 @@ server <- function(input, output, session) {
   })
   output$tab2 <- renderDT({
     datasetInput2()
+  })
+  
+  datasetInput3 <- reactive({
+    tabulado3()
+  })
+  output$tab3 <- renderDT({
+    datasetInput3()
   })
 }
 

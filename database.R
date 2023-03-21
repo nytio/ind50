@@ -5,13 +5,13 @@ library(tidyverse) # 1.3.2
 library(DBI) # 1.1.3
 
 # Conexiones ----
-con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10) #circinus indicadores
+con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10)
 
 # Datos ----
 
 # Lee el catálogo y los indicadores disponibles
 coleccion <- dbReadTable(con, "viewb0")
-opciones_coleccion = unique(coleccion$idcoleccion)
+opciones_coleccion <- unique(coleccion$idcoleccion)
 names(opciones_coleccion) <- coleccion$titulo
 
 indicadores <- NULL
@@ -131,6 +131,12 @@ actualiza_bd(indicadores[1, 1])
 contabiliza_uso <- function(idind, campo) {
   query <- paste0("UPDATE indicador SET ", campo," = ", campo," + 1 WHERE idind = ", idind, ";")
   dbExecute(con, query)
+}
+
+consulta_bde <- function() {
+  use_sql <- "SELECT idind, indicador, unidad, fecha, fuente, producto  FROM view03"
+  campo <- dbGetQuery(con, use_sql)
+  return (campo)
 }
 
 # https://github.com/r-dbi/odbc/blob/main/README.md
