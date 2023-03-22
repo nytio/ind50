@@ -72,6 +72,7 @@ ui <- fluidPage(
                  p("Además de la información accesible en la plataforma, el proyecto Catálogo de Indicadores también ofrece la opción de descargar archivos en formato Excel con proyecciones y pirámides de población a nivel municipal, cubriendo desde 1990 hasta 2050. Estos archivos adicionales brindan una mayor profundidad de análisis a aquellos que buscan explorar los datos con más detalle. Para los interesados en entender cómo se ha implementado el proyecto, también se ofrece el acceso al código fuente, permitiendo mejorar o modificar el proyecto."),
                  tags$ul(tags$li("Descarga de pirámides de población:", a(href = 'datos/piramide.xlsx', '/piramide.xlsx', target='_blank')),
                          tags$li("Descarga de proyecciones de población:", a(href = 'datos/proymun.xlsx', '/proymun.xlsx', target='_blank')),
+                         tags$li("Encuesta Nacional sobre Diversidad Sexual y de Género:", a(href = 'https://www.inegi.org.mx/programas/endiseg/2021/', '/endiseg/2021/', target='_blank')),
                          tags$li("Acceso al código fuente:", a(href = 'https://github.com/nytio/ind50', '/ind50', target='_blank'))),
                  icon = icon("question-sign", lib = "glyphicon")),
         selected = "Ayuda"
