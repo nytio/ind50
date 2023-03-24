@@ -202,6 +202,15 @@ gen_lineas <- function(edo_sel, ind_sel) {
     escala_x <- unique(datos_lineas$year)
   else
     escala_x <- seq(min(datos_lineas$year), max(datos_lineas$year), by = 5)
+  
+  legend_labels <- data.frame(
+    ToHighlight = c("gto", "no"),
+    labels = c("Guanajuato", "Otras entidades")
+  )
+  
+  legend_source <- min(metadatos_sel$fuente)
+  if(grepl("INEGI", legend_source))
+    legend_source <- "INEGI"
 
   datos_lineas %>%
     ggplot(aes(
@@ -212,13 +221,13 @@ gen_lineas <- function(edo_sel, ind_sel) {
       linetype = ToHighlight
     )) +
     geom_line() +
-    scale_color_manual(values = c("gto" = "#00628C", "no" = "#8d8d8d"), guide = "none") +
+    scale_color_manual(values = c("gto" = "#00628C", "no" = "#8d8d8d"), labels = legend_labels$labels) +
     scale_linetype_manual(values = c("gto" = "solid", "no" = "solid"), guide = "none") +
-    scale_size_manual(values = c("gto" = 1.0, "no" = 0.5), guide = "none") +
+    scale_size_manual(values = c("gto" = 1.0, "no" = 0.5), guide = "none")  +
     #geom_point(color = "#8d8d8d") +
     labs(
       title = str_c(min(metadatos_sel$indicador), ", ", min(datos_lineas$year), " - ", max(datos_lineas$year)),
-      caption = str_c("Fuente: ", min(metadatos_sel$fuente)),
+      caption = str_c("Fuente: ", legend_source),
       x = NULL,
       y = min(metadatos_sel$unidad)
     ) +
@@ -231,7 +240,8 @@ gen_lineas <- function(edo_sel, ind_sel) {
       plot.title = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
       plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
       axis.text.x = element_text(angle = 0, hjust = 1)
-    )
+    ) +
+    guides(color = guide_legend(title = NULL)) 
 }
 
 tabulado <- function(edo_sel, ind_sel, anio_sel) {
