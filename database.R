@@ -19,7 +19,7 @@ opciones_indicadores <- NULL
 actualiza_indicador <- function(selColeccion) {
   indicadores <<- dbGetQuery(con, paste0("SELECT idserie, MIN(indicador) AS indicador FROM viewb1 WHERE idcoleccion = ", selColeccion, " GROUP BY idserie;"))
   opciones_indicadores <<- unique(indicadores$idserie)
-  names(opciones_indicadores) <<- indicadores$indicador
+  names(opciones_indicadores) <<- gsub("Población de 5 años y más residente en otra entidad en junio de 2005", "Población de 5 años y más residente en otra entidad hace 5 años", indicadores$indicador)
   opciones_indicadores <<- sort(opciones_indicadores)
 }
 
