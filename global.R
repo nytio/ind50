@@ -280,10 +280,11 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
                 style = "bootstrap4")
   
   # Da formato a los valores numéricos
-  if(metadatos_sel$idtipodato == 1)
-    mis_datos <- mis_datos %>% formatRound(columns = 2:dim(tab)[2], digits = 0)
-  else if(metadatos_sel$idtipodato == 2)
-    mis_datos <- mis_datos %>% formatRound(columns = 2:dim(tab)[2], digits = 2)
+  if(!is.na(metadatos_sel$idtipodato))
+    if(metadatos_sel$idtipodato == 1)
+      mis_datos <- mis_datos %>% formatRound(columns = 2:dim(tab)[2], digits = 0)
+    else if(metadatos_sel$idtipodato == 2)
+      mis_datos <- mis_datos %>% formatRound(columns = 2:dim(tab)[2], digits = 2)
   
   # Registra que se mostró un tabulado
   contabiliza_uso(metadatos_sel$idind, "hitstbl")
