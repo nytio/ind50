@@ -128,6 +128,7 @@ mapea_js <- function(x_null, id, geo2) {
 
     ca = c(sum(x == 1), sum(x == 2), sum(x == 3), sum(x == 4), sum(x == 5));
     ly <- paste(cr2, " (", ca, ")", sep="");
+    ly <- ly[ca > 0]
     
     r <- paste(x, ',', sep = "", collapse = "");
     r <- substr(r, 1, nchar(r)-1);
@@ -317,11 +318,7 @@ mapas_graficos_servidor_a_servidor <- function(rango) {
 #t1 <- system.time(mapas_graficos_servidor_a_servidor(2654:2708)) # 5.58681818 segundos promedio por mapa (estatal y municipal por indicador con valores enteros)
 # mapas_graficos_servidor_a_servidor(2709:4053)
 
-#t1 <- system.time(mapas_graficos_servidor_a_servidor(4060))
-t1 <- system.time(mapas_graficos_servidor_a_servidor(4067))
-#t1 <- system.time(mapas_graficos_servidor_a_servidor(4074))
-
-print(t1)
+t1 <- print(system.time(mapas_graficos_servidor_a_servidor(c(4060, 4067, 4074))))
 
 # Usar en servidor con:
 # > Rscript maps.R &
