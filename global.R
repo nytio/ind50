@@ -39,6 +39,9 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     filter(year == anio_sel) %>%
     filter(ambito == edo_sel)
   
+  if(!is.numeric(datos_barras$valor))
+    return(NULL)
+  
   if(length(datos_barras$ambito) == 0)
     return(NULL)
   
@@ -179,6 +182,9 @@ gen_lineas <- function(edo_sel, ind_sel) {
   datos_lineas <- bd %>%
     filter(no == ind_sel) %>%
     filter(ambito == edo_sel)
+  
+  if(!is.numeric(datos_lineas$valor))
+    return(NULL)
   
   if(length(datos_lineas$ambito) == 0)
     return(NULL)
