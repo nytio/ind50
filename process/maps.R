@@ -5,7 +5,7 @@ library(tidyverse) # 1.3.1
 library(DBI) # 1.1.3
 
 # Conexiones ----
-con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10) #circinus indicadores
+con <- dbConnect(odbc::odbc(), "circinus", timeout = 10) #circinus indicadores
 
 frangeerror <- function(muppets, mini, maxi) {
   mean_val <- mean(muppets[mini:maxi])
@@ -116,14 +116,16 @@ mapea_js <- function(x_null, id, geo2) {
     }
   } else if (mode(x_null) == "character") {
     # Considera este caso de etiquetado
-    cr1 = c("Muy Bajo", "Bajo","Medio", "Alto", "Muy Alto");
-    cr2 = c("Muy bajo", "Bajo","Medio", "Alto", "Muy alto");
     #@todo Generalizar para cualquier uso de etiquetas.
-    
+    cr1 <- c("muy bajo", "bajo", "medio", "alto", "muy alto")
+    cr2 <- c("Muy bajo", "Bajo", "Medio", "Alto", "Muy alto")
+    etiquetas <- 1:5
+    x_factor <- factor(tolower(x_null), levels = cr1, ordered = TRUE)
+    x <- as.numeric(x_factor)
     #! Localiza los valores nulos y les asigna valor
-    x <- (function(y) ifelse(is.na(y), 0, ifelse(y == cr1[1], 1, ifelse(y == cr1[2], 2, ifelse(y == cr1[3], 3, ifelse(y == cr1[4], 4, ifelse(y == cr1[5], 5, y)))))))(x_null);
-    x <- (function(y) ifelse(is.na(y), 0, ifelse(y == cr2[1], 1, ifelse(y == cr2[2], 2, ifelse(y == cr2[3], 3, ifelse(y == cr2[4], 4, ifelse(y == cr2[5], 5, y)))))))(x);
-    
+    x <- ifelse(x_null == "", 0, x)
+    x <- ifelse(is.na(x), 0, x)
+
     ca = c(sum(x == 1), sum(x == 2), sum(x == 3), sum(x == 4), sum(x == 5));
     ly <- paste(cr2, " (", ca, ")", sep="");
     
@@ -224,12 +226,18 @@ mapas_graficos_servidor_a_servidor <- function(rango) {
                 sep = ""
               )
             
-            rows2m <- dbGetQuery(con, query2m)
-            
-            if (!(all(is.na(rows2m$valor))))
-              m <-
-              mapea_js(as.numeric(rows2m$valor), numindicador, "m")
-            
+            rows2m <- try(dbGetQuery(con, query2m), silent = TRUE)
+            if(class(rows2m) == "try-error") {
+              query2m <-
+                paste(
+                  "SELECT valort AS valor FROM fun_indicador(",
+                  numindicador,
+                  ", 1) WHERE ID > 0 ORDER BY ID ASC;",
+                  sep = "")
+              rows2m <- dbGetQuery(con, query2m)
+              m <- mapea_js(rows2m$valor, numindicador, "m")
+            } else if (!(all(is.na(rows2m$valor))))
+              m <- mapea_js(as.numeric(rows2m$valor), numindicador, "m")
           }
           #! Procesa los mapas de estados
           if (geo == 2 || geo == 3 || geo == 4 || geo == 8) {
@@ -241,9 +249,17 @@ mapas_graficos_servidor_a_servidor <- function(rango) {
                 sep = ""
               )
             
-            rows2e <- dbGetQuery(con, query2e)
-            
-            if (!is.na(rows2e$valor[11]))
+            rows2e <- try(dbGetQuery(con, query2e), silent = TRUE)
+            if(class(rows2e) == "try-error") {
+              query2e <-
+                paste(
+                  "SELECT valort AS valor FROM fun_indicador(",
+                  numindicador,
+                  ", 2) WHERE ID > 0 ORDER BY ID ASC;",
+                  sep = "")
+              rows2e <- dbGetQuery(con, query2e)
+              e <- mapea_js(rows2e$valor, numindicador, "e")
+            } else if (!is.na(rows2e$valor[11]))
               e <- mapea_js(as.numeric(rows2e$valor), numindicador, "e")
           }
           #! Procesa los mapas de EE.UU.
@@ -257,11 +273,18 @@ mapas_graficos_servidor_a_servidor <- function(rango) {
               )
             
             rows2u <- dbGetQuery(con, query2u)
-            
-            if (!(all(is.na(rows2u$valor))))
+            if(class(rows2e) == "try-error") {
+              query2u <-
+                paste(
+                  "SELECT valort AS valor FROM fun_indicador(",
+                  numindicador,
+                  ", 3) WHERE ID > 0 AND ID <> 2 AND ID <> 15 ORDER BY ID ASC;",
+                  sep = "")
+              rows2u <- dbGetQuery(con, query2u)
+              u <- mapea_js(rows2u$valor, numindicador, "u")
+            } else if (!(all(is.na(rows2u$valor))))
               u <-
               mapea_js(as.numeric(rows2u$valor), numindicador, "u")
-            
           }
         }
         # Si un mapa no existe, no aparece; así no deja comas de más.
@@ -293,8 +316,12 @@ mapas_graficos_servidor_a_servidor <- function(rango) {
 #t1 <- system.time( mapas_graficos_servidor_a_servidor(2653) )
 #t1 <- system.time(mapas_graficos_servidor_a_servidor(2654:2708)) # 5.58681818 segundos promedio por mapa (estatal y municipal por indicador con valores enteros)
 # mapas_graficos_servidor_a_servidor(2709:4053)
-t1 <- system.time(mapas_graficos_servidor_a_servidor(2710:4053))
-message(t1)
+
+#t1 <- system.time(mapas_graficos_servidor_a_servidor(4060))
+t1 <- system.time(mapas_graficos_servidor_a_servidor(4067))
+#t1 <- system.time(mapas_graficos_servidor_a_servidor(4074))
+
+print(t1)
 
 # Usar en servidor con:
 # > Rscript maps.R &
