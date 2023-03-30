@@ -82,60 +82,59 @@ colorea <- function(muppets) {
 mapea_js <- function(x_null, id, geo2) {
   if (mode(x_null) == "numeric") {
     #! Localiza los valores nulos y les asigna valor
-    x <- (function(y) ifelse(is.na(y), -9999999, y))(x_null);
+    x <- (function(y) ifelse(is.na(y), -9999999, y))(x_null)
     if (min(x) != max(x)) {
       #! Calcula los rangos y clases para colorear
       #! para crear el gráfico con las especificaciones
-      pamd <- colorea(x);
+      pamd <- colorea(x)
       
       #! Procesa la leyenda de datos, redondea a dos dígitos
       #! Poner comas a los números (formato numérico).
       #! 16 de julio de 2009
       #@todo verificar si cuando no hay disponible, se use el valor cero,
-      pamd$rangos <- round(pamd$rangos, digits = 2);
-      pamd$rangos[,1] <- prettyNum(pamd$rangos[,1], big.mark = ",");
-      pamd$rangos[,2] <- prettyNum(pamd$rangos[,2], big.mark = ",");
-      
+      pamd$rangos <- round(pamd$rangos, digits = 2)
+      pamd$rangos[, 1] <- prettyNum(pamd$rangos[, 1], big.mark = ",")
+      pamd$rangos[, 2] <- prettyNum(pamd$rangos[, 2], big.mark = ",")
+
       #! Colocar el número de entidades en la clase entre paréntesis
       #! 22 de marzo de 2010
       #@todo cambiar el exceso de espacios y tabulador por elementos html
-      leyenda <- paste("De ", pamd$rangos[,1], " a ", pamd$rangos[,2], " (", pamd$cuenta, ")", sep="");
-      leyenda <- (function(y) ifelse(y[[1]][,1] == y[[1]][,2], paste(y[[1]][,1], " (", y[[3]], ")"), y[[2]]))(list(pamd$rangos,leyenda,pamd$cuenta));
-      leyenda <- (function(y) ifelse(y[[1]][,1] == "-9,999,999", paste("No disponible (", y[[3]], ")"), y[[2]]))(list(pamd$rangos,leyenda,pamd$cuenta));
-      
+      leyenda <- paste("De ", pamd$rangos[,1], " a ", pamd$rangos[,2], " (", pamd$cuenta, ")", sep = "")
+      leyenda <- (function(y) ifelse(y[[1]][,1] == y[[1]][,2], paste(y[[1]][,1], " (", y[[3]], ")"), y[[2]]))(list(pamd$rangos, leyenda, pamd$cuenta))
+      leyenda <- (function(y) ifelse(y[[1]][,1] == "-9,999,999", paste("No disponible (", y[[3]], ")"), y[[2]]))(list(pamd$rangos, leyenda, pamd$cuenta))
+
       #@todo usar una estrategia para si hay vacios se muestre en etiqueta, sino no.
-      
+
       #! Salida en formato json unitario
       #! 11 de septiembre de 2013
-      r <- paste(pamd$clases,',',sep="",collapse="");
-      r <- substr(r,1,nchar(r)-1);
-      l <- paste('"',leyenda,'",',sep="",collapse="");
-      l <- substr(l,1,nchar(l)-1);
-      s <- paste('"',geo2,'":{"l":[',l,'],"v":[',r,']}',sep="",collapse="");
-      return(s);
+      r <- paste(pamd$clases, ',', sep = "", collapse = "")
+      r <- substr(r, 1, nchar(r) - 1)
+      l <- paste('"', leyenda, '",', sep = "", collapse = "")
+      l <- substr(l, 1, nchar(l) - 1)
+      s <- paste('"', geo2, '":{"l":[', l, '],"v":[', r, ']}', sep = "", collapse = "")
+      return(s)
     }
   } else if (mode(x_null) == "character") {
     # Considera este caso de etiquetado
-    #@todo Generalizar para cualquier uso de etiquetas.
+    #@todo Generalizar para cualquier uso de etiquetas
     cr1 <- c("muy bajo", "bajo", "medio", "alto", "muy alto")
     cr2 <- c("Muy bajo", "Bajo", "Medio", "Alto", "Muy alto")
-    etiquetas <- 1:5
-    x_factor <- factor(tolower(x_null), levels = cr1, ordered = TRUE)
-    x <- as.numeric(x_factor)
+
+    x <- as.numeric(factor(tolower(x_null), levels = cr1, ordered = TRUE))
     #! Localiza los valores nulos y les asigna valor
     x <- ifelse(x_null == "", 0, x)
     x <- ifelse(is.na(x), 0, x)
 
-    ca = c(sum(x == 1), sum(x == 2), sum(x == 3), sum(x == 4), sum(x == 5));
-    ly <- paste(cr2, " (", ca, ")", sep="");
+    ca <- c(sum(x == 1), sum(x == 2), sum(x == 3), sum(x == 4), sum(x == 5))
+    ly <- paste(cr2, " (", ca, ")", sep = "")
     ly <- ly[ca > 0]
-    
-    r <- paste(x, ',', sep = "", collapse = "");
-    r <- substr(r, 1, nchar(r)-1);
-    l <- paste('"', ly, '",', sep = "", collapse = "");
-    l <- substr(l, 1, nchar(l)-1);
-    s <- paste('"', geo2, '":{"l":[', l, '],"v":[', r, ']}', sep="", collapse="");
-    return(s);
+
+    r <- paste(x, ',', sep = "", collapse = "")
+    r <- substr(r, 1, nchar(r) - 1)
+    l <- paste('"', ly, '",', sep = "", collapse = "")
+    l <- substr(l, 1, nchar(l) - 1)
+    s <- paste('"', geo2, '":{"l":[', l, '],"v":[', r, ']}', sep = "", collapse = "")
+    return(s)
   }
 }
 
