@@ -366,10 +366,11 @@ descargar <- function(mis_datos, selAnio, file) {
   addStyle(wb, sheet = "Hoja1", style = fuenteStyle, rows = (nrow(tabla)+5):(nrow(tabla)+8), cols = 1, gridExpand = TRUE, stack = TRUE)
   
   # Da formato a los valores numéricos
-  if(metadatos_sel$idtipodato == 1)
-    addStyle(wb, sheet = "Hoja1", style = styleNum, rows = 4:(nrow(tabla)+8), cols = 2:ncol(tabla), gridExpand = TRUE, stack = TRUE)
-  else if(metadatos_sel$idtipodato == 2)
-    addStyle(wb, sheet = "Hoja1", style = styleDec, rows = 4:(nrow(tabla)+8), cols = 2:ncol(tabla), gridExpand = TRUE, stack = TRUE)
+  if(!is.na(metadatos_sel$idtipodato))
+    if(metadatos_sel$idtipodato == 1)
+      addStyle(wb, sheet = "Hoja1", style = styleNum, rows = 4:(nrow(tabla)+8), cols = 2:ncol(tabla), gridExpand = TRUE, stack = TRUE)
+    else if(metadatos_sel$idtipodato == 2)
+      addStyle(wb, sheet = "Hoja1", style = styleDec, rows = 4:(nrow(tabla)+8), cols = 2:ncol(tabla), gridExpand = TRUE, stack = TRUE)
   
   setColWidths(wb, sheet = "Hoja1", cols = 2:(ncol(tabla)+2), widths = "auto")
   
