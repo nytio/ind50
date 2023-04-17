@@ -317,8 +317,9 @@ mapas_graficos_servidor_a_servidor <- function(rango) {
 #t1 <- system.time(mapas_graficos_servidor_a_servidor(2654:2708)) # 5.58681818 segundos promedio por mapa (estatal y municipal por indicador con valores enteros)
 # mapas_graficos_servidor_a_servidor(2709:4053)
 
-t1 <- print(system.time(mapas_graficos_servidor_a_servidor(c(4060, 4067, 4074))))
-
+#t1 <- print(system.time(mapas_graficos_servidor_a_servidor(c(4060, 4067, 4074))))
+#t1 <- print(system.time(mapas_graficos_servidor_a_servidor(c(4078:4081))))
+t1 <- print(system.time(mapas_graficos_servidor_a_servidor(c(4082:4084))))
 # Usar en servidor con:
 # > Rscript maps.R &
 
