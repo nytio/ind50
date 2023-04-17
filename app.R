@@ -16,6 +16,10 @@ ui <- fluidPage(
   #br(),
   sidebarLayout(
     sidebarPanel(
+      # tabsetPanel(
+      #   type = "pills",
+      #   tabPanel("Indicadores",
+      # hr(),
       # Controles
       selectInput(inputId = "selColeccion",
                   label = "Categoría:",
@@ -33,6 +37,9 @@ ui <- fluidPage(
                   choices = c("1990", "1995", "2000", "2005", "2010", "2015", "2020"),
                   selected = "2020",
                   grid = TRUE),
+      # ),
+      # tabPanel("Proyecto",
+      # )),
       # hr(),
       # checkboxGroupInput("checkGroup", label = "Opciones:", 
       #                    choices = list("Ocultar total" = 1, "Resaltar" = 2),
@@ -60,9 +67,9 @@ ui <- fluidPage(
         #           br(), icon = icon("circle-arrow-up", lib = "glyphicon")),
         tabPanel(title = "Metadato",
                  DTOutput('tab2'),
-                 checkboxInput("show_tab", "Mostrar catálogo de indicadores"),
-                 conditionalPanel(condition = "input.show_tab == true",
-                                  DTOutput('tab3')),
+                 # checkboxInput("show_tab", "Mostrar catálogo de indicadores"),
+                 # conditionalPanel(condition = "input.show_tab",
+                 #                  DTOutput('tab3')),
                  icon = icon("info-sign", lib = "glyphicon")),
         tabPanel(title = "Ayuda",
                  h4("Descripción"),
