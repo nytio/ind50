@@ -1,18 +1,28 @@
 # Consultas la base de datos
 
 # Librerias ----
-library(tidyverse) # 1.3.2
+library(tidyverse) # 2.0.0
 library(DBI) # 1.1.3
 
 # Conexiones ----
-con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10)
+con <- dbConnect(odbc::odbc(), "circinus", timeout = 10)
 
 # Datos ----
 
 # Lee el catálogo y los indicadores disponibles
-coleccion <- dbReadTable(con, "viewb0")
-opciones_coleccion <- unique(coleccion$idcoleccion)
-names(opciones_coleccion) <- coleccion$titulo
+
+paneles <-  dbReadTable(con, "panel")
+opciones_panel <- paneles$idpanel # Actualizar con los nombres de los temas
+names(opciones_panel) <- paneles$panel
+
+coleccion <- NULL
+opciones_coleccion <- NULL
+actualiza_coleccion <- function(selPanel) {
+  coleccion <<- dbGetQuery(con, paste0("SELECT idcoleccion, titulo FROM viewb0 WHERE idpanel = ", selPanel) )
+  opciones_coleccion <<- unique(coleccion$idcoleccion)
+  names(opciones_coleccion) <<- coleccion$titulo
+}
+actualiza_coleccion(opciones_panel[1])
 
 indicadores <- NULL
 opciones_indicadores <- NULL
@@ -22,7 +32,6 @@ actualiza_indicador <- function(selColeccion) {
   names(opciones_indicadores) <<- gsub("Población de 5 años y más residente en otra entidad en junio de 2005", "Población de 5 años y más residente en otra entidad hace 5 años", indicadores$indicador)
   opciones_indicadores <<- sort(opciones_indicadores)
 }
-
 actualiza_indicador(coleccion[1, 1])
 
 meta <- NULL

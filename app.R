@@ -16,10 +16,10 @@ ui <- fluidPage(
   #br(),
   sidebarLayout(
     sidebarPanel(
-      # tabsetPanel(
-      #   type = "pills",
-      #   tabPanel("Indicadores",
-      # hr(),
+      tabsetPanel(
+        type = "pills",
+        tabPanelBody("Indicadores",
+      hr(),
       # Controles
       selectInput(inputId = "selColeccion",
                   label = "Categoría:",
@@ -37,13 +37,19 @@ ui <- fluidPage(
                   choices = c("1990", "1995", "2000", "2005", "2010", "2015", "2020"),
                   selected = "2020",
                   grid = TRUE),
-      # ),
-      # tabPanel("Proyecto",
-      # )),
+      icon = icon("bookmark")),
+      tabPanelBody("Proyecto",
+       hr(),
+       selectInput(inputId = "selTema",
+                   label = "Tema:",
+                   choices = opciones_panel,
+                   selected = opciones_panel[1]),
+       icon = icon("database")
+      )),
       # hr(),
-      # checkboxGroupInput("checkGroup", label = "Opciones:", 
-      #                    choices = list("Ocultar total" = 1, "Resaltar" = 2),
-      #                    selected = c(1, 2)),
+      #  checkboxGroupInput("checkGroup", label = "Opciones:", 
+      #                     choices = list("Ocultar total" = 1, "Resaltar" = 2),
+      #                     selected = c(1, 2)),
       hr(),
       helpText("© 2023 Gobierno del Estado de Guanajuato")
     ),
@@ -55,13 +61,13 @@ ui <- fluidPage(
                  div(class="boxtab2", DTOutput('tab1'))),
                  icon = icon("table")),
         tabPanel(title = "Gráfica",
-                 plotOutput("grafica_barras", height = "85vh") %>% withSpinner(type = 4),
+                 plotOutput("grafica_barras", height = "85vh") |> withSpinner(type = 4),
                  icon = icon("bar-chart")),
         tabPanel(title = "Mapa",
-                 plotOutput("grafica_mapa", height = "85vh") %>% withSpinner(type = 4),
+                 plotOutput("grafica_mapa", height = "85vh") |> withSpinner(type = 4),
                  icon = icon("map-marker", lib = "glyphicon")),
         tabPanel(title = "Serie",
-                 plotOutput("grafica_lineas", height = "85vh") %>% withSpinner(type = 4),
+                 plotOutput("grafica_lineas", height = "85vh") |> withSpinner(type = 4),
                  icon = icon("stats", lib = "glyphicon")),
         # tabPanel(title = "Prospectiva",
         #           br(), icon = icon("circle-arrow-up", lib = "glyphicon")),
@@ -90,12 +96,20 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   anios_disponibles <- reactive({
-    bd %>%
-      filter(no == input$selIndicador) %>%
-      filter(ambito == input$selEnt) %>%
-      pull(year) %>%
+    bd |>
+      dplyr::filter(no == input$selIndicador) |>
+      dplyr::filter(ambito == input$selEnt) |>
+      pull(year) |>
       unique()
   })
+  
+  observeEvent(input$selTema, {
+    actualiza_coleccion(input$selTema)
+    updateSelectInput(
+      session = session,
+      inputId = "selColeccion",
+      choices = opciones_coleccion)
+  }, ignoreInit = TRUE)
   
   observeEvent(input$selColeccion, {
     actualiza_indicador(input$selColeccion)

@@ -3,9 +3,9 @@
 # Librerias ----
 library(tidyverse) # 2.0.0
 library(DT) # 0.27
-library(ggplot2) # 3.4.1
+library(ggplot2) # 3.4.2
 library(jsonlite) # 1.8.4
-library(sf) # 1.0-9
+library(sf) # 1.0-12
 library(ggspatial) # 1.1.7
 library(openxlsx) # 4.2.5.2
 library(rvest) # 1.0.3
@@ -28,16 +28,16 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
   if(is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)
 
-  metadatos_sel <- meta %>%
-    filter(fecha == anio_sel)
+  metadatos_sel <- meta |>
+    dplyr::filter(fecha == anio_sel)
 
   if(length(metadatos_sel$fecha) == 0)
     return(NULL)
 
-  datos_barras <- bd %>%
-    filter(no == ind_sel) %>%
-    filter(year == anio_sel) %>%
-    filter(ambito == edo_sel)
+  datos_barras <- bd |>
+    dplyr::filter(no == ind_sel) |>
+    dplyr::filter(year == anio_sel) |>
+    dplyr::filter(ambito == edo_sel)
   
   if(!is.numeric(datos_barras$valor))
     return(NULL)
@@ -47,19 +47,19 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
   
   if(edo_sel == "2") {
     datos_barras <-
-      datos_barras %>% mutate(ToHighlight = ifelse(cve == 11, "gto", "no" ))
+      datos_barras |> mutate(ToHighlight = ifelse(cve == 11, "gto", "no" ))
     datos_barras <-
-      datos_barras %>% filter(cve != "MEX")
+      datos_barras |> dplyr::filter(cve != "MEX")
   } else {
     datos_barras <-
-      datos_barras %>% mutate(ToHighlight = "no")
+      datos_barras |> mutate(ToHighlight = "no")
   }
   
   # Registra que se mostró un gráfico
   contabiliza_uso(metadatos_sel$idind, "hitsgph")
 
   # Gráfico
-  datos_barras %>%
+  datos_barras |>
     ggplot(aes(x = reorder(nom, valor),
                y = valor,
                fill = ToHighlight)) +
@@ -90,8 +90,8 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   if (is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)
   
-  metadatos_sel <- meta %>%
-    filter(fecha == anio_sel)
+  metadatos_sel <- meta |>
+    dplyr::filter(fecha == anio_sel)
   
   if(length(metadatos_sel$fecha) == 0)
     return(NULL)
@@ -99,23 +99,23 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   if (file.exists("www/datos/shp.rds")) {
     shp <- readRDS("www/datos/shp.rds")
   } else {
-    gto <- read_sf("www/datos/gto.shp") %>%
-      mutate(geo = 1) %>%
-      rename(cve = CLAVE, nom = NOM_MUN) %>%
+    gto <- read_sf("www/datos/gto.shp") |>
+      mutate(geo = 1) |>
+      rename(cve = CLAVE, nom = NOM_MUN) |>
       select(geo, cve, nom, geometry)
     gto <- st_transform(gto, 3857)
     gto <- st_simplify(gto, dTolerance = 100)
     
-    mex <- read_sf("www/datos/mex.shp") %>%
-      mutate(geo = 2) %>%
-      rename(cve = CVE_ENT, nom = NOM_ENT) %>%
+    mex <- read_sf("www/datos/mex.shp") |>
+      mutate(geo = 2) |>
+      rename(cve = CVE_ENT, nom = NOM_ENT) |>
       select(geo, cve, nom, geometry)
     mex <- st_transform(mex, 3857)
     mex <- st_simplify(mex, dTolerance = 1000)
     
-    usa <- read_sf("www/datos/usa.shp") %>%
-      mutate(geo = 7) %>%
-      rename(cve = FIPS, nom = NAME) %>%
+    usa <- read_sf("www/datos/usa.shp") |>
+      mutate(geo = 7) |>
+      rename(cve = FIPS, nom = NAME) |>
       select(geo, cve, nom, geometry)
     usa <- st_transform(usa, 3857)
     usa <- st_simplify(usa, dTolerance = 1000)
@@ -126,8 +126,8 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   }
   
   #@todo ajustar consultas para que coincidan las claves
-  mapa <- shp %>%
-    filter(geo == edo_sel)
+  mapa <- shp |>
+    dplyr::filter(geo == edo_sel)
   
   # Carga los datos del mapa temático
   k <- fromJSON(metadatos_sel$jsonmap)
@@ -145,7 +145,7 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   contabiliza_uso(metadatos_sel$idind, "hitsmap")
   
   # Mapa
-  mapa %>%
+  mapa |>
     ggplot() +
     geom_sf(aes(fill = valorT)) +
     theme_light(base_size = 13, base_family = "typus") +
@@ -179,9 +179,9 @@ gen_lineas <- function(edo_sel, ind_sel) {
     return(NULL)
   metadatos_sel <- meta
   
-  datos_lineas <- bd %>%
-    filter(no == ind_sel) %>%
-    filter(ambito == edo_sel)
+  datos_lineas <- bd |>
+    dplyr::filter(no == ind_sel) |>
+    dplyr::filter(ambito == edo_sel)
   
   if(!is.numeric(datos_lineas$valor))
     return(NULL)
@@ -193,12 +193,12 @@ gen_lineas <- function(edo_sel, ind_sel) {
   
   if(edo_sel == "2") {
     datos_lineas <-
-      datos_lineas %>% mutate(ToHighlight = ifelse(cve == 11, "gto", "no" ))
+      datos_lineas |> mutate(ToHighlight = ifelse(cve == 11, "gto", "no" ))
     datos_lineas <-
-      datos_lineas %>% filter(cve != "MEX")
+      datos_lineas |> dplyr::filter(cve != "MEX")
   } else {
     datos_lineas <-
-      datos_lineas %>% mutate(ToHighlight = "no")
+      datos_lineas |> mutate(ToHighlight = "no")
   }
   
   if(length(unique(datos_lineas$year)) < 2)
@@ -218,7 +218,7 @@ gen_lineas <- function(edo_sel, ind_sel) {
   if(grepl("INEGI", legend_source))
     legend_source <- "INEGI"
 
-  datos_lineas %>%
+  datos_lineas |>
     ggplot(aes(
       x = year,
       y = valor,
@@ -254,27 +254,27 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
   if(is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)
 
-  metadatos_sel <- meta %>%
-    filter(fecha == anio_sel)
+  metadatos_sel <- meta |>
+    dplyr::filter(fecha == anio_sel)
   
   if(length(metadatos_sel$fecha) == 0)
     return(NULL)
   
-  tab <- bd %>%
-    filter(no == ind_sel) %>%
-    filter(year == anio_sel) %>%
-    filter(ambito == edo_sel)
+  tab <- bd |>
+    dplyr::filter(no == ind_sel) |>
+    dplyr::filter(year == anio_sel) |>
+    dplyr::filter(ambito == edo_sel)
   
   if(length(tab$ambito) == 0)
     return(NULL)
   
   rownames(tab) <- tab$cve
   if(is.na(metadatos_sel$idmasculino)) {
-    tab <- tab %>%
+    tab <- tab |>
       select(nom, valor)
     names(tab) <- c(c("Municipio", "Entidad federativa")[as.numeric(edo_sel)], metadatos_sel$unidad)
   } else {
-    tab <- tab %>%
+    tab <- tab |>
       select(nom, valor, valor_m, valor_f)
     names(tab) <- c(c("Municipio", "Entidad federativa")[as.numeric(edo_sel)], metadatos_sel$unidad, "Hombres", "Mujeres")
   }
@@ -288,9 +288,9 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
   # Da formato a los valores numéricos
   if(!is.na(metadatos_sel$idtipodato))
     if(metadatos_sel$idtipodato == 1)
-      mis_datos <- mis_datos %>% formatRound(columns = 2:dim(tab)[2], digits = 0)
+      mis_datos <- mis_datos |> formatRound(columns = 2:dim(tab)[2], digits = 0)
     else if(metadatos_sel$idtipodato == 2)
-      mis_datos <- mis_datos %>% formatRound(columns = 2:dim(tab)[2], digits = 2)
+      mis_datos <- mis_datos |> formatRound(columns = 2:dim(tab)[2], digits = 2)
   
   # Registra que se mostró un tabulado
   contabiliza_uso(metadatos_sel$idind, "hitstbl")
@@ -301,7 +301,7 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
 descargar <- function(mis_datos, selAnio, file) {
   # Extraer los datos y el título de la tabla
   tabla <- mis_datos$x$data
-  titulo <- minimal_html(mis_datos$x$caption) %>% html_text()
+  titulo <- minimal_html(mis_datos$x$caption) |> html_text()
   
   # Crea un nuevo libro de trabajo
   wb <- createWorkbook(
@@ -316,14 +316,14 @@ descargar <- function(mis_datos, selAnio, file) {
   writeData(wb, "Hoja1", tabla, startRow = 3)
   
   # Obtener metadatos del indicador seleccionado
-  metadatos_sel <- meta %>% 
-    filter(fecha == selAnio)
+  metadatos_sel <- meta |> 
+    dplyr::filter(fecha == selAnio)
   
   # Escribir metadatos en la hoja de trabajo
   writeData(wb, "Hoja1", paste("Fuente:", metadatos_sel$fuente), startRow = nrow(tabla)+5)
-  html <- minimal_html(metadatos_sel$producto) %>% html_elements("a")
-  writeData(wb, "Hoja1", html %>% html_text(), startRow = nrow(tabla)+6)
-  writeData(wb, "Hoja1", html %>% html_attrs(), startRow = nrow(tabla)+7)
+  html <- minimal_html(metadatos_sel$producto) |> html_elements("a")
+  writeData(wb, "Hoja1", html |> html_text(), startRow = nrow(tabla)+6)
+  writeData(wb, "Hoja1", html |> html_attrs(), startRow = nrow(tabla)+7)
   writeData(wb, "Hoja1", "Elaboró: Instituto de Planeación, Estadística y Geografía del Estado de Guanajuato (IPLANEG).", startRow = nrow(tabla)+8)
   
   # Establecer los estilos de la tabla
@@ -386,8 +386,8 @@ descargar <- function(mis_datos, selAnio, file) {
 tabulado2 <- function(ind_sel) {
   if(is.null(ind_sel))
     return(NULL)
-  metadatos_sel <- meta %>% 
-    mutate(id = paste(idserie, idind, sep = "-")) %>%
+  metadatos_sel <- meta |> 
+    mutate(id = paste(idserie, idind, sep = "-")) |>
     select(id, indicador, descripcion, unidad, fecha,  fuente, producto)
   names(metadatos_sel) <- c("No", "Nombre del Indicador", "Definición del indicador", "Unidad de medida", "Fecha","Fuente del indicador", "Sitio de consulta del indicador")
 
