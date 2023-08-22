@@ -5,7 +5,7 @@ library(tidyverse) # 2.0.0
 library(DBI) # 1.1.3
 
 # Conexiones ----
-con <- dbConnect(odbc::odbc(), "circinus", timeout = 10)
+con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10) #circinus
 
 # Datos ----
 
