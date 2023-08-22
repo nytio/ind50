@@ -17,9 +17,8 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       tabsetPanel(
-        type = "pills",
+        type = "hidden", # pills
         tabPanelBody("Indicadores",
-      hr(),
       # Controles
       selectInput(inputId = "selColeccion",
                   label = "Categoría:",
@@ -39,7 +38,6 @@ ui <- fluidPage(
                   grid = TRUE),
       icon = icon("bookmark")),
       tabPanelBody("Proyecto",
-       hr(),
        selectInput(inputId = "selTema",
                    label = "Tema:",
                    choices = opciones_panel,
