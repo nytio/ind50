@@ -138,9 +138,32 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   if(is.null(ke))
     return(NULL)
 
-  mapa$valorT <- factor(ke$v)
+  mapa$valorT <- factor(ke$v, levels = 1:5)
   colores_etq <- as.vector(ke$l)
   
+  # Asegurarse de que colores_etq contenga todas las etiquetas básicas
+  if(length(colores_etq) < 5) {
+    # Función para obtener la etiqueta que contiene una subcadena específica
+    obtener_etiqueta <- function(subcadena, vector_etiquetas) {
+      for (vec_etiqueta in vector_etiquetas) {
+        if (grepl(subcadena, vec_etiqueta)) {
+          return(vec_etiqueta)
+        }
+      }
+      return(subcadena)
+    }
+    
+    etiquetas_basicas <- c("Muy bajo", "Bajo", "Medio", "Alto", "Muy alto")
+    
+    # Construir el vector de etiquetas en el orden correcto
+    nuevas_etiquetas <- character(length(etiquetas_basicas))
+    for (i in 1:length(etiquetas_basicas)) {
+      nuevas_etiquetas[i] <- obtener_etiqueta(etiquetas_basicas[i], colores_etq)
+    }
+    
+    colores_etq <- nuevas_etiquetas
+  }
+
   # Registra que se mostró un mapa
   contabiliza_uso(metadatos_sel$idind, "hitsmap")
   
@@ -149,7 +172,7 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
     ggplot() +
     geom_sf(aes(fill = valorT)) +
     theme_light(base_size = 13, base_family = "typus") +
-    scale_fill_manual(values = colores_tematico, labels = colores_etq) +
+    scale_fill_manual(values = colores_tematico, labels = colores_etq, breaks = 1:5) +
     theme(
       axis.text = element_blank(),
       axis.ticks = element_blank(),

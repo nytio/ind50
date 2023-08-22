@@ -120,12 +120,22 @@ mapea_js <- function(x_null, id, geo2) {
     cr1 <- c("muy bajo", "bajo", "medio", "alto", "muy alto")
     cr2 <- c("Muy bajo", "Bajo", "Medio", "Alto", "Muy alto")
 
+    # Convertir todo a minúsculas y asignar los valores numéricos
     x <- as.numeric(factor(tolower(x_null), levels = cr1, ordered = TRUE))
-    #! Localiza los valores nulos y les asigna valor
+
+    # Localiza los valores nulos y les asigna valor
     x <- ifelse(x_null == "", 0, x)
     x <- ifelse(is.na(x), 0, x)
 
-    ca <- c(sum(x == 1), sum(x == 2), sum(x == 3), sum(x == 4), sum(x == 5))
+    # Crea una lista para almacenar el conteo de ocurrencias
+    ca <- numeric(length(cr1))
+
+    # Contar las ocurrencias para cada etiqueta
+    for (i in 1:length(cr1)) {
+      ca[i] <- sum(x == i)
+    }
+
+    # Crea las etiquetas con los conteos
     ly <- paste(cr2, " (", ca, ")", sep = "")
     ly <- ly[ca > 0]
 
@@ -319,7 +329,10 @@ mapas_graficos_servidor_a_servidor <- function(rango) {
 
 #t1 <- print(system.time(mapas_graficos_servidor_a_servidor(c(4060, 4067, 4074))))
 #t1 <- print(system.time(mapas_graficos_servidor_a_servidor(c(4078:4081))))
-t1 <- print(system.time(mapas_graficos_servidor_a_servidor(c(4082:4084))))
+#t1 <- print(system.time(mapas_graficos_servidor_a_servidor(c(4082:4084))))
+
+t1 <- print(system.time(mapas_graficos_servidor_a_servidor(c(4060,4067,4074))))
+
 # Usar en servidor con:
 # > Rscript maps.R &
 
