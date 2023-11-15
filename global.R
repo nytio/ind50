@@ -2,11 +2,11 @@
 
 # Librerias ----
 library(tidyverse) # 2.0.0
-library(DT) # 0.27
+library(DT) # 0.28
 library(ggplot2) # 3.4.2
 library(jsonlite) # 1.8.4
-library(sf) # 1.0-12
-library(ggspatial) # 1.1.7
+library(sf) # 1.0-14
+library(ggspatial) # 1.1.8
 library(openxlsx) # 4.2.5.2
 library(rvest) # 1.0.3
 source("database.R")

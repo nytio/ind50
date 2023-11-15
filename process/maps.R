@@ -1,7 +1,7 @@
 # Genera los mapas temáticos y los guarda en la base de datos
 
 # Librerias ----
-library(tidyverse) # 1.3.1
+library(tidyverse) # 2.0.0
 library(DBI) # 1.1.3
 
 # Conexiones ----
