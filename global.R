@@ -343,6 +343,12 @@ descargarSerie <- function(edo_sel, ind_sel, file) {
   
   # Extraer los datos y el título de la tabla
   tabla <-  datos_lineas[,-c(1, 3)]
+  if(all(is.na(metadatos_sel$idmasculino))) {
+    names(tabla) <- c("Año", "Clave", c("Municipio", "Entidad federativa")[as.numeric(edo_sel)], metadatos_sel$unidad)
+  } else {
+    names(tabla) <- c("Año", "Clave", c("Municipio", "Entidad federativa")[as.numeric(edo_sel)], metadatos_sel$unidad, "Hombres", "Mujeres")
+  }
+
   titulo <- minimal_html(metadatos_sel$indicador[1]) |> html_text()
   
   # Crea un nuevo libro de trabajo
