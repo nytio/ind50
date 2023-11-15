@@ -1,9 +1,9 @@
 options(scipen = 999)
-library(shiny) # 1.7.4.1
+library(shiny) # 1.7.5.1
 library(shinyWidgets) # 0.7.6
 library(shinycssloaders) # 1.0.0
 library(tidyverse) # 2.0.0
-library(DT) # 0.28
+library(DT) # 0.30
 source("global.R")
 
 #@todo TEST probar con diferentes niveles de desagregación geográfica
@@ -66,6 +66,7 @@ ui <- fluidPage(
                  icon = icon("map-marker", lib = "glyphicon")),
         tabPanel(title = "Serie",
                  plotOutput("grafica_lineas", height = "85vh") |> withSpinner(type = 4),
+                 downloadButton("downloadSerie", "Descargar", icon = icon("download", lib = "glyphicon")),
                  icon = icon("stats", lib = "glyphicon")),
         # tabPanel(title = "Prospectiva",
         #           br(), icon = icon("circle-arrow-up", lib = "glyphicon")),
@@ -196,6 +197,15 @@ server <- function(input, output, session) {
     }
   )
 
+  output$downloadSerie <- downloadHandler(
+    filename = function() {
+      paste0("hist", input$selIndicador, "_", input$selEnt, ".xlsx")
+    },
+    content = function(file) {
+      descargarSerie(edo_sel = input$selEnt, ind_sel = input$selIndicador, file)
+    }
+  )
+  
   output$grafica_barras <- renderPlot({
     gen_barras(edo_sel = input$selEnt,
                ind_sel = input$selIndicador,
