@@ -66,7 +66,7 @@ ui <- fluidPage(
                  icon = icon("map-marker", lib = "glyphicon")),
         tabPanel(title = "Serie",
                  plotOutput("grafica_lineas", height = "85vh") |> withSpinner(type = 4),
-                 downloadButton("downloadSerie", "Descargar", icon = icon("download", lib = "glyphicon")),
+                 downloadButton("downloadSerie", "Descargar serie", icon = icon("download", lib = "glyphicon")),
                  icon = icon("stats", lib = "glyphicon")),
         # tabPanel(title = "Prospectiva",
         #           br(), icon = icon("circle-arrow-up", lib = "glyphicon")),
