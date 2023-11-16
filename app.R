@@ -55,7 +55,7 @@ ui <- fluidPage(
       tabsetPanel(
         tabPanel(title = "Tabulado",
                  div(class="boxtab0",
-                 div(class="boxtab1", downloadButton("downloadData", "Descargar", icon = icon("download", lib = "glyphicon")),
+                 div(class="boxtab1", downloadButton("downloadData", "Descargar", icon = icon("download", lib = "glyphicon"), class = "download-button")),
                  div(class="boxtab2", DTOutput('tab1'))),
                  icon = icon("table")),
         tabPanel(title = "Gráfica",
