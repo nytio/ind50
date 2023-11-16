@@ -1,9 +1,9 @@
 # Calcula los datos y los guarda en la base de datos
 
 # Librerias ----
-library(tidyverse) # 1.3.2
-library(data.table) # 1.14.6
-library(foreign) # 0.8-84
+library(tidyverse) # 2.0.0
+library(data.table) # 1.14.8
+library(foreign) # 0.8-85
 
 # Ejercicio completo con tabla de mortalidad ----
 
@@ -156,16 +156,21 @@ etiqueta_base <- function(defun) {
                                      "8" = "No aplica a menores de 12 años",
                                      "9" = "No especificado"))
   
+  if("PRESUNTO" %in% names(defun)) {
+    defun <- defun |>
+      rename(TIPO_DEFUN = PRESUNTO)
+  }
   defun <- defun |>
-    mutate(PRESUNTO = recode_factor(PRESUNTO,
+    mutate(TIPO_DEFUN = recode_factor(TIPO_DEFUN,
                                     "1" = "Accidente",
                                     "2" = "Homicidio",
                                     "3" = "Suicidio",
-                                    "4" = "Se ignora",
-                                    "5" = "Operaciones legales y de guerra",
-                                    "8" = "No aplica para muerte natural",
-                                    .default = "No aplica para muerte natural"))
-  
+                                    "4" = "Enfermedad",
+                                    "5" = "Intervención legal",
+                                    "8" = "No aplica",
+                                    "9" = "Se ignora",
+                                    .default = "No aplica"))
+
   defun <- defun |>
     mutate(OCURR_TRAB = recode_factor(OCURR_TRAB,
                                       "1" = "Sí",
@@ -894,8 +899,24 @@ categoriza_causas_principales <- function(defun) {
   return(defun)
 }
 
+## Calculo de variables para el año 2022
+procesa_defun22 <- function() {
+  defun <- tibble(read.dbf(paste0(path, "2022/DEFUN22.dbf")))
+  defun <- fechas_base(defun)
+  defun <- defun |>
+    arrange(FECHA_OCUR)
+  defun <- etiqueta_base(defun)
+  defun <- categoriza_causas_principales(defun)
+  saveRDS(defun, file = "docs/data/defun22.rds")
+  
+  defun <- defun |>
+    filter(FECHA_OCUR >= "2022-01-01")
+  saveRDS(defun, file = "docs/data/defunO22.rds")
+  rm(defun)
+}
+
 ## Calculo de variables para el año 2021
-procesa_defun21 <- function(){
+procesa_defun21 <- function() {
   defun <- tibble(read.dbf(paste0(path, "2021/defun21.dbf")))
   defun <- fechas_base(defun)
   defun <- defun |>
@@ -906,8 +927,12 @@ procesa_defun21 <- function(){
   
   defun <- defun |>
     filter(FECHA_OCUR >= "2021-01-01")
-  saveRDS(defun, file = "docs/data/defunO21.rds")
-  rm(defun)
+  defun22 <- readRDS("docs/data/defun22.rds") |>
+    filter(FECHA_OCUR >= "2021-01-01" & FECHA_OCUR < "2022-01-01")
+  
+  defunB <- bind_rows(defun, defun22)
+  saveRDS(defunB, file = "docs/data/defunO21.rds")
+  rm(defun, defun22, defunB)
 }
 
 ## Calculo de variables para el año 2020
@@ -929,7 +954,6 @@ procesa_defun20 <- function() {
   saveRDS(defunB, file = "docs/data/defunO20.rds")
   rm(defun, defun21, defunB)
 }
-
 
 ## Calculo de variables para el año N (de 1990 a 2019)
 procesa_defun <- function(ddig, dir_alm) {
@@ -999,36 +1023,41 @@ procesa_defun <- function(ddig, dir_alm) {
   saveRDS(defunB, file = sprintf("docs/data/defunO%02d.rds", ddig))
 }
 
-# procesa_defun(19, "2015_2019")
-# procesa_defun(18, "2015_2019")
-# procesa_defun(17, "2015_2019")
-# procesa_defun(16, "2015_2019")
-# procesa_defun(15, "2015_2019")
-# procesa_defun(14, "2010_2014")
-# procesa_defun(13, "2010_2014")
-# procesa_defun(12, "2010_2014")
-# procesa_defun(11, "2010_2014")
-# procesa_defun(10, "2010_2014")
-# procesa_defun(9, "2005_2009")
-# procesa_defun(8, "2005_2009")
-# procesa_defun(7, "2005_2009")
-# procesa_defun(6, "2005_2009")
-# procesa_defun(5, "2005_2009")
-# procesa_defun(4, "2000_2004")
-# procesa_defun(3, "2000_2004")
-# procesa_defun(2, "2000_2004")
-# procesa_defun(1, "2000_2004")
-# procesa_defun(0, "2000_2004")
-# procesa_defun(99, "1995_1999")
-# procesa_defun(98, "1995_1999")
-# procesa_defun(97, "1995_1999")
-# procesa_defun(96, "1995_1999")
-# procesa_defun(95, "1995_1999")
-# procesa_defun(94, "1990_1994")
-# procesa_defun(93, "1990_1994")
-# procesa_defun(92, "1990_1994")
-# procesa_defun(91, "1990_1994")
-# procesa_defun(90, "1990_1994")
+# procesa_defun22()
+# procesa_defun21()
+# procesa_defun20()
+procesa_defun(19, "2015_2019")
+procesa_defun(18, "2015_2019")
+procesa_defun(17, "2015_2019")
+procesa_defun(16, "2015_2019")
+procesa_defun(15, "2015_2019")
+procesa_defun(14, "2010_2014")
+procesa_defun(13, "2010_2014")
+procesa_defun(12, "2010_2014")
+procesa_defun(11, "2010_2014")
+procesa_defun(10, "2010_2014")
+procesa_defun(9, "2005_2009")
+procesa_defun(8, "2005_2009")
+procesa_defun(7, "2005_2009")
+procesa_defun(6, "2005_2009")
+procesa_defun(5, "2005_2009")
+procesa_defun(4, "2000_2004")
+procesa_defun(3, "2000_2004")
+procesa_defun(2, "2000_2004")
+procesa_defun(1, "2000_2004")
+procesa_defun(0, "2000_2004")
+procesa_defun(99, "1995_1999")
+procesa_defun(98, "1995_1999")
+procesa_defun(97, "1995_1999")
+procesa_defun(96, "1995_1999")
+procesa_defun(95, "1995_1999")
+procesa_defun(94, "1990_1994")
+procesa_defun(93, "1990_1994")
+procesa_defun(92, "1990_1994")
+procesa_defun(91, "1990_1994")
+procesa_defun(90, "1990_1994")
+
+#-------------------------------------------------------------------------------
 
 # 2.- Entender ----
 
