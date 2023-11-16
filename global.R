@@ -349,11 +349,11 @@ descargarSerie <- function(edo_sel, ind_sel, file) {
     names(tabla) <- c("Año", "Clave", c("Municipio", "Entidad federativa")[as.numeric(edo_sel)], metadatos_sel$unidad[length(metadatos_sel$unidad)], "Hombres", "Mujeres")
   }
 
-  titulo <- minimal_html(metadatos_sel$indicador[1]) |> html_text()
+  titulo <- trimws(minimal_html(metadatos_sel$indicador[1]) |> html_text() )
   
   # Crea un nuevo libro de trabajo
   wb <- createWorkbook(
-    creator = "Mario Hernandez",
+    creator = "Mario Hernández Morales",
     title = titulo,
     subject = "Datos históricos",
     category = "Catálogo de indicadores")
