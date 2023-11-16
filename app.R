@@ -194,7 +194,8 @@ server <- function(input, output, session) {
     },
     content = function(file) {
       descargar(datasetInput(), input$selAnio, file)
-    }
+    },
+    contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
   )
 
   output$downloadSerie <- downloadHandler(
@@ -203,7 +204,8 @@ server <- function(input, output, session) {
     },
     content = function(file) {
       descargarSerie(edo_sel = input$selEnt, ind_sel = input$selIndicador, file)
-    }
+    },
+    contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
   )
   
   output$grafica_barras <- renderPlot({

@@ -435,6 +435,7 @@ descargarSerie <- function(edo_sel, ind_sel, file) {
   }
 
   titulo <- trimws(minimal_html(metadatos_sel$indicador[1]) |> html_text() )
+  titulo <- str_c(titulo, ", ", min(datos_lineas$year), " - ", max(datos_lineas$year))
   
   # Crea un nuevo libro de trabajo
   wb <- createWorkbook(
