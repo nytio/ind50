@@ -321,6 +321,91 @@ tabulado <- function(edo_sel, ind_sel, anio_sel) {
   return(mis_datos)
 }
 
+descargar <- function(mis_datos, selAnio, file) {
+  # Extraer los datos y el título de la tabla
+  tabla <- mis_datos$x$data
+  titulo <- trimws(minimal_html(mis_datos$x$caption) |> html_text())
+
+  # Crea un nuevo libro de trabajo
+  wb <- createWorkbook(
+    creator = "Mario Hernández Morales",
+    title = titulo,
+    subject = names(tabla)[2],
+    category = "Catálogo de indicadores")
+  
+  # Agrega una hoja de trabajo al libro y escribe los datos en ella
+  addWorksheet(wb, "Hoja1")
+  writeData(wb, "Hoja1", titulo, startRow = 1, startCol = 1)
+  writeData(wb, "Hoja1", tabla, startRow = 3)
+  
+  # Obtener metadatos del indicador seleccionado
+  metadatos_sel <- meta |> 
+    dplyr::filter(fecha == selAnio)
+  
+  # Escribir metadatos en la hoja de trabajo
+  writeData(wb, "Hoja1", paste("Fuente:", metadatos_sel$fuente), startRow = nrow(tabla)+5)
+  html <- minimal_html(metadatos_sel$producto) |> html_elements("a")
+  writeData(wb, "Hoja1", html |> html_text(), startRow = nrow(tabla)+6)
+  writeData(wb, "Hoja1", html |> html_attrs(), startRow = nrow(tabla)+7)
+  writeData(wb, "Hoja1", "Elaboró: Instituto de Planeación, Estadística y Geografía del Estado de Guanajuato (IPLANEG).", startRow = nrow(tabla)+8)
+  
+  # Establecer los estilos de la tabla
+  titleStyle <- createStyle(
+    fontName = "Arial",
+    fontSize = 13,
+    textDecoration = "bold"
+  )
+  
+  headerStyle <- createStyle(
+    fontName = "Arial",
+    fontSize = 11,
+    fontColour = "white",
+    fgFill = "#3465a4",
+    halign = "center",
+    textDecoration = "bold"
+  )
+  
+  dataStyle <- createStyle(
+    fontName = "Arial",
+    fontSize = 11,
+    borderStyle = "thin"
+  )
+  
+  bottomLineStyle <- createStyle(
+    border = "Bottom",
+    borderColour = "#3465a4",
+    borderStyle = "thin"
+  )
+  
+  fuenteStyle <- createStyle(fontSize = 9)
+  styleNum <- createStyle(numFmt = "#,##0")
+  styleDec <- createStyle(numFmt = "#,##0.00")
+  
+  # Aplica el estilo a las celdas de la tabla
+  addStyle(wb, sheet = "Hoja1", style = titleStyle, rows = 1, cols = 1)
+  addStyle(wb, sheet = "Hoja1", style = headerStyle, rows = 3, cols = 1:ncol(tabla))
+  addStyle(wb, sheet = "Hoja1", style = dataStyle, rows = 4:(nrow(tabla)+8), cols = 1:ncol(tabla), gridExpand = TRUE)
+  addStyle(wb, sheet = "Hoja1", style = bottomLineStyle, rows = nrow(tabla)+3, cols = 1:ncol(tabla), gridExpand = TRUE, stack = TRUE)
+  addStyle(wb, sheet = "Hoja1", style = fuenteStyle, rows = (nrow(tabla)+5):(nrow(tabla)+8), cols = 1, gridExpand = TRUE, stack = TRUE)
+  
+  # Da formato a los valores numéricos
+  if(!is.na(metadatos_sel$idtipodato))
+    if(metadatos_sel$idtipodato == 1)
+      addStyle(wb, sheet = "Hoja1", style = styleNum, rows = 4:(nrow(tabla)+8), cols = 2:ncol(tabla), gridExpand = TRUE, stack = TRUE)
+  else if(metadatos_sel$idtipodato == 2)
+    addStyle(wb, sheet = "Hoja1", style = styleDec, rows = 4:(nrow(tabla)+8), cols = 2:ncol(tabla), gridExpand = TRUE, stack = TRUE)
+  
+  setColWidths(wb, sheet = "Hoja1", cols = 2:(ncol(tabla)+2), widths = "auto")
+  
+  showGridLines(wb, sheet = "Hoja1", showGridLines = FALSE)
+  
+  # Registra que se descargó un archivo en excel
+  contabiliza_uso(metadatos_sel$idind, "hitsxls")
+  
+  # Guarda el libro de trabajo en un archivo xlsx
+  saveWorkbook(wb, file)
+}
+
 descargarSerie <- function(edo_sel, ind_sel, file) {
   if(is.null(edo_sel) || is.null(ind_sel))
     return(NULL)
