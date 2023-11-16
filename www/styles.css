@@ -29,5 +29,7 @@ caption {
 }
 
 .download-button {
-  float: right;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 80%
 }
