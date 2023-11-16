@@ -55,7 +55,7 @@ ui <- fluidPage(
       tabsetPanel(
         tabPanel(title = "Tabulado",
                  div(class="boxtab0",
-                 div(class="boxtab1", downloadButton("downloadData", "Descargar", icon = icon("download", lib = "glyphicon"))),
+                 div(class="boxtab1", downloadButton("downloadData", "Descargar", icon = icon("download", lib = "glyphicon"), class = "download-button")),
                  div(class="boxtab2", DTOutput('tab1'))),
                  icon = icon("table")),
         tabPanel(title = "Gráfica",
@@ -66,7 +66,7 @@ ui <- fluidPage(
                  icon = icon("map-marker", lib = "glyphicon")),
         tabPanel(title = "Serie",
                  plotOutput("grafica_lineas", height = "85vh") |> withSpinner(type = 4),
-                 downloadButton("downloadSerie", "Descargar serie", icon = icon("download", lib = "glyphicon")),
+                 downloadButton("downloadSerie", "Descargar serie", icon = icon("download", lib = "glyphicon"), class = "download-button"),
                  icon = icon("stats", lib = "glyphicon")),
         # tabPanel(title = "Prospectiva",
         #           br(), icon = icon("circle-arrow-up", lib = "glyphicon")),
