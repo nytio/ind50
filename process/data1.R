@@ -891,7 +891,7 @@ categoriza_causas_principales <- function(defun) {
                                                     substr(LISTA_MEX, 1, 2) == "57" |
                                                     substr(LISTA_MEX, 1, 2) == "58", "Accidentes",
                                                   if_else(
-                                                    substr(LISTA_MEX, 1, 2) == "55", "Agresiones",
+                                                    substr(LISTA_MEX, 1, 2) == "55", "Agresiones", # @todo y 56? (TIPO_DEFUN = 2)
                                                     if_else(
                                                       substr(LISTA_MEX, 1, 2) == "54", "Suicidio",
                                                       "Otro"
@@ -1010,7 +1010,7 @@ procesa_defun_filtrado <- function(ddig) {
   }
   
   defun_list <- lapply(years, function(year) {
-    readRDS(sprintf("docs/data/defun%02d.rds", year)) %>%
+    readRDS(sprintf("docs/data/defun%02d.rds", year)) |>
       filter(FECHA_OCUR >= fecha1 & FECHA_OCUR < fecha2)
   })
   names(defun_list) <- sprintf("defun%02d", years)
@@ -1495,8 +1495,9 @@ crea_tabla_defun <- function(ddig = 21) {
 }
 
 #crea_tabla_defun(22)
-#for(i in c(21:0, 99:90))
+#for(i in c(21:0, 99:90)) {
 #  crea_tabla_defun(i)
+#} se quedó en i = 5
 
 # Completa la documentación de los indicadores en la base de datos
 library(DBI)
@@ -1505,6 +1506,8 @@ library(data.table)
 con <- dbConnect(odbc::odbc(), "circinus", timeout = 10)
 
 test_variales_tabla  <- function(nombre_tabla) {
+#nombre_tabla <- "tabla_defun_22"  
+  
   query <- paste0("SELECT * FROM tabla WHERE tabla = '", nombre_tabla, "'")
   tabla <- dbGetQuery(con, query)
   
@@ -1536,7 +1539,7 @@ test_variales_tabla  <- function(nombre_tabla) {
   return(faltan)
 }
 
-test_variales_tabla(sprintf("tabla_defun_22"))
+#test_variales_tabla("tabla_defun_22")
 # for(i in c(22:0,99:90))
 #   test_variales_tabla(sprintf("tabla_defun_%02d", i))
 
