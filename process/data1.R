@@ -12,6 +12,15 @@ library(foreign) # 0.8-85
 # Descargan los archivos de Inegi y se descomprimen en disco duro externo.
 # Página web o sitio de consulta:
 # https://www.inegi.org.mx/programas/mortalidad/#Microdatos
+# https://www.inegi.org.mx/contenidos/programas/mortalidad/microdatos/defunciones/datos/defunciones_generales_base_datos_1990_1994_dbf.zip
+# https://www.inegi.org.mx/contenidos/programas/mortalidad/microdatos/defunciones/datos/defunciones_generales_base_datos_1995_1999_dbf.zip
+# https://www.inegi.org.mx/contenidos/programas/mortalidad/microdatos/defunciones/datos/defunciones_generales_base_datos_2000_2004_dbf.zip
+# https://www.inegi.org.mx/contenidos/programas/mortalidad/microdatos/defunciones/datos/defunciones_generales_base_datos_2005_2009_dbf.zip
+# https://www.inegi.org.mx/contenidos/programas/mortalidad/microdatos/defunciones/datos/defunciones_generales_base_datos_2010_2014_dbf.zip
+# https://www.inegi.org.mx/contenidos/programas/mortalidad/microdatos/defunciones/datos/defunciones_generales_base_datos_2015_2019_dbf.zip
+# https://www.inegi.org.mx/contenidos/programas/mortalidad/microdatos/defunciones/2020/defunciones_base_datos_2020_dbf.zip
+# https://www.inegi.org.mx/contenidos/programas/mortalidad/microdatos/defunciones/2021/defunciones_base_datos_2021_dbf.zip
+# https://www.inegi.org.mx/contenidos/programas/mortalidad/microdatos/defunciones/2022/defunciones_base_datos_2022_dbf.zip
 path <- "/media/mario/home/R/Mortalidad/"
 
 # Funciones para etiquetar
@@ -128,7 +137,7 @@ etiqueta_base <- function(defun) {
                                      "97" = "No aplica a menores de 5 años",
                                      "98" = "Insuficientemente especificada",
                                      "99" = "No especificada",
-                                     .default = "No especificada"))
+                                     .default = "No especificada")) #! Diferente
   
   defun <- defun |>
     mutate(ESCOLARIDA = recode_factor(ESCOLARIDA,
@@ -245,9 +254,10 @@ etiqueta_base <- function(defun) {
                                       "4" = "PEMEX",
                                       "5" = "SEDENA",
                                       "6" = "SEMAR",
-                                      "7" = "Seguro Popular",
+                                      "7" = "Equivalente al Seguro Popular",
                                       "8" = "Otra",
-                                      "9" = "IMSS PROSPERA",
+                                      "9" = "IMSS BIENESTAR",
+                                      "10" = "Instituto de Seguridad Social para las Fuerzas Armadas Mexicanas (ISSFAM)",
                                       "99" = "No especificada",
                                       .default = "No especificada"))
   if("EMBARAZO" %in% names(defun))
@@ -275,6 +285,18 @@ etiqueta_base <- function(defun) {
                                       "2" = "No",
                                       "8" = "No aplica cuando no es homicidio",
                                       "9" = "No especificado"))
+  # @todo 2022
+  # Nota: Para identificar la Condición de violencia familiar en la base de 
+  # datos de la edición 2022 de las estadísticas de defunciones registradas, 
+  # se deben considerar los registros que tengan en el campo Causa 
+  # de defunción (CAUSA_DEF) el rango de X850-Y099, así como el Parentesco del 
+  # presunto agresor (PAR_AGRE). El campo PAR_AGRE permite identificar la 
+  # condición de violencia familiar en las defunciones por presunto homicidio; 
+  # los códigos del 01 al 26 y del 37 al 52 corresponden a Sí hubo violencia 
+  # familiar; los códigos del 27 al 36 y del 53 al 71 a No hubo violencia 
+  # familiar; y los códigos 72 y 99 a condición de violencia familiar No 
+  # especificada.
+  
   if("AREA_UR" %in% names(defun))
     defun <- defun |>
       mutate(AREA_UR = recode_factor(AREA_UR,
@@ -312,7 +334,7 @@ etiqueta_base <- function(defun) {
                                      "26" = "De 105 a 109",
                                      "27" = "De 110 a 114",
                                      "28" = "De 115 a 119",
-                                     "29" = "De 120",
+                                     "29" = "De 120 y más",
                                      "30" = "No especificada", .ordered = TRUE))
   if("COMPLICARO" %in% names(defun))
     defun <- defun |>
@@ -899,64 +921,8 @@ categoriza_causas_principales <- function(defun) {
   return(defun)
 }
 
-## Calculo de variables para el año 2022
-procesa_defun22 <- function() {
-  defun <- tibble(read.dbf(paste0(path, "2022/DEFUN22.dbf")))
-  defun <- fechas_base(defun)
-  defun <- defun |>
-    arrange(FECHA_OCUR)
-  defun <- etiqueta_base(defun)
-  defun <- categoriza_causas_principales(defun)
-  saveRDS(defun, file = "docs/data/defun22.rds")
-  
-  defun <- defun |>
-    filter(FECHA_OCUR >= "2022-01-01")
-  saveRDS(defun, file = "docs/data/defunO22.rds")
-  rm(defun)
-}
-
-## Calculo de variables para el año 2021
-procesa_defun21 <- function() {
-  defun <- tibble(read.dbf(paste0(path, "2021/defun21.dbf")))
-  defun <- fechas_base(defun)
-  defun <- defun |>
-    arrange(FECHA_OCUR)
-  defun <- etiqueta_base(defun)
-  defun <- categoriza_causas_principales(defun)
-  saveRDS(defun, file = "docs/data/defun21.rds")
-  
-  defun <- defun |>
-    filter(FECHA_OCUR >= "2021-01-01")
-  defun22 <- readRDS("docs/data/defun22.rds") |>
-    filter(FECHA_OCUR >= "2021-01-01" & FECHA_OCUR < "2022-01-01")
-  
-  defunB <- bind_rows(defun, defun22)
-  saveRDS(defunB, file = "docs/data/defunO21.rds")
-  rm(defun, defun22, defunB)
-}
-
-## Calculo de variables para el año 2020
-procesa_defun20 <- function() {
-  defun <- tibble(read.dbf(paste0(path, "2020/defun20.dbf")))
-  defun <- fechas_base(defun)
-  defun <- defun |>
-    arrange(FECHA_OCUR)
-  defun <- etiqueta_base(defun)
-  defun <- categoriza_causas_principales(defun)
-  saveRDS(defun, file = "docs/data/defun20.rds")
-  
-  defun <- defun |>
-    filter(FECHA_OCUR >= "2020-01-01")
-  defun21 <- readRDS("docs/data/defun21.rds") |>
-    filter(FECHA_OCUR >= "2020-01-01" & FECHA_OCUR < "2021-01-01")
-  
-  defunB <- bind_rows(defun, defun21)
-  saveRDS(defunB, file = "docs/data/defunO20.rds")
-  rm(defun, defun21, defunB)
-}
-
-## Calculo de variables para el año N (de 1990 a 2019)
-procesa_defun <- function(ddig, dir_alm) {
+#Procesamiento inicial
+procesa_defun_inicial <- function(ddig, dir_alm) {
   ydig <- ddig + ifelse(ddig < 50, 2000, 1900)
   
   ruta <- paste0(path, sprintf("%s/%04d/DEFUN%02d.dbf", dir_alm, ydig, ddig))
@@ -967,47 +933,82 @@ procesa_defun <- function(ddig, dir_alm) {
       if (!file.exists(ruta)) {
         ruta <- paste0(path, sprintf("%s/DEFUN%02d.DBF", dir_alm, ddig))
         if (!file.exists(ruta)) {
-          return(NULL)
+          stop("Archivo no encontrado: ", dbf_path)
         }
       }
     }
   }
-  defun <- tibble(read.dbf(ruta))
-  defun <- fechas_base(defun)
-  defun <- defun |>
-    arrange(FECHA_OCUR)
-  # Etiqueta las variables
-  try(defun <- etiqueta_base(defun), silent = FALSE)
-  try(defun <- categoriza_causas_principales(defun), silent = FALSE)  
-
-  fecha1 <- paste0(ydig, "-01-01")
-  fecha2 <- paste0(ydig + 1, "-01-01")
   
-  defun21 <- readRDS("docs/data/defun21.rds") |>
-    filter(FECHA_OCUR >= fecha1 & FECHA_OCUR < fecha2)
-  # Elimina variables nuevas
-  defun <- defun |>
-    select(-colnames(defun)[!(colnames(defun) %in% colnames(defun21))])
-  # Agrega variables faltantes
-  defun[colnames(defun21)[!(colnames(defun21) %in% colnames(defun))]] <- NA
+  defun <- read.dbf(ruta) |>
+    tibble() |>
+    fechas_base() |>
+    arrange(FECHA_OCUR) |>
+    etiqueta_base() |>
+    categoriza_causas_principales()
+  
+  if(ddig == 22) {
+    saveRDS(colnames(defun), file = "docs/data/colnames_defun.rds")
+  } else {
+    colnames_defun <- readRDS("docs/data/colnames_defun.rds")
+    # Elimina variables nuevas
+    defun <- defun |>
+      select(-colnames(defun)[!(colnames(defun) %in% colnames_defun)])
+    # Agrega variables faltantes
+    defun[colnames_defun[!(colnames_defun %in% colnames(defun))]] <- NA
+  }
   
   saveRDS(defun, file = sprintf("docs/data/defun%02d.rds", ddig))
-  
-  defun <- defun |>
-    filter(FECHA_OCUR >= fecha1)
-  
+}
+
+# procesa_defun_inicial(22, "2022")
+# procesa_defun_inicial(21, "2021")
+# procesa_defun_inicial(20, "2020")
+# procesa_defun_inicial(19, "2015_2019")
+# procesa_defun_inicial(18, "2015_2019")
+# procesa_defun_inicial(17, "2015_2019")
+# procesa_defun_inicial(16, "2015_2019")
+# procesa_defun_inicial(15, "2015_2019")
+# procesa_defun_inicial(14, "2010_2014")
+# procesa_defun_inicial(13, "2010_2014")
+# procesa_defun_inicial(12, "2010_2014")
+# procesa_defun_inicial(11, "2010_2014")
+# procesa_defun_inicial(10, "2010_2014")
+# procesa_defun_inicial(9, "2005_2009")
+# procesa_defun_inicial(8, "2005_2009")
+# procesa_defun_inicial(7, "2005_2009")
+# procesa_defun_inicial(6, "2005_2009")
+# procesa_defun_inicial(5, "2005_2009")
+# procesa_defun_inicial(4, "2000_2004")
+# procesa_defun_inicial(3, "2000_2004")
+# procesa_defun_inicial(2, "2000_2004")
+# procesa_defun_inicial(1, "2000_2004")
+# procesa_defun_inicial(0, "2000_2004")
+# procesa_defun_inicial(99, "1995_1999")
+# procesa_defun_inicial(98, "1995_1999")
+# procesa_defun_inicial(97, "1995_1999")
+# procesa_defun_inicial(96, "1995_1999")
+# procesa_defun_inicial(95, "1995_1999")
+# procesa_defun_inicial(94, "1990_1994")
+# procesa_defun_inicial(93, "1990_1994")
+# procesa_defun_inicial(92, "1990_1994")
+# procesa_defun_inicial(91, "1990_1994")
+# procesa_defun_inicial(90, "1990_1994")
+
+# Filtrado y Combinación
+procesa_defun_filtrado <- function(ddig) {
+  ydig <- ddig + ifelse(ddig < 50, 2000, 1900)
+  fecha1 <- paste0(ydig, "-01-01")
+  fecha2 <- paste0(ydig + 1, "-01-01")
+
+  myu <- 22
   if(ddig < 50) {
-    years <- c(20:(ddig + 1))
-    sraey <- c((ddig + 1):21)
+    years <- c(myu:ddig)
+    sraey <- c(ddig:myu)
   } else  {
-    if(ddig == 99) {
-      years <- c(20:0)
-      sraey <- c(0:21)
-    } else {
-      years <- c(20:0, 99:(ddig+1))
-      sraey <- c((ddig+1):99, 0:21)
-    }
+    years <- c(myu:0, 99:ddig)
+    sraey <- c(ddig:99, 0:myu)
   }
+  
   defun_list <- lapply(years, function(year) {
     readRDS(sprintf("docs/data/defun%02d.rds", year)) %>%
       filter(FECHA_OCUR >= fecha1 & FECHA_OCUR < fecha2)
@@ -1018,44 +1019,13 @@ procesa_defun <- function(ddig, dir_alm) {
   df_list <-
     lapply(sraey, function(x)
       get(sprintf("defun%02d", x)))
-  defunB <- rbind(defun, do.call(rbind, df_list))
+  defun_combinado <- do.call(rbind, df_list)
   
-  saveRDS(defunB, file = sprintf("docs/data/defunO%02d.rds", ddig))
+  saveRDS(defun_combinado, file = sprintf("docs/data/defunO%02d.rds", ddig))
 }
 
-# procesa_defun22()
-# procesa_defun21()
-# procesa_defun20()
-procesa_defun(19, "2015_2019")
-procesa_defun(18, "2015_2019")
-procesa_defun(17, "2015_2019")
-procesa_defun(16, "2015_2019")
-procesa_defun(15, "2015_2019")
-procesa_defun(14, "2010_2014")
-procesa_defun(13, "2010_2014")
-procesa_defun(12, "2010_2014")
-procesa_defun(11, "2010_2014")
-procesa_defun(10, "2010_2014")
-procesa_defun(9, "2005_2009")
-procesa_defun(8, "2005_2009")
-procesa_defun(7, "2005_2009")
-procesa_defun(6, "2005_2009")
-procesa_defun(5, "2005_2009")
-procesa_defun(4, "2000_2004")
-procesa_defun(3, "2000_2004")
-procesa_defun(2, "2000_2004")
-procesa_defun(1, "2000_2004")
-procesa_defun(0, "2000_2004")
-procesa_defun(99, "1995_1999")
-procesa_defun(98, "1995_1999")
-procesa_defun(97, "1995_1999")
-procesa_defun(96, "1995_1999")
-procesa_defun(95, "1995_1999")
-procesa_defun(94, "1990_1994")
-procesa_defun(93, "1990_1994")
-procesa_defun(92, "1990_1994")
-procesa_defun(91, "1990_1994")
-procesa_defun(90, "1990_1994")
+# for(i in c(22:0, 99:90))
+#   procesa_defun_filtrado(i)
 
 #-------------------------------------------------------------------------------
 
@@ -1224,6 +1194,9 @@ elabora_tabulado_RESID <- function(anio = "21", sexo = "", causa = "") {
 # test1 <- elabora_tabulado_REGIS("90", sexo = "Hombre", causa = "Diabetes mellitus")
 
 # Analiza las bases de datos por año
+
+
+#-------------------------------------------------------------------------------
 
 # 3.- Comunicar ----
 
@@ -1521,9 +1494,9 @@ crea_tabla_defun <- function(ddig = 21) {
   }
 }
 
-# crea_tabla_defun(21)
-# for(i in c(20:0, 99:90))
-#   crea_tabla_defun(i)
+#crea_tabla_defun(22)
+#for(i in c(21:0, 99:90))
+#  crea_tabla_defun(i)
 
 # Completa la documentación de los indicadores en la base de datos
 library(DBI)
@@ -1563,9 +1536,9 @@ test_variales_tabla  <- function(nombre_tabla) {
   return(faltan)
 }
 
-# for(i in c(21:0,99:90)) {
-#   test_variales_tabla(sprintf("tabla_defun_%02d"))
-# }
+test_variales_tabla(sprintf("tabla_defun_22"))
+# for(i in c(22:0,99:90))
+#   test_variales_tabla(sprintf("tabla_defun_%02d", i))
 
 alta_variales_tabla <- function(nombre_tabla, anio = 2020) {
   u <- test_variales_tabla(nombre_tabla)
@@ -1603,6 +1576,7 @@ alta_variales_tabla <- function(nombre_tabla, anio = 2020) {
   }
 }
 
+alta_variales_tabla("tabla_defun_22", 2022)
 #alta_variales_tabla("tabla_defun_21", 2021)
 #alta_variales_tabla("tabla_defun_20", 2020)
 # for(i in c(19:0)) {
