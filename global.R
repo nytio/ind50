@@ -86,6 +86,58 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     )
 }
 
+gen_dispesion <- function(edo_sel, ind_sel, anio_sel, log_scale = FALSE, add_regression = FALSE) {
+  if(is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
+    return(NULL)
+  
+  metadatos_sel <- meta |>
+    dplyr::filter(fecha == anio_sel)
+  
+  if(length(metadatos_sel$fecha) == 0)
+    return(NULL)
+  
+  datos_barras <- bd |>
+    dplyr::filter(no == ind_sel) |>
+    dplyr::filter(year == anio_sel) |>
+    dplyr::filter(ambito == edo_sel)
+  
+  if(!is.numeric(datos_barras$valor))
+    return(NULL)
+  
+  if(length(datos_barras$ambito) == 0)
+    return(NULL)
+  
+  data$y_var <- datos_barras$valor
+  data$x_var <- datos_barras$valor
+
+  # Create the initial scatter plot
+  p <- ggplot(data, aes_string(x = x_var, y = y_var)) +
+    geom_point()
+  
+  # If log scale for X axis is requested, apply transformation
+  if (log_scale) {
+    p <- p + scale_x_continuous(trans = 'log10', labels = scales::comma)
+  }
+  
+  # If regression line is requested, add it to the plot
+  if (add_regression) {
+    p <- p + geom_smooth(method = 'lm', se = FALSE, color = 'blue')
+  }
+  
+  # Customize the plot
+  p <- p +
+    theme_minimal() +
+    labs(x = x_var, y = y_var) +
+    theme(
+      plot.title = element_text(hjust = 0.5),
+      axis.text = element_text(color = colores_texto),
+      axis.title = element_text(color = colores_texto)
+    )
+  
+  # Return the plot
+  return(p)
+}
+
 gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
   if (is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)

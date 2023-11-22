@@ -58,8 +58,11 @@ ui <- fluidPage(
                  div(class="boxtab1", downloadButton("downloadData", "Descargar", icon = icon("download", lib = "glyphicon"))),
                  div(class="boxtab2", DTOutput('tab1'))),
                  icon = icon("table")),
-        tabPanel(title = "Gráfica",
+        tabPanel(title = "Frecuencias",
                  plotOutput("grafica_barras", height = "85vh") |> withSpinner(type = 4),
+                 icon = icon("bar-chart")),
+        tabPanel(title = "Dispersión",
+                 plotOutput("grafica_dispesion", height = "85vh") |> withSpinner(type = 4),
                  icon = icon("bar-chart")),
         tabPanel(title = "Mapa",
                  plotOutput("grafica_mapa", height = "85vh") |> withSpinner(type = 4),
@@ -214,6 +217,12 @@ server <- function(input, output, session) {
                anio_sel = input$selAnio)
   })
 
+  output$grafica_dispesion <- renderPlot({
+    gen_dispesion(edo_sel = input$selEnt,
+               ind_sel = input$selIndicador,
+               anio_sel = input$selAnio)
+  })
+  
   output$grafica_mapa <- renderPlot({
     gen_mapa(edo_sel = input$selEnt,
              ind_sel = input$selIndicador,
