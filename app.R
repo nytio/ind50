@@ -63,7 +63,15 @@ ui <- fluidPage(
                  icon = icon("bar-chart")),
         tabPanel(title = "Dispersión",
                  plotOutput("grafica_dispesion", height = "85vh") |> withSpinner(type = 4),
-                 icon = icon("bar-chart")),
+                 fluidRow(
+                   column(8, selectInput("selIndicadorVis", "Seleccione:",
+                                         choices = opciones_indicadores,
+                                         selected = opciones_indicadores[1])),
+                   column(2, checkboxInput("logScaleInput", "Escala logarítmica", value = FALSE)),
+                   column(2, checkboxInput("addRegressionInput", "Línea de tendencia", value = FALSE))
+                 ),
+                 icon = icon("bar-chart")
+        ),
         tabPanel(title = "Mapa",
                  plotOutput("grafica_mapa", height = "85vh") |> withSpinner(type = 4),
                  icon = icon("map-marker", lib = "glyphicon")),
@@ -118,6 +126,11 @@ server <- function(input, output, session) {
     updateSelectInput(
       session = session,
       inputId = "selIndicador",
+      choices = opciones_indicadores
+    )
+    updateSelectInput(
+      session = session,
+      inputId = "selIndicadorVis",
       choices = opciones_indicadores
     )
   }, ignoreInit = TRUE)
@@ -220,7 +233,10 @@ server <- function(input, output, session) {
   output$grafica_dispesion <- renderPlot({
     gen_dispesion(edo_sel = input$selEnt,
                ind_sel = input$selIndicador,
-               anio_sel = input$selAnio)
+               anio_sel = input$selAnio,
+               ind_selvis = input$selIndicadorVis,
+               log_scale = input$logScaleInput,
+               add_regression = input$addRegressionInput)
   })
   
   output$grafica_mapa <- renderPlot({

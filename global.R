@@ -86,8 +86,8 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     )
 }
 
-gen_dispesion <- function(edo_sel, ind_sel, anio_sel, log_scale = FALSE, add_regression = FALSE) {
-  if(is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
+gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FALSE, add_regression = FALSE) {
+  if(is.null(edo_sel) || is.null(ind_sel) || is.null(ind_selvis) || is.null(anio_sel))
     return(NULL)
   
   metadatos_sel <- meta |>
@@ -96,10 +96,17 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, log_scale = FALSE, add_reg
   if(length(metadatos_sel$fecha) == 0)
     return(NULL)
   
+  metadatos_selvis <- get_meta(ind_selvis) |>
+    dplyr::filter(fecha == anio_sel)
+
+  if(length(metadatos_selvis$fecha) == 0)
+    return(NULL)
+  
   datos_dispersion <- bd |>
     dplyr::filter(no == ind_sel) |>
     dplyr::filter(year == anio_sel) |>
-    dplyr::filter(ambito == edo_sel)
+    dplyr::filter(ambito == edo_sel) |>
+    dplyr::filter(cve != "MEX")
   
   if(!is.numeric(datos_dispersion$valor))
     return(NULL)
@@ -107,9 +114,21 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, log_scale = FALSE, add_reg
   if(length(datos_dispersion$ambito) == 0)
     return(NULL)
   
+  datos_dispersionvis <- actualiza_bde(ind_selvis, metadatos_selvis) |>
+    dplyr::filter(no == ind_selvis) |>
+    dplyr::filter(year == anio_sel) |>
+    dplyr::filter(ambito == edo_sel) |>
+    dplyr::filter(cve != "MEX")
+  
+  if(!is.numeric(datos_dispersionvis$valor))
+    return(NULL)
+  
+  if(length(datos_dispersionvis$ambito) == 0)
+    return(NULL)
+  
   # Asignar los valores del eje Y y el eje X
   datos <- data.frame(y_var = datos_dispersion$valor,
-                     x_var = datos_dispersion$valor, #@todo: faltan datos de x
+                     x_var = datos_dispersionvis$valor,
                      etiqueta = datos_dispersion$nom,
                      resaltar = datos_dispersion$cve == "11")
 
@@ -132,10 +151,12 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, log_scale = FALSE, add_reg
   
   p <- p +
     theme_minimal() + # Personaliza el gráfico
+    scale_x_continuous(label = scales::comma_format()) +
+    scale_y_continuous(label = scales::comma_format()) +
     labs(
-      title = str_c(metadatos_sel$indicador, " vs. ", "PIB", ", ", metadatos_sel$fecha),
-      caption = str_c("Fuente: ", metadatos_sel$fuente, "\n otro"),
-      x = "Variable X",
+      title = str_c(metadatos_sel$indicador, " vs. ", metadatos_selvis$indicador, ", ", metadatos_sel$fecha),
+      caption = str_c("Fuente: ", metadatos_sel$fuente, " & ", metadatos_sel$fuente),
+      x = metadatos_selvis$unidad,
       y = metadatos_sel$unidad) +
     theme_light(base_size = 13, base_family = "typus") +
     theme(
