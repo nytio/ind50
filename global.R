@@ -96,45 +96,56 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, log_scale = FALSE, add_reg
   if(length(metadatos_sel$fecha) == 0)
     return(NULL)
   
-  datos_barras <- bd |>
+  datos_dispersion <- bd |>
     dplyr::filter(no == ind_sel) |>
     dplyr::filter(year == anio_sel) |>
     dplyr::filter(ambito == edo_sel)
   
-  if(!is.numeric(datos_barras$valor))
+  if(!is.numeric(datos_dispersion$valor))
     return(NULL)
   
-  if(length(datos_barras$ambito) == 0)
+  if(length(datos_dispersion$ambito) == 0)
     return(NULL)
   
-  data$y_var <- datos_barras$valor
-  data$x_var <- datos_barras$valor
+  # Asignar los valores del eje Y y el eje X
+  datos <- data.frame(y_var = datos_dispersion$valor,
+                     x_var = datos_dispersion$valor, #@todo: faltan datos de x
+                     etiqueta = datos_dispersion$nom,
+                     resaltar = datos_dispersion$cve == "11")
 
-  # Create the initial scatter plot
-  p <- ggplot(data, aes_string(x = x_var, y = y_var)) +
-    geom_point()
+  # Crea el diagrama de dispersión inicial
+  p <- ggplot(datos, aes_string(x = 'x_var', y = 'y_var')) +
+    geom_point(aes(color = resaltar)) +
+    scale_color_manual(values = c("#F28E2E", "#4C7BA1"), guide = FALSE) + # Colorea
+    geom_text(aes(label = etiqueta, color = resaltar), vjust = -1, check_overlap = TRUE) +
+    theme(legend.position = "none")
   
-  # If log scale for X axis is requested, apply transformation
+  # Si se solicita una escala logarítmica para el eje X, aplicar la transformación
   if (log_scale) {
     p <- p + scale_x_continuous(trans = 'log10', labels = scales::comma)
   }
   
-  # If regression line is requested, add it to the plot
+  # Si se solicita una línea de regresión, agréguela al gráfico
   if (add_regression) {
-    p <- p + geom_smooth(method = 'lm', se = FALSE, color = 'blue')
+    p <- p + geom_smooth(method = 'lm', se = FALSE, color = '#787A86')
   }
   
-  # Customize the plot
   p <- p +
-    theme_minimal() +
-    labs(x = x_var, y = y_var) +
+    theme_minimal() + # Personaliza el gráfico
+    labs(
+      title = str_c(metadatos_sel$indicador, " vs. ", "PIB", ", ", metadatos_sel$fecha),
+      caption = str_c("Fuente: ", metadatos_sel$fuente, "\n otro"),
+      x = "Variable X",
+      y = metadatos_sel$unidad) +
+    theme_light(base_size = 13, base_family = "typus") +
     theme(
-      plot.title = element_text(hjust = 0.5),
-      axis.text = element_text(color = colores_texto),
-      axis.title = element_text(color = colores_texto)
+      plot.title.position  = "plot",
+      plot.title = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
+      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
+      axis.text = element_text(colour = colores_texto),
+      axis.title = element_text(colour = colores_texto)
     )
   
-  # Return the plot
   return(p)
 }
 

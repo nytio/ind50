@@ -58,7 +58,7 @@ ui <- fluidPage(
                  div(class="boxtab1", downloadButton("downloadData", "Descargar", icon = icon("download", lib = "glyphicon"))),
                  div(class="boxtab2", DTOutput('tab1'))),
                  icon = icon("table")),
-        tabPanel(title = "Frecuencias",
+        tabPanel(title = "Gráfica",
                  plotOutput("grafica_barras", height = "85vh") |> withSpinner(type = 4),
                  icon = icon("bar-chart")),
         tabPanel(title = "Dispersión",
