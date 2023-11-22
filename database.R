@@ -34,11 +34,15 @@ actualiza_indicador <- function(selColeccion) {
 }
 actualiza_indicador(coleccion[1, 1])
 
+get_meta <- function(selIndicador) {
+  dbGetQuery(con, paste0("SELECT * FROM viewb2 WHERE idserie = ", selIndicador, "ORDER BY orden;"))
+}
+
 meta <- NULL
 opciones_entidad <-NULL
 bd <- NULL
 actualiza_opciones_entidad <- function(selIndicador, selAnio = NULL) {
-  meta <<- dbGetQuery(con, paste0("SELECT * FROM viewb2 WHERE idserie = ", selIndicador, "ORDER BY orden;"))
+  meta <<- get_meta(selIndicador)
   if(is.null(selAnio)) {
     idambito <- meta$idambito[meta$fecha == max(meta$fecha)]
   } else {
@@ -85,8 +89,8 @@ actualiza_opciones_entidad <- function(selIndicador, selAnio = NULL) {
   }
 }
 
-actualiza_bde <- function(selIndicador, caso = 1) {
-  caso1 <- switch (caso, meta$idind, meta$idmasculino, meta$idfemenino)
+actualiza_bde <- function(selIndicador, metaL, caso = 1) {
+  caso1 <- switch (caso, metaL$idind, metaL$idmasculino, metaL$idfemenino)
   if(any(is.na(caso1)))
     return(NULL)
   campo1 <- NULL
@@ -114,7 +118,7 @@ actualiza_bde <- function(selIndicador, caso = 1) {
   bde <- NULL
   for (i in 1:length(use_sql)) {
     cs <-
-      cbind(meta$idserie[i], cbind(meta$fecha[i], dbGetQuery(con, use_sql[i])))
+      cbind(metaL$idserie[i], cbind(metaL$fecha[i], dbGetQuery(con, use_sql[i])))
     bde <- rbind(bde, cs)
   }
   colnames(bde)[1] <- "no"
@@ -125,9 +129,9 @@ actualiza_bde <- function(selIndicador, caso = 1) {
 
 actualiza_bd <- function(selIndicador) {
   actualiza_opciones_entidad(selIndicador)
-  bd <<- actualiza_bde(selIndicador)
-  bd_m <- actualiza_bde(selIndicador, 2)
-  bd_f <- actualiza_bde(selIndicador, 3)
+  bd <<- actualiza_bde(selIndicador, meta)
+  bd_m <- actualiza_bde(selIndicador, meta, 2)
+  bd_f <- actualiza_bde(selIndicador, meta, 3)
   if(!is.null(bd_f)) {
     colnames(bd_m)[6] <- "valor_m"
     colnames(bd_f)[6] <- "valor_f"
