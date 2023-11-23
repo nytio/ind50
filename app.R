@@ -64,11 +64,11 @@ ui <- fluidPage(
         tabPanel(title = "Dispersión",
                  plotOutput("grafica_dispesion", height = "85vh") |> withSpinner(type = 4),
                  fluidRow(
-                   column(8, selectInput("selIndicadorVis", "Seleccione:",
+                   column(6, selectInput("selIndicadorVis", "Seleccione:",
                                          choices = opciones_indicadores,
                                          selected = opciones_indicadores[1])),
-                   column(2, checkboxInput("logScaleInput", "Escala logarítmica", value = FALSE)),
-                   column(2, checkboxInput("addRegressionInput", "Línea de tendencia", value = FALSE))
+                   column(3, checkboxInput("logScaleInput", "Escala logarítmica", value = FALSE)),
+                   column(3, checkboxInput("addRegressionInput", "Línea de tendencia", value = FALSE))
                  ),
                  icon = icon("bar-chart")
         ),

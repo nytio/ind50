@@ -9,6 +9,8 @@ library(sf) # 1.0-14
 library(ggspatial) # 1.1.8
 library(openxlsx) # 4.2.5.2
 library(rvest) # 1.0.3
+library(ggrepel) # 0.9.3
+library(stringr) # 1.5.0
 source("database.R")
 
 systemfonts::register_font(
@@ -131,31 +133,41 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FA
                      x_var = datos_dispersionvis$valor,
                      etiqueta = datos_dispersion$nom,
                      resaltar = datos_dispersion$cve == "11")
+  datos$fontface <- ifelse(datos$resaltar, "bold", "plain")
 
   # Crea el diagrama de dispersión inicial
   p <- ggplot(datos, aes_string(x = 'x_var', y = 'y_var')) +
-    geom_point(aes(color = resaltar)) +
-    scale_color_manual(values = c("#F28E2E", "#4C7BA1"), guide = FALSE) + # Colorea
-    geom_text(aes(label = etiqueta, color = resaltar), vjust = -1, check_overlap = TRUE) +
-    theme(legend.position = "none")
+    geom_point(aes(color = resaltar)) + 
+    scale_color_manual(values = c("#555753", "#4C7BA1"), guide = FALSE) +
+    geom_text_repel(aes(label = etiqueta, color = resaltar, fontface = fontface), 
+                    box.padding = unit(0.35, "lines"),
+                    point.padding = unit(0.5, "lines"),
+                    max.overlaps = Inf) +
+    theme(legend.position = "none") +
+    guides(color = FALSE) +
+    scale_y_continuous(labels = scales::comma)
   
   # Si se solicita una escala logarítmica para el eje X, aplicar la transformación
   if (log_scale) {
     p <- p + scale_x_continuous(trans = 'log10', labels = scales::comma)
+  } else {
+    p <- p + scale_x_continuous(labels = scales::comma)
   }
   
   # Si se solicita una línea de regresión, agréguela al gráfico
   if (add_regression) {
-    p <- p + geom_smooth(method = 'lm', se = FALSE, color = '#787A86')
+    p <- p + geom_smooth(method = 'lm', se = FALSE, color = '#8d8d8d')
   }
   
   p <- p +
     theme_minimal() + # Personaliza el gráfico
-    scale_x_continuous(label = scales::comma_format()) +
-    scale_y_continuous(label = scales::comma_format()) +
     labs(
-      title = str_c(metadatos_sel$indicador, " vs. ", metadatos_selvis$indicador, ", ", metadatos_sel$fecha),
-      caption = str_c("Fuente: ", metadatos_sel$fuente, " & ", metadatos_sel$fuente),
+      title = str_wrap(str_c(metadatos_sel$indicador, " vs. ",
+                             metadatos_selvis$indicador, ", ", metadatos_sel$fecha),
+                       width = 100),
+      caption = ifelse(metadatos_sel$fuente == metadatos_selvis$fuente,
+                       str_c("Fuente: ", metadatos_sel$fuente),
+                       str_c("Fuente: ", metadatos_sel$fuente, " & ", metadatos_selvis$fuente)),
       x = metadatos_selvis$unidad,
       y = metadatos_sel$unidad) +
     theme_light(base_size = 13, base_family = "typus") +
@@ -630,3 +642,4 @@ tabulado3 <- function() {
 }
 
 # https://youtu.be/_gzOovLEXWo?t=4027
+# https://www.uv.es/vcoll/graficos.html
