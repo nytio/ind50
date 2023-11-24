@@ -332,7 +332,7 @@ mapas_graficos_servidor_a_servidor <- function(rango) {
 #t1 <- print(system.time(mapas_graficos_servidor_a_servidor(c(4082:4084))))
 
 #t1 <- print(system.time(mapas_graficos_servidor_a_servidor(c(4060,4067,4074))))
-t1 <- print(system.time(mapas_graficos_servidor_a_servidor(c(4085:4126))))
+##t1 <- print(system.time(mapas_graficos_servidor_a_servidor(c(4085:4126))))
 
 # Usar en servidor con:
 # > Rscript maps.R &
@@ -341,9 +341,8 @@ t1 <- print(system.time(mapas_graficos_servidor_a_servidor(c(4085:4126))))
 ##mapas_graficos_servidor_a_servidor(dbGetQuery(con, "SELECT idind FROM indicador WHERE idtabla = 25"))
 ##mapas_graficos_servidor_a_servidor(dbGetQuery(con, "SELECT idind FROM indicador WHERE idtabla = 35"))
 ##mapas_graficos_servidor_a_servidor(dbGetQuery(con, "SELECT idind FROM indicador WHERE idtabla = 36"))i
-for(i in c(56:74))
-  mapas_graficos_servidor_a_servidor(dbGetQuery(con, paste0("SELECT idind FROM indicador WHERE idtabla = ", i) ))
-#i = 56, 3260
+# for(i in c(82:84))
+#  mapas_graficos_servidor_a_servidor(dbGetQuery(con, paste0("SELECT idind FROM indicador WHERE idtabla = ", i) ))
 
 #@todo Pendientes
 #! Generar los mapas faltantes, consultando primero aquellos que no tienen mapa dado de alto (son 2300)
