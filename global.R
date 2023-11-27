@@ -2,15 +2,15 @@
 
 # Librerias ----
 library(tidyverse) # 2.0.0
-library(DT) # 0.28
-library(ggplot2) # 3.4.2
-library(jsonlite) # 1.8.4
+library(DT) # 0.30
+library(ggplot2) # 3.4.4
+library(jsonlite) # 1.8.7
 library(sf) # 1.0-14
-library(ggspatial) # 1.1.8
+library(ggspatial) # 1.1.9
 library(openxlsx) # 4.2.5.2
 library(rvest) # 1.0.3
-library(ggrepel) # 0.9.3
-library(stringr) # 1.5.0
+library(ggrepel) # 0.9.4
+library(stringr) # 1.5.1
 source("database.R")
 
 systemfonts::register_font(
@@ -25,7 +25,7 @@ colores_tematico <-
   c("#FEFED1", "#FDFC91", "#F9D114", "#EB8936", "#B93623")
 colores_simbolos <- c("#484A49", "#F5F7F6")
 colores_texto <- "#333333"
-  
+
 gen_barras <- function(edo_sel, ind_sel, anio_sel) {
   if(is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)

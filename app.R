@@ -1,5 +1,5 @@
 options(scipen = 999)
-library(shiny) # 1.7.5.1
+library(shiny) # 1.8.0
 library(shinyWidgets) # 0.7.6
 library(shinycssloaders) # 1.0.0
 library(tidyverse) # 2.0.0
