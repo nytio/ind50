@@ -74,7 +74,7 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
                        label = scales::comma_format()) +
     coord_flip() +
     labs(
-      title = str_c(metadatos_sel$indicador, ", ", metadatos_sel$fecha),
+      title = str_wrap(str_c(metadatos_sel$indicador, ", ", metadatos_sel$fecha), width = 100),
       #subtitle = str_c("Entidad seleccionada: ", datos_barras$entidad[1]),
       caption = str_c("Fuente: ", metadatos_sel$fuente),
       x = NULL,
@@ -156,7 +156,7 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FA
   
   # Si se solicita una línea de regresión, agréguela al gráfico
   if (add_regression) {
-    p <- p + geom_smooth(method = 'lm', se = FALSE, color = '#8d8d8d')
+    p <- p + geom_smooth(method = 'lm', se = FALSE, color = '#8d8d8d', linetype = "dashed")
   }
   
   p <- p +
@@ -278,7 +278,7 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
       plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = colores_texto)
     ) +
     labs(
-      title = str_c(metadatos_sel$indicador, ", ", anio_sel),
+      title = str_wrap(str_c(metadatos_sel$indicador, ", ", anio_sel), width = 100),
       caption = str_c("Fuente: ", metadatos_sel$fuente),
       x = NULL,
       y = NULL,
@@ -351,7 +351,7 @@ gen_lineas <- function(edo_sel, ind_sel) {
     scale_size_manual(values = c("gto" = 1.0, "no" = 0.5), guide = "none")  +
     #geom_point(color = "#8d8d8d") +
     labs(
-      title = str_c(min(metadatos_sel$indicador), ", ", min(datos_lineas$year), " - ", max(datos_lineas$year)),
+      title = str_wrap(str_c(min(metadatos_sel$indicador), ", ", min(datos_lineas$year), " - ", max(datos_lineas$year)), width = 100),
       caption = str_c("Fuente: ", legend_source),
       x = NULL,
       y = min(metadatos_sel$unidad)
