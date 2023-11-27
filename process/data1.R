@@ -1640,3 +1640,22 @@ alta_variales_tabla <- function(nombre_tabla, anio = 2020) {
 # for(i in c(99:90)) {
 #   alta_variales_tabla(sprintf("tabla_defun_%02d", i), 1900+i)
 # }
+
+
+# Importante!
+# UPDATE tabla_defun_22
+#   SET
+#     regis = COALESCE(regis, 0), regis_f = COALESCE(regis_f, 0), regis_m = COALESCE(regis_m, 0), 
+#     ocurr = COALESCE(ocurr, 0), ocurr_f = COALESCE(ocurr_f, 0), ocurr_m = COALESCE(ocurr_m, 0),
+#     resid = COALESCE(resid, 0), resid_f = COALESCE(resid_f, 0), resid_m = COALESCE(resid_m, 0), 
+#     causa_1 = COALESCE(causa_1, 0), causa_1_f = COALESCE(causa_1_f, 0), causa_1_m = COALESCE(causa_1_m, 0), 
+#     causa_2 = COALESCE(causa_2, 0), causa_2_f = COALESCE(causa_2_f, 0), causa_2_m = COALESCE(causa_2_m, 0), 
+#     causa_3 = COALESCE(causa_3, 0), causa_3_f = COALESCE(causa_3_f, 0), causa_3_m = COALESCE(causa_3_m, 0), 
+#     causa_4 = COALESCE(causa_4, 0), causa_4_f = COALESCE(causa_4_f, 0), causa_4_m = COALESCE(causa_4_m, 0), 
+#     causa_5 = COALESCE(causa_5, 0), causa_5_f = COALESCE(causa_5_f, 0), causa_5_m = COALESCE(causa_5_m, 0), 
+#     o_resid = COALESCE(o_resid, 0), o_resid_f = COALESCE(o_resid_f, 0), o_resid_m = COALESCE(o_resid_m, 0), 
+#     o_causa_1 = COALESCE(o_causa_1, 0), o_causa_1_f = COALESCE(o_causa_1_f, 0), o_causa_1_m = COALESCE(o_causa_1_m, 0), 
+#     o_causa_2 = COALESCE(o_causa_2, 0), o_causa_2_f = COALESCE(o_causa_2_f, 0), o_causa_2_m = COALESCE(o_causa_2_m, 0), 
+#     o_causa_3 = COALESCE(o_causa_3, 0), o_causa_3_f = COALESCE(o_causa_3_f, 0), o_causa_3_m = COALESCE(o_causa_3_m, 0), 
+#     o_causa_4 = COALESCE(o_causa_4, 0), o_causa_4_f = COALESCE(o_causa_4_f, 0), o_causa_4_m = COALESCE(o_causa_4_m, 0), 
+#     o_causa_5 = COALESCE(o_causa_5, 0), o_causa_5_f = COALESCE(o_causa_5_f, 0), o_causa_5_m = COALESCE(o_causa_5_m, 0)
