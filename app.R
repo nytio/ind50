@@ -64,11 +64,13 @@ ui <- fluidPage(
         tabPanel(title = "Dispersión",
                  plotOutput("grafica_dispesion", height = "85vh") |> withSpinner(type = 4),
                  fluidRow(
-                   column(6, selectInput("selIndicadorVis", "Seleccione:",
+                   column(6, class = "selInd",
+                          selectInput("selIndicadorVis", "Seleccione:",
                                          choices = opciones_indicadores,
                                          selected = opciones_indicadores[1])),
-                   column(3, checkboxInput("logScaleInput", "Escala logarítmica", value = FALSE)),
-                   column(3, checkboxInput("addRegressionInput", "Línea de tendencia", value = FALSE))
+                   column(2, class = "selInd2", checkboxInput("logScaleInput", "Escala logarítmica", value = FALSE)),
+                   column(2, class = "selInd2", checkboxInput("addRegressionInput", "Línea de tendencia", value = FALSE)),
+                   column(2, class = "selInd2", checkboxInput("selSubconjunto", "Filtro específico", value = FALSE))
                  ),
                  icon = icon("bar-chart")
         ),
@@ -236,7 +238,8 @@ server <- function(input, output, session) {
                anio_sel = input$selAnio,
                ind_selvis = input$selIndicadorVis,
                log_scale = input$logScaleInput,
-               add_regression = input$addRegressionInput)
+               add_regression = input$addRegressionInput,
+               sel_entidades = input$selSubconjunto)
   })
   
   output$grafica_mapa <- renderPlot({

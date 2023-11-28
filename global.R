@@ -88,7 +88,7 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     )
 }
 
-gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FALSE, add_regression = FALSE) {
+gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FALSE, add_regression = FALSE, sel_entidades = FALSE) {
   if(is.null(edo_sel) || is.null(ind_sel) || is.null(ind_selvis) || is.null(anio_sel))
     return(NULL)
   
@@ -127,6 +127,17 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FA
   
   if(length(datos_dispersionvis$ambito) == 0)
     return(NULL)
+  
+  # Filtra los datos si sel_entidades es TRUE
+  if(edo_sel == "2") {
+    entidades_comparables <- c("Puebla", "San Luis Potosí", "Jalisco", "Aguascalientes", "Querétaro", "Nuevo León", "Guanajuato")
+    if(sel_entidades) {
+      datos_dispersion <- datos_dispersion |>
+        dplyr::filter(nom %in% entidades_comparables)
+      datos_dispersionvis <- datos_dispersionvis |>
+        dplyr::filter(nom %in% entidades_comparables)
+    }
+  }
   
   # Asignar los valores del eje Y y el eje X
   datos <- data.frame(y_var = datos_dispersion$valor,
