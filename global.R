@@ -84,7 +84,8 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     theme(
       plot.title.position  = "plot",
       plot.title = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
-      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = colores_texto)
+      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
+      plot.caption = element_text(hjust = 0, colour = colores_texto)
     )
 }
 
@@ -186,6 +187,7 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FA
       plot.title.position  = "plot",
       plot.title = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
       plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
+      plot.caption = element_text(hjust = 0, colour = colores_texto),
       axis.text = element_text(colour = colores_texto),
       axis.title = element_text(colour = colores_texto)
     )
@@ -286,7 +288,8 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
       panel.border = element_blank(),
       legend.position = "bottom",
       plot.title = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
-      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = colores_texto)
+      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
+      plot.caption = element_text(hjust = 0, colour = colores_texto)
     ) +
     labs(
       title = str_wrap(str_c(metadatos_sel$indicador, ", ", anio_sel), width = 100),
@@ -375,6 +378,7 @@ gen_lineas <- function(edo_sel, ind_sel) {
       legend.position = "bottom",
       plot.title = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
       plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
+      plot.caption = element_text(hjust = 0, colour = colores_texto),
       axis.text.x = element_text(angle = 0, hjust = 1)
     ) +
     guides(color = guide_legend(title = NULL)) 
