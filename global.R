@@ -147,7 +147,7 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FA
   datos$fontface <- ifelse(datos$resaltar, "bold", "plain")
 
   # Crea el diagrama de dispersión inicial
-  p <- ggplot(datos, aes_string(x = 'x_var', y = 'y_var')) +
+  p <- ggplot(datos, aes(x = !!sym('x_var'), y = !!sym('y_var'))) +
     geom_point(aes(color = resaltar)) + 
     scale_color_manual(values = c("#555753", "#4C7BA1"), guide = FALSE) +
     geom_text_repel(aes(label = etiqueta, color = resaltar, fontface = fontface), 
@@ -155,7 +155,7 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FA
                     point.padding = unit(0.5, "lines"),
                     max.overlaps = Inf) +
     theme(legend.position = "none") +
-    guides(color = FALSE) +
+    guides(color = "none") +
     scale_y_continuous(labels = scales::comma)
   
   # Si se solicita una escala logarítmica para el eje X, aplicar la transformación
