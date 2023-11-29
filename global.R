@@ -57,6 +57,12 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
       datos_barras |> mutate(ToHighlight = "no")
   }
   
+  datos_barras <- datos_barras |>
+    mutate(nom = str_replace(nom, "Coahuila de Zaragoza", "Coahuila"),
+           nom = str_replace(nom, "Michoacán de Ocampo", "Michoacán"),
+           nom = str_replace(nom, "Veracruz de Ignacio de la Llave", "Veracruz"),
+           nom = str_replace(nom, "Dolores Hidalgo Cuna de la Independencia Nacional", "Dolores Hidalgo"))
+
   # Registra que se mostró un gráfico
   contabiliza_uso(metadatos_sel$idind, "hitsgph")
 
@@ -76,7 +82,7 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     labs(
       title = str_wrap(str_c(metadatos_sel$indicador, ", ", metadatos_sel$fecha), width = 100),
       #subtitle = str_c("Entidad seleccionada: ", datos_barras$entidad[1]),
-      caption = str_c("Fuente: ", metadatos_sel$fuente),
+      caption = str_wrap(str_c("Fuente: ", metadatos_sel$fuente), width = 175),
       x = NULL,
       y = metadatos_sel$unidad
     ) +
@@ -147,6 +153,12 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FA
                      resaltar = datos_dispersion$cve == "11")
   datos$fontface <- ifelse(datos$resaltar, "bold", "plain")
 
+  datos <- datos |>
+    mutate(etiqueta = str_replace(etiqueta, "Coahuila de Zaragoza", "Coahuila"),
+           etiqueta = str_replace(etiqueta, "Michoacán de Ocampo", "Michoacán"),
+           etiqueta = str_replace(etiqueta, "Veracruz de Ignacio de la Llave", "Veracruz"),
+           etiqueta = str_replace(etiqueta, "Dolores Hidalgo Cuna de la Independencia Nacional", "Dolores Hidalgo"))
+
   # Crea el diagrama de dispersión inicial
   p <- ggplot(datos, aes(x = !!sym('x_var'), y = !!sym('y_var'))) +
     geom_point(aes(color = resaltar)) + 
@@ -177,9 +189,10 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FA
       title = str_wrap(str_c(metadatos_sel$indicador, " vs. ",
                              metadatos_selvis$indicador, ", ", metadatos_sel$fecha),
                        width = 100),
-      caption = ifelse(metadatos_sel$fuente == metadatos_selvis$fuente,
+      caption = str_wrap(ifelse(metadatos_sel$fuente == metadatos_selvis$fuente,
                        str_c("Fuente: ", metadatos_sel$fuente),
                        str_c("Fuente: ", metadatos_sel$fuente, " & ", metadatos_selvis$fuente)),
+                       width = 175),
       x = metadatos_selvis$unidad,
       y = metadatos_sel$unidad) +
     theme_light(base_size = 13, base_family = "typus") +
@@ -293,7 +306,7 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
     ) +
     labs(
       title = str_wrap(str_c(metadatos_sel$indicador, ", ", anio_sel), width = 100),
-      caption = str_c("Fuente: ", metadatos_sel$fuente),
+      caption = str_wrap(str_c("Fuente: ", metadatos_sel$fuente), width = 175),
       x = NULL,
       y = NULL,
       fill = metadatos_sel$unidad
@@ -366,7 +379,7 @@ gen_lineas <- function(edo_sel, ind_sel) {
     #geom_point(color = "#8d8d8d") +
     labs(
       title = str_wrap(str_c(min(metadatos_sel$indicador), ", ", min(datos_lineas$year), " - ", max(datos_lineas$year)), width = 100),
-      caption = str_c("Fuente: ", legend_source),
+      caption = str_wrap(str_c("Fuente: ", legend_source), width = 175),
       x = NULL,
       y = min(metadatos_sel$unidad)
     ) +
