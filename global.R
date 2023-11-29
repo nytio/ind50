@@ -82,7 +82,7 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     labs(
       title = str_wrap(str_c(metadatos_sel$indicador, ", ", metadatos_sel$fecha), width = 100),
       #subtitle = str_c("Entidad seleccionada: ", datos_barras$entidad[1]),
-      caption = str_wrap(str_c("Fuente: ", metadatos_sel$fuente), width = 175),
+      caption = str_wrap(str_c("Fuente: ", metadatos_sel$fuente), width = 160),
       x = NULL,
       y = metadatos_sel$unidad
     ) +
@@ -192,7 +192,7 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FA
       caption = str_wrap(ifelse(metadatos_sel$fuente == metadatos_selvis$fuente,
                        str_c("Fuente: ", metadatos_sel$fuente),
                        str_c("Fuente: ", metadatos_sel$fuente, " & ", metadatos_selvis$fuente)),
-                       width = 175),
+                       width = 160),
       x = metadatos_selvis$unidad,
       y = metadatos_sel$unidad) +
     theme_light(base_size = 13, base_family = "typus") +
@@ -306,7 +306,7 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
     ) +
     labs(
       title = str_wrap(str_c(metadatos_sel$indicador, ", ", anio_sel), width = 100),
-      caption = str_wrap(str_c("Fuente: ", metadatos_sel$fuente), width = 175),
+      caption = str_wrap(str_c("Fuente: ", metadatos_sel$fuente), width = 160),
       x = NULL,
       y = NULL,
       fill = metadatos_sel$unidad
@@ -379,7 +379,7 @@ gen_lineas <- function(edo_sel, ind_sel) {
     #geom_point(color = "#8d8d8d") +
     labs(
       title = str_wrap(str_c(min(metadatos_sel$indicador), ", ", min(datos_lineas$year), " - ", max(datos_lineas$year)), width = 100),
-      caption = str_wrap(str_c("Fuente: ", legend_source), width = 175),
+      caption = str_wrap(str_c("Fuente: ", legend_source), width = 160),
       x = NULL,
       y = min(metadatos_sel$unidad)
     ) +
