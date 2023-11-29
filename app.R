@@ -60,50 +60,39 @@ ui <- fluidPage(
                  icon = icon("table")),
         tabPanel(title = "Gráfica",
                  plotOutput("grafica_barras", height = "85vh") |> withSpinner(type = 4),
-                 fluidRow(column(4, offset = 8,
-                                 div(
-                                   class = "download-buttons",
-                                   downloadButton("grafica_barras_svg", "SVG")
-                                 )
+                 fluidRow(column(4, offset = 8, class = "selInd3",
+                                 downloadButton("grafica_barras_svg", "SVG")
                  )),
                  icon = icon("bar-chart")),
         tabPanel(title = "Dispersión",
                  plotOutput("grafica_dispesion", height = "85vh") |> withSpinner(type = 4),
                  fluidRow(
-                   column(4, class = "selInd",
+                   column(6, class = "selInd",
                           selectInput("selIndicadorVis", "Seleccione:",
                                          choices = opciones_indicadores,
                                          selected = opciones_indicadores[1])),
-                   column(2, class = "selInd2", checkboxInput("logScaleInput", "Escala logarítmica", value = FALSE)),
-                   column(2, class = "selInd2", checkboxInput("addRegressionInput", "Línea de tendencia", value = FALSE)),
-                   column(2, class = "selInd2", checkboxInput("selSubconjunto", "Filtro específico", value = FALSE)),
-                   div(
-                     class = "download-buttons",
-                     downloadButton("grafica_dispesion_svg", "SVG")
-                   )
+                   column(4, class = "selInd2",
+                          checkboxInput("logScaleInput", "Escala logarítmica", value = FALSE),
+                          checkboxInput("addRegressionInput", "Línea de tendencia", value = FALSE),
+                          checkboxInput("selSubconjunto", "Filtro específico", value = FALSE)),
+                   column(2, class = "selInd3",
+                          downloadButton("grafica_dispesion_svg", "SVG"))
                  ),
                  icon = icon("bar-chart")
         ),
         tabPanel(title = "Mapa",
                  plotOutput("grafica_mapa", height = "85vh") |> withSpinner(type = 4),
-                 fluidRow(column(4, offset = 8,
-                                 div(
-                                   class = "download-buttons",
-                                   downloadButton("grafica_mapa_svg", "SVG")
-                                 )
+                 fluidRow(column(4, offset = 8, class = "selInd3",
+                                 downloadButton("grafica_mapa_svg", "SVG")
                  )),
                  icon = icon("map-marker", lib = "glyphicon")),
         tabPanel(title = "Serie",
                  plotOutput("grafica_lineas", height = "85vh") |> withSpinner(type = 4),
                  fluidRow(column(4, offset = 8,
-                   div(
-                     class = "download-buttons",
-                     downloadButton("grafica_lineas_svg", "SVG"),
+                   div(class = "selInd3",
                      downloadButton("downloadSerie", "Descargar serie",
-                       icon = icon("download", lib = "glyphicon")
-                     )
-                   )
-                 )), 
+                                    icon = icon("download", lib = "glyphicon")),
+                     downloadButton("grafica_lineas_svg", "SVG")))),
                  icon = icon("stats", lib = "glyphicon")),
         # tabPanel(title = "Prospectiva",
         #           br(), icon = icon("circle-arrow-up", lib = "glyphicon")),
