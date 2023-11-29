@@ -34,6 +34,18 @@ caption {
   margin-left: 80%
 }
 
+
+.download-buttons {
+  text-align: right;
+  margin-top: 1em;
+  margin-bottom: 1em
+}
+
+.download-buttons .btn {
+  display: inline-block;
+  margin-right: 10px
+}
+
 .selInd {
   margin-top: 1em;
   margin-bottom: 16em

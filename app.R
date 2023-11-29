@@ -60,26 +60,50 @@ ui <- fluidPage(
                  icon = icon("table")),
         tabPanel(title = "Gráfica",
                  plotOutput("grafica_barras", height = "85vh") |> withSpinner(type = 4),
+                 fluidRow(column(4, offset = 8,
+                                 div(
+                                   class = "download-buttons",
+                                   downloadButton("grafica_barras_svg", "SVG")
+                                 )
+                 )),
                  icon = icon("bar-chart")),
         tabPanel(title = "Dispersión",
                  plotOutput("grafica_dispesion", height = "85vh") |> withSpinner(type = 4),
                  fluidRow(
-                   column(6, class = "selInd",
+                   column(4, class = "selInd",
                           selectInput("selIndicadorVis", "Seleccione:",
                                          choices = opciones_indicadores,
                                          selected = opciones_indicadores[1])),
                    column(2, class = "selInd2", checkboxInput("logScaleInput", "Escala logarítmica", value = FALSE)),
                    column(2, class = "selInd2", checkboxInput("addRegressionInput", "Línea de tendencia", value = FALSE)),
-                   column(2, class = "selInd2", checkboxInput("selSubconjunto", "Filtro específico", value = FALSE))
+                   column(2, class = "selInd2", checkboxInput("selSubconjunto", "Filtro específico", value = FALSE)),
+                   div(
+                     class = "download-buttons",
+                     downloadButton("grafica_dispesion_svg", "SVG")
+                   )
                  ),
                  icon = icon("bar-chart")
         ),
         tabPanel(title = "Mapa",
                  plotOutput("grafica_mapa", height = "85vh") |> withSpinner(type = 4),
+                 fluidRow(column(4, offset = 8,
+                                 div(
+                                   class = "download-buttons",
+                                   downloadButton("grafica_mapa_svg", "SVG")
+                                 )
+                 )),
                  icon = icon("map-marker", lib = "glyphicon")),
         tabPanel(title = "Serie",
                  plotOutput("grafica_lineas", height = "85vh") |> withSpinner(type = 4),
-                 downloadButton("downloadSerie", "Descargar serie", icon = icon("download", lib = "glyphicon"), class = "download-button"),
+                 fluidRow(column(4, offset = 8,
+                   div(
+                     class = "download-buttons",
+                     downloadButton("grafica_lineas_svg", "SVG"),
+                     downloadButton("downloadSerie", "Descargar serie",
+                       icon = icon("download", lib = "glyphicon")
+                     )
+                   )
+                 )), 
                  icon = icon("stats", lib = "glyphicon")),
         # tabPanel(title = "Prospectiva",
         #           br(), icon = icon("circle-arrow-up", lib = "glyphicon")),
@@ -232,6 +256,18 @@ server <- function(input, output, session) {
                anio_sel = input$selAnio)
   })
 
+  output$grafica_barras_svg <- downloadHandler(
+    filename = function() {
+      paste0("barras", input$selIndicador, "_", input$selEnt, "_", input$selAnio, ".svg")
+    },
+    content = function(file) {
+      grafico <- gen_barras(edo_sel = input$selEnt,
+                            ind_sel = input$selIndicador,
+                            anio_sel = input$selAnio)
+      ggsave(file, plot = grafico, device = "svg", width = 14.60, height = 8.15,  units = "in")
+    }
+  )
+
   output$grafica_dispesion <- renderPlot({
     gen_dispesion(edo_sel = input$selEnt,
                ind_sel = input$selIndicador,
@@ -241,18 +277,56 @@ server <- function(input, output, session) {
                add_regression = input$addRegressionInput,
                sel_entidades = input$selSubconjunto)
   })
-  
+
+  output$grafica_dispesion_svg <- downloadHandler(
+    filename = function() {
+      paste0("dispersion", input$selIndicador, "_", input$selIndicadorVis, "_", input$selAnio, ".svg")
+    },
+    content = function(file) {
+      grafico <- gen_dispesion(edo_sel = input$selEnt,
+                               ind_sel = input$selIndicador,
+                               anio_sel = input$selAnio,
+                               ind_selvis = input$selIndicadorVis,
+                               log_scale = input$logScaleInput,
+                               add_regression = input$addRegressionInput,
+                               sel_entidades = input$selSubconjunto)
+      ggsave(file, plot = grafico, device = "svg", width = 14.60, height = 8.15,  units = "in")
+    }
+  )
+
   output$grafica_mapa <- renderPlot({
     gen_mapa(edo_sel = input$selEnt,
              ind_sel = input$selIndicador,
              anio_sel = input$selAnio)
   })
+
+  output$grafica_mapa_svg <- downloadHandler(
+    filename = function() {
+      paste0("mapa", input$selIndicador, "_", input$selEnt, "_", input$selAnio,".svg")
+    },
+    content = function(file) {
+      grafico <- gen_mapa(edo_sel = input$selEnt,
+                          ind_sel = input$selIndicador,
+                          anio_sel = input$selAnio)
+      ggsave(file, plot = grafico, device = "svg", width = 10.37, height = 7.78,  units = "in")
+    }
+  )
   
   output$grafica_lineas <- renderPlot({
     gen_lineas(edo_sel = input$selEnt,
                ind_sel = input$selIndicador)
   })
-  
+
+  output$grafica_lineas_svg <- downloadHandler(
+    filename = function() {
+      paste0("serie", input$selIndicador, "_", input$selEnt,".svg")
+    },
+    content = function(file) {
+      grafico <- gen_lineas(edo_sel = input$selEnt, ind_sel = input$selIndicador)
+      ggsave(file, plot = grafico, device = "svg", width = 14.60, height = 8.15,  units = "in")
+    }
+  )
+
   datasetInput2 <- reactive({
     tabulado2(ind_sel = input$selIndicador)
   })
