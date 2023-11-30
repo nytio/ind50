@@ -88,7 +88,7 @@ ui <- fluidPage(
                  icon = icon("map-marker", lib = "glyphicon")),
         tabPanel(title = "Serie",
                  plotOutput("grafica_lineas", height = "85vh") |> withSpinner(type = 4),
-                 fluidRow(column(4, offset = 8,
+                 fluidRow(column(8, offset = 4,
                    div(class = "selInd3",
                      downloadButton("downloadSerie", "Descargar serie",
                                     icon = icon("download", lib = "glyphicon")),
