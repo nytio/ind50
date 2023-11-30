@@ -26,7 +26,7 @@ colores_tematico <-
 colores_simbolos <- c("#484A49", "#F5F7F6")
 colores_texto <- "#333333"
 
-gen_barras <- function(edo_sel, ind_sel, anio_sel) {
+gen_barras <- function(edo_sel, ind_sel, anio_sel, titula = TRUE) {
   if(is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)
 
@@ -65,6 +65,14 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
 
   # Registra que se mostró un gráfico
   contabiliza_uso(metadatos_sel$idind, "hitsgph")
+  
+  if(titula) {
+    titulo <- str_wrap(str_c(metadatos_sel$indicador, ", ", metadatos_sel$fecha), width = 100)
+    fuente <- str_wrap(str_c("Fuente: ", metadatos_sel$fuente), width = 160)
+  } else {
+    titulo <- NULL
+    fuente <- NULL
+  }
 
   # Gráfico
   datos_barras |>
@@ -80,9 +88,9 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
                        label = scales::comma_format()) +
     coord_flip() +
     labs(
-      title = str_wrap(str_c(metadatos_sel$indicador, ", ", metadatos_sel$fecha), width = 100),
+      title = titulo,
       #subtitle = str_c("Entidad seleccionada: ", datos_barras$entidad[1]),
-      caption = str_wrap(str_c("Fuente: ", metadatos_sel$fuente), width = 160),
+      caption = fuente,
       x = NULL,
       y = metadatos_sel$unidad
     ) +
@@ -95,7 +103,7 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel) {
     )
 }
 
-gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FALSE, add_regression = FALSE, sel_entidades = FALSE) {
+gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FALSE, add_regression = FALSE, sel_entidades = FALSE, titula = TRUE) {
   if(is.null(edo_sel) || is.null(ind_sel) || is.null(ind_selvis) || is.null(anio_sel))
     return(NULL)
   
@@ -183,16 +191,24 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FA
     p <- p + geom_smooth(method = 'lm', se = FALSE, color = '#8d8d8d', linetype = "dashed")
   }
   
+  if(titula) {
+    titulo <- str_wrap(str_c(metadatos_sel$indicador, " vs. ",
+                             metadatos_selvis$indicador, ", ", metadatos_sel$fecha),
+                       width = 100)
+    fuente <- str_wrap(ifelse(metadatos_sel$fuente == metadatos_selvis$fuente,
+                              str_c("Fuente: ", metadatos_sel$fuente),
+                              str_c("Fuente: ", metadatos_sel$fuente, " & ", metadatos_selvis$fuente)),
+                       width = 160)
+  } else {
+    titulo <- NULL
+    fuente <- NULL
+  }
+  
   p <- p +
     theme_minimal() + # Personaliza el gráfico
     labs(
-      title = str_wrap(str_c(metadatos_sel$indicador, " vs. ",
-                             metadatos_selvis$indicador, ", ", metadatos_sel$fecha),
-                       width = 100),
-      caption = str_wrap(ifelse(metadatos_sel$fuente == metadatos_selvis$fuente,
-                       str_c("Fuente: ", metadatos_sel$fuente),
-                       str_c("Fuente: ", metadatos_sel$fuente, " & ", metadatos_selvis$fuente)),
-                       width = 160),
+      title = titulo,
+      caption = fuente,
       x = metadatos_selvis$unidad,
       y = metadatos_sel$unidad) +
     theme_light(base_size = 13, base_family = "typus") +
@@ -208,7 +224,7 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FA
   return(p)
 }
 
-gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
+gen_mapa <- function(edo_sel, ind_sel, anio_sel, titula = TRUE) {
   if (is.null(edo_sel) || is.null(ind_sel) || is.null(anio_sel))
     return(NULL)
   
@@ -286,9 +302,17 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
     colores_etq <- nuevas_etiquetas
   }
 
+  if(titula) {
+    titulo <- str_wrap(str_c(metadatos_sel$indicador, ", ", anio_sel), width = 100)
+    fuente <- str_wrap(str_c("Fuente: ", metadatos_sel$fuente), width = 160)
+  } else {
+    titulo <- NULL
+    fuente <- NULL
+  }
+
   # Registra que se mostró un mapa
   contabiliza_uso(metadatos_sel$idind, "hitsmap")
-  
+
   # Mapa
   mapa |>
     ggplot() +
@@ -305,8 +329,8 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
       plot.caption = element_text(hjust = 0, colour = colores_texto)
     ) +
     labs(
-      title = str_wrap(str_c(metadatos_sel$indicador, ", ", anio_sel), width = 100),
-      caption = str_wrap(str_c("Fuente: ", metadatos_sel$fuente), width = 160),
+      title = titulo,
+      caption = fuente,
       x = NULL,
       y = NULL,
       fill = metadatos_sel$unidad
@@ -320,7 +344,7 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel) {
                            ))
 }
 
-gen_lineas <- function(edo_sel, ind_sel) {
+gen_lineas <- function(edo_sel, ind_sel, titula = TRUE) {
   if(is.null(edo_sel) || is.null(ind_sel))
     return(NULL)
   metadatos_sel <- meta
@@ -359,10 +383,17 @@ gen_lineas <- function(edo_sel, ind_sel) {
     ToHighlight = c("gto", "no"),
     labels = c("Guanajuato", "Otras entidades")
   )
-  
-  legend_source <- min(metadatos_sel$fuente)
-  if(grepl("INEGI", legend_source))
-    legend_source <- "INEGI"
+
+  if(titula) {
+    titulo <- str_wrap(str_c(min(metadatos_sel$indicador), ", ", min(datos_lineas$year), " - ", max(datos_lineas$year)), width = 100)
+    legend_source <- min(metadatos_sel$fuente)
+    if(grepl("INEGI", legend_source))
+      legend_source <- "INEGI"
+    fuente <- str_wrap(str_c("Fuente: ", legend_source), width = 160)
+  } else {
+    titulo <- NULL
+    fuente <- NULL
+  }
 
   datos_lineas |>
     ggplot(aes(
@@ -378,8 +409,8 @@ gen_lineas <- function(edo_sel, ind_sel) {
     scale_size_manual(values = c("gto" = 1.0, "no" = 0.5), guide = "none")  +
     #geom_point(color = "#8d8d8d") +
     labs(
-      title = str_wrap(str_c(min(metadatos_sel$indicador), ", ", min(datos_lineas$year), " - ", max(datos_lineas$year)), width = 100),
-      caption = str_wrap(str_c("Fuente: ", legend_source), width = 160),
+      title = titulo,
+      caption = fuente,
       x = NULL,
       y = min(metadatos_sel$unidad)
     ) +

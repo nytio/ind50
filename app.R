@@ -252,7 +252,7 @@ server <- function(input, output, session) {
     content = function(file) {
       grafico <- gen_barras(edo_sel = input$selEnt,
                             ind_sel = input$selIndicador,
-                            anio_sel = input$selAnio)
+                            anio_sel = input$selAnio, titula = FALSE)
       ggsave(file, plot = grafico, device = "svg", width = 14.60, height = 8.15,  units = "in")
     },
     contentType = "image/svg+xml"
@@ -279,7 +279,7 @@ server <- function(input, output, session) {
                                ind_selvis = input$selIndicadorVis,
                                log_scale = input$logScaleInput,
                                add_regression = input$addRegressionInput,
-                               sel_entidades = input$selSubconjunto)
+                               sel_entidades = input$selSubconjunto, titula = FALSE)
       ggsave(file, plot = grafico, device = "svg", width = 14.60, height = 8.15,  units = "in")
     },
     contentType = "image/svg+xml"
@@ -298,7 +298,7 @@ server <- function(input, output, session) {
     content = function(file) {
       grafico <- gen_mapa(edo_sel = input$selEnt,
                           ind_sel = input$selIndicador,
-                          anio_sel = input$selAnio)
+                          anio_sel = input$selAnio, titula = FALSE)
       ggsave(file, plot = grafico, device = "svg", width = 10.37, height = 7.78,  units = "in")
     },
     contentType = "image/svg+xml"
@@ -314,7 +314,7 @@ server <- function(input, output, session) {
       paste0("serie", input$selIndicador, "_", input$selEnt,".svg")
     },
     content = function(file) {
-      grafico <- gen_lineas(edo_sel = input$selEnt, ind_sel = input$selIndicador)
+      grafico <- gen_lineas(edo_sel = input$selEnt, ind_sel = input$selIndicador, titula = FALSE)
       ggsave(file, plot = grafico, device = "svg", width = 14.60, height = 8.15,  units = "in")
     },
     contentType = "image/svg+xml"
