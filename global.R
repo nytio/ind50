@@ -363,12 +363,14 @@ gen_lineas <- function(edo_sel, ind_sel, titula = TRUE) {
   
   if(edo_sel == "2") {
     datos_lineas <-
-      datos_lineas |> mutate(ToHighlight = ifelse(cve == 11, "gto", "no" ))
+      datos_lineas |> dplyr::filter(cve == "11" | cve == "MEX")
     datos_lineas <-
-      datos_lineas |> dplyr::filter(cve != "MEX")
+      datos_lineas |> mutate(ToHighlight = ifelse(cve == 11, "gto", "no"))
   } else {
     datos_lineas <-
-      datos_lineas |> mutate(ToHighlight = "no")
+      datos_lineas |> dplyr::filter(cve == "11015" | cve == "11")
+    datos_lineas <-
+      datos_lineas |> mutate(ToHighlight = ifelse(cve == "11015", "gto", "no"))
   }
   
   if(length(unique(datos_lineas$year)) < 2)
@@ -381,7 +383,7 @@ gen_lineas <- function(edo_sel, ind_sel, titula = TRUE) {
   
   legend_labels <- data.frame(
     ToHighlight = c("gto", "no"),
-    labels = c("Guanajuato", "Otras entidades")
+    labels = c("Guanajuato", "República Mexicana")
   )
 
   if(titula) {
@@ -395,7 +397,7 @@ gen_lineas <- function(edo_sel, ind_sel, titula = TRUE) {
     fuente <- NULL
   }
 
-  datos_lineas |>
+  p <- datos_lineas |>
     ggplot(aes(
       x = year,
       y = valor,
@@ -403,11 +405,22 @@ gen_lineas <- function(edo_sel, ind_sel, titula = TRUE) {
       color = ToHighlight,
       linetype = ToHighlight
     )) +
-    geom_line() +
-    scale_color_manual(values = c("gto" = "#00628C", "no" = "#8d8d8d"), labels = legend_labels$labels) +
+    geom_line(size = 1.5) +
+    geom_point(aes(color = ToHighlight), size = 3) +
+    geom_text_repel(
+      aes(label = prettyNum(round(valor, 2), big.mark = ",")),
+      nudge_y = 0.025, # Ajustar ligeramente las etiquetas hacia arriba o abajo si es necesario
+      size = 3.5,      # Puedes ajustar el tamaño del texto aquí
+      color = "#4c4c4c", # Establecer el color del texto, si se desea
+      max.overlaps = Inf, # Permite un número infinito de intentos para evitar solapamientos
+      box.padding   = 0.35,   # Espacio alrededor del texto dentro de la caja
+      point.padding = 0.5,    # Espacio alrededor de los puntos
+      segment.color = 'grey50' # Color de las líneas de conexión
+    ) +
+    #scale_color_manual(values = c("gto" = "#00628C", "no" = "#E07B39")) +
+    scale_color_manual(values = c("gto" = "#5b9bd5", "no" = "#ed7d31"), labels = legend_labels$labels) +
     scale_linetype_manual(values = c("gto" = "solid", "no" = "solid"), guide = "none") +
     scale_size_manual(values = c("gto" = 1.0, "no" = 0.5), guide = "none")  +
-    #geom_point(color = "#8d8d8d") +
     labs(
       title = titulo,
       caption = fuente,
@@ -425,7 +438,9 @@ gen_lineas <- function(edo_sel, ind_sel, titula = TRUE) {
       plot.caption = element_text(hjust = 0, colour = colores_texto),
       axis.text.x = element_text(angle = 0, hjust = 1)
     ) +
-    guides(color = guide_legend(title = NULL)) 
+    guides(color = guide_legend(title = NULL))
+
+  return(p)
 }
 
 tabulado <- function(edo_sel, ind_sel, anio_sel) {
