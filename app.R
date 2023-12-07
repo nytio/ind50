@@ -88,11 +88,16 @@ ui <- fluidPage(
                  icon = icon("map-marker", lib = "glyphicon")),
         tabPanel(title = "Serie",
                  plotOutput("grafica_lineas", height = "85vh") |> withSpinner(type = 4),
-                 fluidRow(column(8, offset = 4,
-                   div(class = "selInd3",
-                     downloadButton("downloadSerie", "Descargar serie",
-                                    icon = icon("download", lib = "glyphicon")),
-                     downloadButton("grafica_lineas_svg", "SVG")))),
+                 fluidRow(
+                   column(4, class = "selInd",
+                          selectInput("selDesGeo", "Seleccione:", choices = NULL)),
+                   column(4, class = "selInd2",
+                          checkboxInput("selTotal", "Incluye total", value = TRUE)),
+                   column(4, class = "selInd3",
+                          downloadButton("downloadSerie", "Descargar serie",
+                                         icon = icon("download", lib = "glyphicon")),
+                          downloadButton("grafica_lineas_svg", "SVG"))
+                 ),
                  icon = icon("stats", lib = "glyphicon")),
         # tabPanel(title = "Prospectiva",
         #           br(), icon = icon("circle-arrow-up", lib = "glyphicon")),
@@ -205,8 +210,64 @@ server <- function(input, output, session) {
                             inputId = "selAnio",
                             choices = ad,
                             selected = usel)
+      
+      if(input$selEnt == "2")
+        updateSelectInput(session = session,
+                        inputId = "selDesGeo",
+                        choices = c("Estado de Guanajuato" = "11",
+                                    "Estados Unidos Mexicanos" = "MEX"),
+                        selected = "11")
+      else
+        updateSelectInput(session = session,
+                          inputId = "selDesGeo",
+                          choices = c("Acámbaro"  = "11002",
+                                      "San Miguel de Allende"  = "11003",
+                                      "Apaseo el Alto"  = "11004",
+                                      "Apaseo el Grande"  = "11005",
+                                      "Atarjea"  = "11006",
+                                      "Celaya"  = "11007",
+                                      "Manuel Doblado"  = "11008",
+                                      "Comonfort"  = "11009",
+                                      "Coroneo"  = "11010",
+                                      "Cortazar"  = "11011",
+                                      "Cuerámaro"  = "11012",
+                                      "Doctor Mora"  = "11013",
+                                      "Dolores Hidalgo"  = "11014",
+                                      "Guanajuato"  = "11015",
+                                      "Huanímaro"  = "11016",
+                                      "Irapuato"  = "11017",
+                                      "Jaral del Progreso"  = "11018",
+                                      "Jerécuaro"  = "11019",
+                                      "León"  = "11020",
+                                      "Moroleón"  = "11021",
+                                      "Ocampo"  = "11022",
+                                      "Pénjamo"  = "11023",
+                                      "Pueblo Nuevo"  = "11024",
+                                      "Purísima del Rincón"  = "11025",
+                                      "Romita"  = "11026",
+                                      "Salamanca"  = "11027",
+                                      "Salvatierra"  = "11028",
+                                      "San Diego de la Unión"  = "11029",
+                                      "San Felipe"  = "11030",
+                                      "San Francisco del Rincón"  = "11031",
+                                      "San José Iturbide"  = "11032",
+                                      "San Luis de la Paz"  = "11033",
+                                      "Santa Catarina"  = "11034",
+                                      "Santa Cruz de Juventino Rosas"  = "11035",
+                                      "Santiago Maravatío"  = "11036",
+                                      "Silao de la Victoria"  = "11037",
+                                      "Tarandacuao"  = "11038",
+                                      "Tarimoro"  = "11039",
+                                      "Tierra Blanca"  = "11040",
+                                      "Uriangato"  = "11041",
+                                      "Valle de Santiago"  = "11042",
+                                      "Victoria"  = "11043",
+                                      "Villagrán"  = "11044",
+                                      "Xichú"  = "11045",
+                                      "Yuriria"  = "11046"),
+                          selected = "11015")
     }
-  }, ignoreInit = TRUE)
+  }, ignoreInit = FALSE)
   
   datasetInput <- reactive({
     tabulado(edo_sel = input$selEnt,
@@ -306,7 +367,9 @@ server <- function(input, output, session) {
   
   output$grafica_lineas <- renderPlot({
     gen_lineas(edo_sel = input$selEnt,
-               ind_sel = input$selIndicador)
+               ind_sel = input$selIndicador,
+               geo_sel = input$selDesGeo,
+               tot_sel = input$selTotal)
   })
 
   output$grafica_lineas_svg <- downloadHandler(
@@ -314,7 +377,11 @@ server <- function(input, output, session) {
       paste0("serie", input$selIndicador, "_", input$selEnt,".svg")
     },
     content = function(file) {
-      grafico <- gen_lineas(edo_sel = input$selEnt, ind_sel = input$selIndicador, titula = FALSE)
+      grafico <- gen_lineas(edo_sel = input$selEnt,
+                            ind_sel = input$selIndicador,
+                            titula = FALSE,
+                            geo_sel = input$selDesGeo,
+                            tot_sel = input$selTotal )
       ggsave(file, plot = grafico, device = "svg", width = 14.60, height = 8.15,  units = "in")
     },
     contentType = "image/svg+xml"

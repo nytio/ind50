@@ -74,9 +74,12 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel, titula = TRUE) {
     fuente <- NULL
   }
 
+  datos_barras <- datos_barras |>
+    mutate(nom = factor(nom, levels = unique(nom[order(valor)])))
+  
   # Gráfico
-  datos_barras |>
-    ggplot(aes(x = reorder(nom, valor),
+  p <- datos_barras |>
+    ggplot(aes(x = nom,
                y = valor,
                fill = ToHighlight)) +
     geom_col() +
@@ -101,6 +104,8 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel, titula = TRUE) {
       plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
       plot.caption = element_text(hjust = 0, colour = colores_texto)
     )
+  
+  return(p)
 }
 
 gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FALSE, add_regression = FALSE, sel_entidades = FALSE, titula = TRUE) {
@@ -344,15 +349,14 @@ gen_mapa <- function(edo_sel, ind_sel, anio_sel, titula = TRUE) {
                            ))
 }
 
-gen_lineas <- function(edo_sel, ind_sel, titula = TRUE) {
+gen_lineas <- function(edo_sel, ind_sel, titula = TRUE, geo_sel = "11", tot_sel = TRUE) {
   if(is.null(edo_sel) || is.null(ind_sel))
     return(NULL)
   metadatos_sel <- meta
   
   datos_lineas <- bd |>
-    dplyr::filter(no == ind_sel) |>
-    dplyr::filter(ambito == edo_sel)
-  
+    dplyr::filter(no == ind_sel)
+
   if(!is.numeric(datos_lineas$valor))
     return(NULL)
   
@@ -362,15 +366,23 @@ gen_lineas <- function(edo_sel, ind_sel, titula = TRUE) {
   datos_lineas$year <- as.integer(as.character(datos_lineas$year))
   
   if(edo_sel == "2") {
+    if(tot_sel)
+      datos_lineas <-
+        datos_lineas |> dplyr::filter(cve == geo_sel | cve == "MEX")
+    else
+      datos_lineas <-
+        datos_lineas |> dplyr::filter(cve == geo_sel)
     datos_lineas <-
-      datos_lineas |> dplyr::filter(cve == "11" | cve == "MEX")
-    datos_lineas <-
-      datos_lineas |> mutate(ToHighlight = ifelse(cve == 11, "gto", "no"))
+      datos_lineas |> mutate(ToHighlight = ifelse(cve == geo_sel, "gto", "no"))
   } else {
+    if(tot_sel)
+      datos_lineas <-
+        datos_lineas |> dplyr::filter(cve == geo_sel  | cve == "11")
+    else
+      datos_lineas <-
+        datos_lineas |> dplyr::filter(cve == geo_sel )
     datos_lineas <-
-      datos_lineas |> dplyr::filter(cve == "11015" | cve == "11")
-    datos_lineas <-
-      datos_lineas |> mutate(ToHighlight = ifelse(cve == "11015", "gto", "no"))
+      datos_lineas |> mutate(ToHighlight = ifelse(cve == geo_sel, "gto", "no"))
   }
   
   if(length(unique(datos_lineas$year)) < 2)
@@ -381,10 +393,24 @@ gen_lineas <- function(edo_sel, ind_sel, titula = TRUE) {
   else
     escala_x <- seq(min(datos_lineas$year), max(datos_lineas$year), by = 5)
   
-  legend_labels <- data.frame(
-    ToHighlight = c("gto", "no"),
-    labels = c("Guanajuato", "República Mexicana")
-  )
+  etiqueta_datos <- datos_lineas |> 
+    dplyr::filter(cve == geo_sel) |> 
+    dplyr::slice(1) |> 
+    dplyr::pull(nom)
+
+  if(edo_sel == "2") 
+    legend_labels <- data.frame(
+      ToHighlight = c("gto", "no"),
+        labels = c(etiqueta_datos, "República Mexicana"))
+  else {
+    legend_labels <- data.frame(
+      ToHighlight = c("gto", "no"),
+      labels = c(etiqueta_datos, "Estado de Guanajuato"))
+    datos_lineas <- datos_lineas |>
+      dplyr::mutate(nom = case_when(
+        cve == "11" ~ "Estatal",
+        TRUE ~ nom))
+  }
 
   if(titula) {
     titulo <- str_wrap(str_c(min(metadatos_sel$indicador), ", ", min(datos_lineas$year), " - ", max(datos_lineas$year)), width = 100)
