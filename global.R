@@ -431,7 +431,7 @@ gen_lineas <- function(edo_sel, ind_sel, titula = TRUE, geo_sel = "11", tot_sel 
       color = ToHighlight,
       linetype = ToHighlight
     )) +
-    geom_line(size = 1.5) +
+    geom_line(linewidth = 1.5) +
     geom_point(aes(color = ToHighlight), size = 3) +
     geom_text_repel(
       aes(label = prettyNum(round(valor, 2), big.mark = ",")),
