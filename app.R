@@ -1,6 +1,6 @@
 options(scipen = 999)
 library(shiny) # 1.8.0
-library(shinyWidgets) # 0.7.6
+library(shinyWidgets) # 0.8.0
 library(shinycssloaders) # 1.0.0
 library(tidyverse) # 2.0.0
 library(DT) # 0.30
@@ -68,13 +68,13 @@ ui <- fluidPage(
                  plotOutput("grafica_dispesion", height = "85vh") |> withSpinner(type = 4),
                  fluidRow(
                    column(6, class = "selInd",
-                          selectInput("selIndicadorVis", "Seleccione:",
+                          pickerInput("selIndicadorVis", "Seleccione:",
                                          choices = opciones_indicadores,
                                          selected = opciones_indicadores[1])),
                    column(4, class = "selInd2",
-                          checkboxInput("logScaleInput", "Escala logarítmica", value = FALSE),
-                          checkboxInput("addRegressionInput", "Línea de tendencia", value = FALSE),
-                          checkboxInput("selSubconjunto", "Filtro específico", value = FALSE)),
+                          materialSwitch("logScaleInput", "Escala logarítmica", value = FALSE, right = TRUE, status = "primary"),
+                          materialSwitch("addRegressionInput", "Línea de tendencia", value = FALSE, right = TRUE, status = "primary"),
+                          materialSwitch("selSubconjunto", "Filtro específico", value = FALSE, right = TRUE, status = "primary")),
                    column(2, class = "selInd3",
                           downloadButton("grafica_dispesion_svg", "SVG"))
                  ),
@@ -90,9 +90,9 @@ ui <- fluidPage(
                  plotOutput("grafica_lineas", height = "85vh") |> withSpinner(type = 4),
                  fluidRow(
                    column(4, class = "selInd",
-                          selectInput("selDesGeo", "Seleccione:", choices = NULL)),
+                          pickerInput("selDesGeo", "Seleccione:", choices = NULL)),
                    column(4, class = "selInd2",
-                          checkboxInput("selTotal", "Incluye total", value = TRUE)),
+                          materialSwitch("selTotal", "Incluye total", value = TRUE, right = TRUE, status = "primary")),
                    column(4, class = "selInd3",
                           downloadButton("downloadSerie", "Descargar serie",
                                          icon = icon("download", lib = "glyphicon")),
@@ -148,7 +148,7 @@ server <- function(input, output, session) {
       inputId = "selIndicador",
       choices = opciones_indicadores
     )
-    updateSelectInput(
+    updatePickerInput(
       session = session,
       inputId = "selIndicadorVis",
       choices = opciones_indicadores
@@ -212,13 +212,13 @@ server <- function(input, output, session) {
                             selected = usel)
       
       if(input$selEnt == "2")
-        updateSelectInput(session = session,
+        updatePickerInput(session = session,
                         inputId = "selDesGeo",
                         choices = c("Estado de Guanajuato" = "11",
                                     "Estados Unidos Mexicanos" = "MEX"),
                         selected = "11")
       else
-        updateSelectInput(session = session,
+        updatePickerInput(session = session,
                           inputId = "selDesGeo",
                           choices = c("Acámbaro"  = "11002",
                                       "San Miguel de Allende"  = "11003",
