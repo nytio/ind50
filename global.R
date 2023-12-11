@@ -4,7 +4,7 @@
 library(tidyverse) # 2.0.0
 library(DT) # 0.30
 library(ggplot2) # 3.4.4
-library(jsonlite) # 1.8.7
+library(jsonlite) # 1.8.8
 library(sf) # 1.0-14
 library(ggspatial) # 1.1.9
 library(openxlsx) # 4.2.5.2
@@ -108,20 +108,23 @@ gen_barras <- function(edo_sel, ind_sel, anio_sel, titula = TRUE) {
   return(p)
 }
 
-gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FALSE, add_regression = FALSE, sel_entidades = FALSE, titula = TRUE) {
-  if(is.null(edo_sel) || is.null(ind_sel) || is.null(ind_selvis) || is.null(anio_sel))
+gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, 
+                          log_scale = FALSE, add_regression = FALSE, 
+                          sel_entidades = FALSE, titula = TRUE) {
+  if (is.null(edo_sel) ||
+      is.null(ind_sel) || is.null(ind_selvis) || is.null(anio_sel))
     return(NULL)
   
   metadatos_sel <- meta |>
     dplyr::filter(fecha == anio_sel)
   
-  if(length(metadatos_sel$fecha) == 0)
+  if (length(metadatos_sel$fecha) == 0)
     return(NULL)
   
   metadatos_selvis <- get_meta(ind_selvis) |>
     dplyr::filter(fecha == anio_sel)
-
-  if(length(metadatos_selvis$fecha) == 0)
+  
+  if (length(metadatos_selvis$fecha) == 0)
     return(NULL)
   
   datos_dispersion <- bd |>
@@ -130,28 +133,38 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FA
     dplyr::filter(ambito == edo_sel) |>
     dplyr::filter(cve != "MEX")
   
-  if(!is.numeric(datos_dispersion$valor))
+  if (!is.numeric(datos_dispersion$valor))
     return(NULL)
   
-  if(length(datos_dispersion$ambito) == 0)
+  if (length(datos_dispersion$ambito) == 0)
     return(NULL)
   
-  datos_dispersionvis <- actualiza_bde(ind_selvis, metadatos_selvis) |>
+  datos_dispersionvis <-
+    actualiza_bde(ind_selvis, metadatos_selvis) |>
     dplyr::filter(no == ind_selvis) |>
     dplyr::filter(year == anio_sel) |>
     dplyr::filter(ambito == edo_sel) |>
     dplyr::filter(cve != "MEX")
   
-  if(!is.numeric(datos_dispersionvis$valor))
+  if (!is.numeric(datos_dispersionvis$valor))
     return(NULL)
   
-  if(length(datos_dispersionvis$ambito) == 0)
+  if (length(datos_dispersionvis$ambito) == 0)
     return(NULL)
   
   # Filtra los datos si sel_entidades es TRUE
-  if(edo_sel == "2") {
-    entidades_comparables <- c("Puebla", "San Luis Potosí", "Jalisco", "Aguascalientes", "Querétaro", "Nuevo León", "Guanajuato")
-    if(sel_entidades) {
+  if (edo_sel == "2") {
+    entidades_comparables <-
+      c(
+        "Puebla",
+        "San Luis Potosí",
+        "Jalisco",
+        "Aguascalientes",
+        "Querétaro",
+        "Nuevo León",
+        "Guanajuato"
+      )
+    if (sel_entidades) {
       datos_dispersion <- datos_dispersion |>
         dplyr::filter(nom %in% entidades_comparables)
       datos_dispersionvis <- datos_dispersionvis |>
@@ -160,26 +173,40 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FA
   }
   
   # Asignar los valores del eje Y y el eje X
-  datos <- data.frame(y_var = datos_dispersion$valor,
-                     x_var = datos_dispersionvis$valor,
-                     etiqueta = datos_dispersion$nom,
-                     resaltar = datos_dispersion$cve == "11")
+  datos <- data.frame(
+    y_var = datos_dispersion$valor,
+    x_var = datos_dispersionvis$valor,
+    etiqueta = datos_dispersion$nom,
+    resaltar = datos_dispersion$cve == "11"
+  )
   datos$fontface <- ifelse(datos$resaltar, "bold", "plain")
-
+  
   datos <- datos |>
-    mutate(etiqueta = str_replace(etiqueta, "Coahuila de Zaragoza", "Coahuila"),
-           etiqueta = str_replace(etiqueta, "Michoacán de Ocampo", "Michoacán"),
-           etiqueta = str_replace(etiqueta, "Veracruz de Ignacio de la Llave", "Veracruz"),
-           etiqueta = str_replace(etiqueta, "Dolores Hidalgo Cuna de la Independencia Nacional", "Dolores Hidalgo"))
-
+    mutate(
+      etiqueta = str_replace(etiqueta, "Coahuila de Zaragoza", "Coahuila"),
+      etiqueta = str_replace(etiqueta, "Michoacán de Ocampo", "Michoacán"),
+      etiqueta = str_replace(etiqueta, "Veracruz de Ignacio de la Llave", "Veracruz"),
+      etiqueta = str_replace(
+        etiqueta,
+        "Dolores Hidalgo Cuna de la Independencia Nacional",
+        "Dolores Hidalgo"
+      )
+    )
+  
   # Crea el diagrama de dispersión inicial
   p <- ggplot(datos, aes(x = !!sym('x_var'), y = !!sym('y_var'))) +
-    geom_point(aes(color = resaltar)) + 
+    geom_point(aes(color = resaltar)) +
     scale_color_manual(values = c("#555753", "#4C7BA1"), guide = FALSE) +
-    geom_text_repel(aes(label = etiqueta, color = resaltar, fontface = fontface), 
-                    box.padding = unit(0.35, "lines"),
-                    point.padding = unit(0.5, "lines"),
-                    max.overlaps = Inf) +
+    geom_text_repel(
+      aes(
+        label = etiqueta,
+        color = resaltar,
+        fontface = fontface
+      ),
+      box.padding = unit(0.35, "lines"),
+      point.padding = unit(0.5, "lines"),
+      max.overlaps = Inf
+    ) +
     theme(legend.position = "none") +
     guides(color = "none") +
     scale_y_continuous(labels = scales::comma)
@@ -193,34 +220,55 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis, log_scale = FA
   
   # Si se solicita una línea de regresión, agréguela al gráfico
   if (add_regression) {
-    p <- p + geom_smooth(method = 'lm', se = FALSE, color = '#8d8d8d', linetype = "dashed")
+    p <- p + geom_smooth(
+        method = 'lm',
+        formula = 'y ~ x',
+        se = TRUE,
+        level = 0.9,
+        color = '#8d8d8d',
+        fill = "#d6d6d6",
+        linetype = "dashed")
   }
   
-  if(titula) {
-    titulo <- str_wrap(str_c(metadatos_sel$indicador, " vs. ",
-                             metadatos_selvis$indicador, ", ", metadatos_sel$fecha),
-                       width = 100)
-    fuente <- str_wrap(ifelse(metadatos_sel$fuente == metadatos_selvis$fuente,
-                              str_c("Fuente: ", metadatos_sel$fuente),
-                              str_c("Fuente: ", metadatos_sel$fuente, " & ", metadatos_selvis$fuente)),
-                       width = 160)
+  if (titula) {
+    titulo <- str_wrap(
+      str_c(metadatos_sel$indicador, " vs. ", metadatos_selvis$indicador, ", ",
+        metadatos_sel$fecha),
+      width = 100
+    )
+    fuente <-
+      str_wrap(ifelse(
+        metadatos_sel$fuente == metadatos_selvis$fuente,
+        str_c("Fuente: ", metadatos_sel$fuente),
+        str_c("Fuente: ", metadatos_sel$fuente, " & ", metadatos_selvis$fuente)
+      ),
+      width = 160)
   } else {
     titulo <- NULL
     fuente <- NULL
   }
   
   p <- p +
-    theme_minimal() + # Personaliza el gráfico
+    theme_minimal() + 
     labs(
       title = titulo,
       caption = fuente,
       x = metadatos_selvis$unidad,
-      y = metadatos_sel$unidad) +
+      y = metadatos_sel$unidad
+    ) +
     theme_light(base_size = 13, base_family = "typus") +
     theme(
       plot.title.position  = "plot",
-      plot.title = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
-      plot.subtitle = element_text(hjust = 0.5, face = "bold", colour = colores_texto),
+      plot.title = element_text(
+        hjust = 0.5,
+        face = "bold",
+        colour = colores_texto
+      ),
+      plot.subtitle = element_text(
+        hjust = 0.5,
+        face = "bold",
+        colour = colores_texto
+      ),
       plot.caption = element_text(hjust = 0, colour = colores_texto),
       axis.text = element_text(colour = colores_texto),
       axis.title = element_text(colour = colores_texto)
