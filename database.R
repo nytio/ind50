@@ -5,7 +5,7 @@ library(tidyverse) # 2.0.0
 library(DBI) # 1.1.3
 
 # Conexiones ----
-con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10) #circinus
+con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10)
 
 # Datos ----
 
@@ -35,7 +35,7 @@ actualiza_indicador <- function(selColeccion) {
 actualiza_indicador(coleccion[1, 1])
 
 get_meta <- function(selIndicador) {
-  dbGetQuery(con, paste0("SELECT * FROM viewb2 WHERE idserie = ", selIndicador, "ORDER BY orden;"))
+  dbGetQuery(con, paste0("SELECT * FROM viewb2 WHERE idserie = ", selIndicador, " ORDER BY orden;"))
 }
 
 meta <- NULL
@@ -94,7 +94,7 @@ actualiza_bde <- function(selIndicador, metaL, caso = 1) {
   if(any(is.na(caso1)))
     return(NULL)
   campo1 <- NULL
-  use_sql <-  paste("SELECT * FROM view04 WHERE idind =", caso1)
+  use_sql <-  paste("SELECT * FROM view04 WHERE idind = ", caso1)
   for (i in 1:length(use_sql)) {
     campo1 <- rbind(campo1, dbGetQuery(con, use_sql[i]))
   }
@@ -112,7 +112,7 @@ actualiza_bde <- function(selIndicador, metaL, caso = 1) {
     campo1$tabla,
     ".mun AND geografico.loc = ",
     campo1$tabla,
-    ".loc WHERE ambito != 5"
+    ".loc WHERE ambito != 5;"
   )
   
   bde <- NULL
@@ -148,7 +148,7 @@ contabiliza_uso <- function(idind, campo) {
 }
 
 consulta_bde <- function() {
-  use_sql <- "SELECT idind, indicador, unidad, fecha, fuente, producto  FROM view03"
+  use_sql <- "SELECT idind, indicador, unidad, fecha, fuente, producto  FROM view03;"
   campo <- dbGetQuery(con, use_sql)
   return (campo)
 }
