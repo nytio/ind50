@@ -226,7 +226,7 @@ gen_dispesion <- function(edo_sel, ind_sel, anio_sel, ind_selvis,
         se = TRUE,
         level = 0.9,
         color = '#8d8d8d',
-        fill = "#d6d6d6",
+        fill = "#e7e7e7",
         linetype = "dashed")
   }
   
