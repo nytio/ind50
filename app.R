@@ -3,7 +3,7 @@ library(shiny) # 1.8.0
 library(shinyWidgets) # 0.8.0
 library(shinycssloaders) # 1.0.0
 library(tidyverse) # 2.0.0
-library(DT) # 0.30
+library(DT) # 0.31
 source("global.R")
 
 #@todo TEST probar con diferentes niveles de desagregación geográfica
