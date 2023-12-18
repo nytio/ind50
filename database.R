@@ -94,7 +94,7 @@ actualiza_bde <- function(selIndicador, metaL, caso = 1) {
   if(any(is.na(caso1)))
     return(NULL)
   campo1 <- NULL
-  use_sql <-  paste("SELECT * FROM view04 WHERE idind = ", caso1)
+  use_sql <-  paste0("SELECT * FROM view04 WHERE idind = ", caso1)
   for (i in 1:length(use_sql)) {
     campo1 <- rbind(campo1, dbGetQuery(con, use_sql[i]))
   }
