@@ -2,7 +2,7 @@
 
 # Librerias ----
 library(tidyverse) # 2.0.0
-library(DT) # 0.30
+library(DT) # 0.31
 library(ggplot2) # 3.4.4
 library(jsonlite) # 1.8.8
 library(sf) # 1.0-14
