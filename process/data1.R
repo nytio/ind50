@@ -2,8 +2,8 @@
 
 # Librerias ----
 library(tidyverse) # 2.0.0
-library(data.table) # 1.14.8
-library(foreign) # 0.8-85
+library(data.table) # 1.14.10
+library(foreign) # 0.8-86
 
 # Ejercicio completo con tabla de mortalidad ----
 
@@ -1552,8 +1552,8 @@ for(i in c(2:0, 99:90))
   crea_tabla_defun(i)
 
 # Completa la documentación de los indicadores en la base de datos
-library(DBI)
-library(data.table)
+library(DBI) # 1.1.3
+library(data.table) # 1.14.10
 
 con <- dbConnect(odbc::odbc(), "circinus", timeout = 10)
 
