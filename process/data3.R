@@ -2,7 +2,7 @@
 
 # Librerias ----
 library(tidyverse) # 2.0.0
-library(data.table) # 1.14.8
+library(data.table) # 1.14.10
 library(readr) # 2.1.4
 library(DBI) # 1.1.3
 
