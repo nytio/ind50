@@ -344,6 +344,10 @@ mapas_graficos_servidor_a_servidor <- function(rango) {
 # for(i in c(82:84))
 #  mapas_graficos_servidor_a_servidor(dbGetQuery(con, paste0("SELECT idind FROM indicador WHERE idtabla = ", i) ))
 
+# mapas_graficos_servidor_a_servidor(dbGetQuery(con, paste0("SELECT idind FROM indicador WHERE idtabla = ", 81) ))
+# mapas_graficos_servidor_a_servidor(4112)
+# mapas_graficos_servidor_a_servidor(4106)
+
 #@todo Pendientes
 #! Generar los mapas faltantes, consultando primero aquellos que no tienen mapa dado de alto (son 2300)
 #! Pendientes o indicadores con errores:
