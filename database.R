@@ -2,23 +2,78 @@
 
 # Librerias ----
 library(tidyverse) # 2.0.0
-library(DBI) # 1.1.3
+library(DBI) # 1.2.0
 
 # Conexiones ----
-con <- dbConnect(odbc::odbc(), "indicadores", timeout = 10)
+db <- R6::R6Class("Conexion",
+  public = list(
+    initialize = function() {
+      tryCatch({
+        private$dbconn <- dbConnect(odbc::odbc(), dsn="indicadores", timeout = 10)
+      }, error = function(e) {
+        fileError<-file(paste0("/var/log/shiny-server/I", format(Sys.Date()), ".txt"), "a")
+        writeLines(paste("db::initialize:", csql, e$message), fileError)
+        close(fileError)
+      })
+    },
+    abreConexion = function(csql) {
+      tryCatch({
+        pU <- dbGetQuery(private$dbconn, csql)
+        return(pU)
+      }, error = function(e) {
+        fileError<-file(paste0("/var/log/shiny-server/I", format(Sys.Date()), ".txt"), "a")
+        writeLines(paste("db::abreConexion:", csql, e$message), fileError)
+        close(fileError)
+        return(NULL)
+      })
+    },
+    abreConexionTran = function(csql) {
+      dbBegin(private$dbconn)
+      tryCatch({
+        pU <- dbExecute(private$dbconn, csql)
+        dbCommit(private$dbconn)
+        return(pU)
+      }, error = function(e) {
+        dbRollback(private$dbconn)
+        fileError<-file(paste0("/var/log/shiny-server/I", format(Sys.Date()), ".txt"), "a")
+        writeLines(paste("db::abreConexionTran:", csql, e$message), fileError)
+        close(fileError)
+        return(NULL)
+      })
+    },
+    abreConexionTran2 = function(csql) {
+      dbBegin(private$dbconn)
+      tryCatch({
+        pU <- dbGetQuery(private$dbconn, csql)
+        dbCommit(private$dbconn)
+        return(pU)
+      }, error = function(e) {
+        dbRollback(private$dbconn)
+        fileError<-file(paste0("/var/log/shiny-server/I", format(Sys.Date()), ".txt"), "a")
+        writeLines(paste("db::abreConexionTran2:", csql, e$message), fileError)
+        close(fileError)
+        return(NULL)
+      })
+    },
+    finalize = function() {
+      dbDisconnect(private$dbconn)
+    }
+  ),
+  private = list(dbconn = NULL)
+)$new()
+
 
 # Datos ----
 
 # Lee el catálogo y los indicadores disponibles
-
-paneles <-  dbReadTable(con, "panel")
+paneles <- db$abreConexion("SELECT * FROM panel")
 opciones_panel <- paneles$idpanel # Actualizar con los nombres de los temas
 names(opciones_panel) <- paneles$panel
 
 coleccion <- NULL
 opciones_coleccion <- NULL
 actualiza_coleccion <- function(selPanel) {
-  coleccion <<- dbGetQuery(con, paste0("SELECT idcoleccion, titulo FROM viewb0 WHERE idpanel = ", selPanel) )
+  coleccion <<- db$abreConexion(paste0("SELECT idcoleccion, titulo FROM viewb0 WHERE idpanel = ", selPanel) )
   opciones_coleccion <<- unique(coleccion$idcoleccion)
   names(opciones_coleccion) <<- coleccion$titulo
 }
@@ -27,7 +82,7 @@ actualiza_coleccion(opciones_panel[1])
 indicadores <- NULL
 opciones_indicadores <- NULL
 actualiza_indicador <- function(selColeccion) {
-  indicadores <<- dbGetQuery(con, paste0("SELECT idserie, MIN(indicador) AS indicador FROM viewb1 WHERE idcoleccion = ", selColeccion, " GROUP BY idserie;"))
+  indicadores <<- db$abreConexion(paste0("SELECT idserie, MIN(indicador) AS indicador FROM viewb1 WHERE idcoleccion = ", selColeccion, " GROUP BY idserie;"))
   opciones_indicadores <<- unique(indicadores$idserie)
   names(opciones_indicadores) <<- gsub("Población de 5 años y más residente en otra entidad en junio de 2005", "Población de 5 años y más residente en otra entidad hace 5 años", indicadores$indicador)
   opciones_indicadores <<- sort(opciones_indicadores)
@@ -35,7 +90,7 @@ actualiza_indicador <- function(selColeccion) {
 actualiza_indicador(coleccion[1, 1])
 
 get_meta <- function(selIndicador) {
-  dbGetQuery(con, paste0("SELECT * FROM viewb2 WHERE idserie = ", selIndicador, " ORDER BY orden;"))
+  db$abreConexion(paste0("SELECT * FROM viewb2 WHERE idserie = ", selIndicador, " ORDER BY orden;"))
 }
 
 meta <- NULL
@@ -96,7 +151,7 @@ actualiza_bde <- function(selIndicador, metaL, caso = 1) {
   campo1 <- NULL
   use_sql <-  paste0("SELECT * FROM view04 WHERE idind = ", caso1)
   for (i in 1:length(use_sql)) {
-    campo1 <- rbind(campo1, dbGetQuery(con, use_sql[i]))
+    campo1 <- rbind(campo1, db$abreConexion(use_sql[i]))
   }
 
   use_sql <- paste0(
@@ -118,7 +173,7 @@ actualiza_bde <- function(selIndicador, metaL, caso = 1) {
   bde <- NULL
   for (i in 1:length(use_sql)) {
     cs <-
-      cbind(metaL$idserie[i], cbind(metaL$fecha[i], dbGetQuery(con, use_sql[i])))
+      cbind(metaL$idserie[i], cbind(metaL$fecha[i], db$abreConexion(use_sql[i])))
     bde <- rbind(bde, cs)
   }
   colnames(bde)[1] <- "no"
@@ -144,12 +199,12 @@ actualiza_bd(indicadores[1, 1])
 
 contabiliza_uso <- function(idind, campo) {
   query <- paste0("UPDATE indicador SET ", campo," = ", campo," + 1 WHERE idind = ", idind, ";")
-  dbExecute(con, query)
+  db$abreConexionTran(query)
 }
 
 consulta_bde <- function() {
   use_sql <- "SELECT idind, indicador, unidad, fecha, fuente, producto  FROM view03;"
-  campo <- dbGetQuery(con, use_sql)
+  campo <- db$abreConexion(use_sql)
   return (campo)
 }
 
